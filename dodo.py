@@ -8,7 +8,8 @@ DOIT_CONFIG = {
 }
 
 USER = os.getenv('USER')
-LOGDIR = '/var/log/auto-cert'
+LOGDIR = '/var/tmp/auto-cert'
+print('LOGDIR:', LOGDIR)
 
 def task_noroot():
     '''
@@ -27,7 +28,7 @@ def task_test():
     setup venv and run pytest
     '''
     return {
-        'task_dep': ['noroot'],
+        'task_dep': ['noroot', 'logdir'],
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip install -r api/requirements.txt',
@@ -52,7 +53,7 @@ def task_logdir():
     '''
     return {
         'actions': [
-            'sudo mkdir -p /var/log/auto-cert',
+            'sudo mkdir -p {LOGDIR}'.format(**globals()),
             'sudo chown -R {USER}:{USER} {LOGDIR}'.format(**globals()),
             'touch {LOGDIR}/api.log'.format(**globals()),
         ],

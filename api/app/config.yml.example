@@ -12,7 +12,7 @@ logging:
     handlers:
         logfile:
             class: logging.FileHandler
-            filename: /var/log/auto-cert/api.log
+            filename: /var/tmp/auto-cert/api.log
             formatter: simple
             level: !!python/name:logging.WARN
         console:

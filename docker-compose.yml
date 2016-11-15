@@ -7,7 +7,7 @@ services:
           - "8000"
         volumes:
           - /usr/src/app/static
-          - /var/log/auto-cert
+          - /var/tmp/auto-cert
         command: /usr/local/bin/gunicorn -w 2 -b :8000 main:app
 
     nginx:
