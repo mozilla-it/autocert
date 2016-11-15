@@ -87,3 +87,12 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+#doit
+.doit.db
+
+# prevent version file from being checked in
+api/VERSION
+
+# prevent secrets config.yml file from being checked in
+api/app/config.yml

@@ -1,0 +1,23 @@
+version: '2'
+services:
+    app:
+        restart: always
+        build: ./api
+        expose:
+          - "8000"
+        volumes:
+          - /usr/src/app/static
+          - /var/log/auto-cert
+        command: /usr/local/bin/gunicorn -w 2 -b :8000 main:app
+
+    nginx:
+        restart: always
+        build: ./nginx/
+        ports:
+          - "80:80"
+        volumes:
+          - /www/static
+        volumes_from:
+          - app
+        links:
+          - app:app

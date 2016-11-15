@@ -1,0 +1,35 @@
+logging:
+    version: 1
+    disable_existing_loggers: true
+    root:
+        level: !!python/name:logging.NOTSET
+        handlers: [console]
+    loggers:
+        auto-cert/api:
+            level: !!python/name:logging.WARN
+            handlers: [logfile]
+            propagate: false
+    handlers:
+        logfile:
+            class: logging.FileHandler
+            filename: /var/log/auto-cert/api.log
+            formatter: simple
+            level: !!python/name:logging.WARN
+        console:
+            class: logging.StreamHandler
+            stream: ext://sys.stdout
+            formatter: simple
+            level: !!python/name:logging.WARN
+    formatters:
+        simple:
+            format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        detail:
+            format: '%(asctime)s - %(levelname)s - File: %(filename)s - %(funcName)s() - Line: %(lineno)d -  %(message)s'
+providers:
+    digicert:
+        apikey: 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ.........
+destinations:
+    zlb1.example:
+        username: auto-cert
+        password: password
+        description: zeus
