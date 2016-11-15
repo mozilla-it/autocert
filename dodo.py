@@ -27,7 +27,7 @@ def task_test():
     setup venv and run pytest
     '''
     return {
-        'task_dep': ['noroot', 'logdir'],
+        'task_dep': ['noroot'],
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip install -r api/requirements.txt',
