@@ -53,8 +53,8 @@ def task_logdir():
     '''
     return {
         'actions': [
-            'sudo mkdir -p {LOGDIR}'.format(**globals()),
-            'sudo chown -R {USER}:{USER} {LOGDIR}'.format(**globals()),
+            'mkdir -p {LOGDIR}'.format(**globals()),
+            'chown -R {USER}:{USER} {LOGDIR}'.format(**globals()),
             'touch {LOGDIR}/api.log'.format(**globals()),
         ],
     }
