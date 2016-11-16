@@ -23,7 +23,7 @@ setup(
         'console_scripts': ['auto-cert = cli.cli:main']
     },
     version = __version__,
-    description = 'Python command line application bare bones template',
+    description = 'auto-cert cli tool',
     long_description = open('README.md').read().strip(),
     license = open('LICENSE').read().strip(),
     install_requires=open('requirements.txt').readlines(),

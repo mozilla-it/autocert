@@ -16,15 +16,7 @@ from subprocess import check_output
 from packaging.version import parse as version_parse
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-REQUIRED_API_VERSION = 'v0.2'
-
-def cli_version():
-    try:
-        return open('VERSION').read()
-    except IOError:
-        return  check_output('git describe', shell=True).decode('utf-8').strip()
-
-__version__ = cli_version()
+from utils.version import version as cli_version
 
 VERSIONS = [
     'cli',
@@ -57,12 +49,12 @@ def version_check(ns):
     if ns.version not in VERSIONS:
         version = api_version(ns)
         version = version.split('-')[0]
-        if  version_parse(version) >= version_parse(REQUIRED_API_VERSION):
+        if  version_parse(version) >= version_parse(cli_version()):
             logging.debug('version_check: PASSED')
             return
-        raise VersionCheckFailedError(version, REQUIRED_API_VERSION)
+        raise VersionCheckFailedError(version, cli_version())
     if ns.version == VERSIONS[0]:
-        print(yaml_format({'cli-version': __version__}))
+        print(yaml_format({'cli-version': cli_version()}))
     elif ns.version == VERSIONS[1]:
         print(yaml_format({'api-version': api_version(ns)}))
     sys.exit(0)

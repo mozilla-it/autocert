@@ -1,6 +1,6 @@
 version: '2'
 services:
-    app:
+    api:
         restart: always
         build: ./api
         expose:
@@ -18,6 +18,6 @@ services:
         volumes:
           - /www/static
         volumes_from:
-          - app
+          - api
         links:
-          - app:app
+          - api:app
