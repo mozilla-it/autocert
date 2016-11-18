@@ -2,6 +2,8 @@
 
 import os
 
+from doit import get_var
+
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'logs'],
     'verbosity': 2,
@@ -9,7 +11,6 @@ DOIT_CONFIG = {
 
 USER = os.getenv('USER')
 LOGDIR = '/var/tmp/auto-cert'
-print('LOGDIR:', LOGDIR)
 
 def task_noroot():
     '''
@@ -77,7 +78,11 @@ def task_logs():
     '''
     return {
         'actions': [
+            'echo "{0}"'.format('*'*80),
+            'echo "logging from docker-compose"',
             'docker-compose logs',
+            'echo "{0}"'.format('*'*80),
+            'echo "logging from /var/tmp/auto-cert/api.log"',
             'cat {LOGDIR}/api.log'.format(**globals()),
         ],
     }
@@ -95,6 +100,9 @@ def task_tidy():
     return {
         'actions': [
             'rm -rf ' + ' '.join(TIDY_FILES),
+            'docker-compose kill',
+            'docker-compose rm -f',
+            'rm -rf {LOGDIR}/api.log'.format(**globals()),
         ],
     }
 
@@ -107,6 +115,21 @@ def task_nuke():
         'actions': [
             'git clean -fd',
             'git reset --hard HEAD',
+        ],
+    }
+
+def task_setup():
+    '''
+    setup venv
+    '''
+    return {
+        'actions': [
+            'rm -rf auto_cert_cli.egg-info/ venv/ dist/ __pycache__/',
+            'virtualenv --python=python3 venv',
+            'venv/bin/pip3 install -r cli/requirements.txt',
+            'venv/bin/python3 ./setup.py install',
+            #'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-0.0.dev6+gcd03869-py3.5.egg/',
+            'tree venv/lib/python3.5/site-packages/auto_cert_cli-0.0.dev6+gcd03869-py3.5.egg/',
         ],
     }
 

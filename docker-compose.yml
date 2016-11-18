@@ -8,11 +8,11 @@ services:
         volumes:
           - /usr/src/app/static
           - /var/tmp/auto-cert
-        command: /usr/local/bin/gunicorn -w 2 -b :8000 main:app
+        command: env LOG_LEVEL=INFO /usr/local/bin/gunicorn -w 2 -b :8000 main:app
 
     nginx:
         restart: always
-        build: ./nginx/
+        build: ./nginx
         ports:
           - "80:80"
         volumes:
