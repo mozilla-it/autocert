@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import os
+import pwd
+import sys
 import requests
 
 from flask import Flask, jsonify
@@ -11,9 +13,16 @@ from subprocess import check_output
 from attrdict import AttrDict
 
 from app.config import CFG
+from app.utils import version
+
+#from flask_log import Logging
 
 import logging
 from logging.config import dictConfig
+from logging.handlers import RotatingFileHandler
+
+from pdb import set_trace as bp
+from app.utils.version import version as api_version
 
 LOGGING_MAP = {
     'CRITICAL': logging.CRITICAL,
@@ -29,44 +38,55 @@ INVALID_STATUS = [
     'rejected',
 ]
 
+
+app = Flask('api')
 dictConfig(CFG.logging)
-logger = logging.getLogger('auto-cert/api')
-if 'LOG_LEVEL' in os.environ:
-    el = logger.getEffectiveLevel()
-    LOG_LEVEL = os.getenv('LOG_LEVEL')
-    logger.log(el, 'environment variable found LOG_LEVEL="{0}"'.format(LOG_LEVEL))
-    LOG_LEVEL = LOGGING_MAP[LOG_LEVEL]
-    logger.log(el, 'environment variable found LOG_LEVEL="{0}"'.format(LOG_LEVEL))
-    logger.setLevel(LOG_LEVEL)
-    logger.log(el, 'LOG_LEVEL set to "{0}"'.format(LOG_LEVEL))
+#flasklog = Logging(app)
+
+app.logger.warn('WARN!')
 
 
-logger.info('starting api app')
-app = Flask(__name__)
+@app.before_first_request
+def initialize():
+
+    def logit(msg):
+        app.logger.log(app.logger.getEffectiveLevel(), msg)
+
+    app.logger.log(app.logger.getEffectiveLevel(), 'INITIALIZE')
+
+    PID = os.getpid()
+    PPID = os.getppid()
+    USER = pwd.getpwuid( os.getuid())[0]
+    LOG_LEVEL = os.getenv('LOG_LEVEL', None)
+    app.logger.log(
+        app.logger.getEffectiveLevel(),
+        'starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
+    logit('LOG_LEVEL={LOG_LEVEL}'.format(**locals()))
+    if LOG_LEVEL in LOGGING_MAP:
+        LOG_VALUE = LOGGING_MAP[LOG_LEVEL]
+        logit('LOG_VALUE={LOG_VALUE}'.format(**locals()))
+        app.logger.setLevel(LOG_VALUE)
+        logit('log level set to {LOG_LEVEL}({LOG_VALUE})'.format(**locals()))
 
 def is_valid_cert(status):
     return status not in INVALID_STATUS
 
 @app.route('/version', methods=['GET'])
 def version():
-    logger.info('/version called')
-    version = 'unknown'
-    try:
-        version = open(os.getcwd() + '/' + 'VERSION').read()
-    except IOError:
-        version = check_output('git describe', shell=True).decode('utf-8').strip()
+    app.logger.info('/version called')
+    version = api_version()
     return jsonify({'version': version})
 
 @app.route('/hello', methods=['GET'])
 @app.route('/hello/<string:target>', methods=['GET'])
 def hello(target='world'):
-    logger.info('/hello called with target={target}'.format(**locals()))
+    app.logger.info('/hello called with target={target}'.format(**locals()))
     return jsonify({'msg': 'hello %(target)s' % locals()})
 
 @app.route('/certs/list', methods=['GET'])
 @app.route('/certs/list/<string:provider>', methods=['GET'])
 def listcerts(provider='digicert'):
-    logger.info('/certs/list called with provider={provider}'.format(**locals()))
+    app.logger.info('/certs/list called with provider={provider}'.format(**locals()))
     if provider == 'digicert':
         headers = {
             'X-DC-DEVKEY': CFG.providers.digicert.apikey,
@@ -81,3 +101,7 @@ def listcerts(provider='digicert'):
             return jsonify(certs=certs)
         else:
             logging.error('failed request to /certs/list with status_code={0}'.format(response.status_code))
+
+#if __name__ == '__main__':
+#    bp()
+#    print('WOAH!')

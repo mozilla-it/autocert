@@ -77,7 +77,11 @@ def task_logs():
     '''
     return {
         'actions': [
+            'echo "{0}"'.format('*'*80),
+            'echo "logging from docker-compose"',
             'docker-compose logs',
+            'echo "{0}"'.format('*'*80),
+            'echo "logging from /var/tmp/auto-cert/api.log"',
             'cat {LOGDIR}/api.log'.format(**globals()),
         ],
     }
@@ -107,6 +111,21 @@ def task_nuke():
         'actions': [
             'git clean -fd',
             'git reset --hard HEAD',
+        ],
+    }
+
+def task_setup():
+    '''
+    setup venv
+    '''
+    return {
+        'actions': [
+            'rm -rf auto_cert_cli.egg-info/ venv/ dist/ __pycache__/',
+            'virtualenv --python=python3 venv',
+            'venv/bin/pip3 install -r cli/requirements.txt',
+            'venv/bin/python3 ./setup.py install',
+            #'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-0.0.dev6+gcd03869-py3.5.egg/',
+            'tree venv/lib/python3.5/site-packages/auto_cert_cli-0.0.dev6+gcd03869-py3.5.egg/',
         ],
     }
 

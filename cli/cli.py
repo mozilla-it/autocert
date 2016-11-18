@@ -16,7 +16,7 @@ from subprocess import check_output
 from packaging.version import parse as version_parse
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
-from utils.version import version as cli_version
+from cli.utils.version import version as cli_version
 
 VERSIONS = [
     'cli',
