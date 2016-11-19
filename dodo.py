@@ -2,6 +2,8 @@
 
 import os
 
+from doit import get_var
+
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'logs'],
     'verbosity': 2,
@@ -9,7 +11,6 @@ DOIT_CONFIG = {
 
 USER = os.getenv('USER')
 LOGDIR = '/var/tmp/auto-cert'
-print('LOGDIR:', LOGDIR)
 
 def task_noroot():
     '''
@@ -99,6 +100,9 @@ def task_tidy():
     return {
         'actions': [
             'rm -rf ' + ' '.join(TIDY_FILES),
+            'docker-compose kill',
+            'docker-compose rm -f',
+            'rm -rf {LOGDIR}/api.log'.format(**globals()),
         ],
     }
 

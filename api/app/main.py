@@ -38,35 +38,38 @@ INVALID_STATUS = [
     'rejected',
 ]
 
+# the following statements have to be in THIS specfic order: 1, 2, 3
+app = Flask('api')                  #1
+app.logger                          #2
 
-app = Flask('api')
-dictConfig(CFG.logging)
-#flasklog = Logging(app)
-
-app.logger.warn('WARN!')
+def logit(msg):
+    app.logger.log(app.logger.getEffectiveLevel(), msg)
 
 
 @app.before_first_request
 def initialize():
+    if sys.argv[0] != 'venv/bin/pytest':
+        dictConfig(CFG.logging)     #3
 
-    def logit(msg):
-        app.logger.log(app.logger.getEffectiveLevel(), msg)
+        logit(dir(app.logger.handlers[1]))
 
-    app.logger.log(app.logger.getEffectiveLevel(), 'INITIALIZE')
+        logit('sys.argv = '+' '.join(sys.argv))
+        logit('1 app.logger.handlers = '+ ' '.join([handler.name for handler in app.logger.handlers]))
 
-    PID = os.getpid()
-    PPID = os.getppid()
-    USER = pwd.getpwuid( os.getuid())[0]
-    LOG_LEVEL = os.getenv('LOG_LEVEL', None)
-    app.logger.log(
-        app.logger.getEffectiveLevel(),
-        'starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
-    logit('LOG_LEVEL={LOG_LEVEL}'.format(**locals()))
-    if LOG_LEVEL in LOGGING_MAP:
-        LOG_VALUE = LOGGING_MAP[LOG_LEVEL]
-        logit('LOG_VALUE={LOG_VALUE}'.format(**locals()))
-        app.logger.setLevel(LOG_VALUE)
-        logit('log level set to {LOG_LEVEL}({LOG_VALUE})'.format(**locals()))
+        PID = os.getpid()
+        PPID = os.getppid()
+        USER = pwd.getpwuid(os.getuid())[0]
+        logit('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
+        LOG_LEVEL = os.getenv('LOG_LEVEL', None)
+        logit('LOG_LEVEL={LOG_LEVEL}'.format(**locals()))
+        if LOG_LEVEL in LOGGING_MAP:
+            LOG_VALUE = LOGGING_MAP[LOG_LEVEL]
+            logit('LOG_VALUE={LOG_VALUE}'.format(**locals()))
+            app.logger.setLevel(LOG_VALUE)
+            for handler in app.logger.handlers:
+                logit('hander .name = {0}'.format(handler.name))
+                handler.setLevel(LOG_VALUE)
+            logit('log level set to {LOG_LEVEL}({LOG_VALUE})'.format(**locals()))
 
 def is_valid_cert(status):
     return status not in INVALID_STATUS
@@ -86,7 +89,9 @@ def hello(target='world'):
 @app.route('/certs/list', methods=['GET'])
 @app.route('/certs/list/<string:provider>', methods=['GET'])
 def listcerts(provider='digicert'):
+    logit('2 app.logger.handlers = '+ ' '.join([handler.name for handler in app.logger.handlers]))
     app.logger.info('/certs/list called with provider={provider}'.format(**locals()))
+    app.logger.log(app.logger.getEffectiveLevel(), 'LISTCERTS YO!')
     if provider == 'digicert':
         headers = {
             'X-DC-DEVKEY': CFG.providers.digicert.apikey,

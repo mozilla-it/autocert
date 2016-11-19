@@ -2,24 +2,24 @@ logging:
     version: 1
     disable_existing_loggers: true
     root:
-        level: !!python/name:logging.NOTSET
+        level: NOTSET
         handlers: [console]
     loggers:
-        auto-cert/api:
-            level: !!python/name:logging.WARN
-            handlers: [logfile]
+        api:
+            level: WARNING
+            handlers: [console, logfile]
             propagate: false
     handlers:
-        logfile:
-            class: logging.FileHandler
-            filename: /var/tmp/auto-cert/api.log
-            formatter: simple
-            level: !!python/name:logging.WARN
         console:
             class: logging.StreamHandler
             stream: ext://sys.stdout
             formatter: simple
-            level: !!python/name:logging.WARN
+            level: WARNING
+        logfile:
+            class: logging.FileHandler
+            filename: /var/tmp/auto-cert/api.log
+            formatter: detail
+            level: WARNING
     formatters:
         simple:
             format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
