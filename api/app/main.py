@@ -50,12 +50,6 @@ def logit(msg):
 def initialize():
     if sys.argv[0] != 'venv/bin/pytest':
         dictConfig(CFG.logging)     #3
-
-        logit(dir(app.logger.handlers[1]))
-
-        logit('sys.argv = '+' '.join(sys.argv))
-        logit('1 app.logger.handlers = '+ ' '.join([handler.name for handler in app.logger.handlers]))
-
         PID = os.getpid()
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
@@ -106,7 +100,3 @@ def listcerts(provider='digicert'):
             return jsonify(certs=certs)
         else:
             logging.error('failed request to /certs/list with status_code={0}'.format(response.status_code))
-
-#if __name__ == '__main__':
-#    bp()
-#    print('WOAH!')
