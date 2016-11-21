@@ -33,6 +33,9 @@ def yaml_format(obj):
             return yaml.Dumper.represent_mapping(self, tag, mapping, flow_style)
     return yaml.dump(obj, Dumper=MyDumper).strip()
 
+def output(obj):
+    return print(yaml_format(obj))
+
 class VersionCheckFailedError(Exception):
     def __init__(self, version, required):
         msg = 'auto-cert/api {version} is not at least {required}'.format(**locals())
@@ -54,14 +57,14 @@ def version_check(ns):
             return
         raise VersionCheckFailedError(version, cli_version())
     if ns.version == VERSIONS[0]:
-        print(yaml_format({'cli-version': cli_version()}))
+        output({'cli-version': cli_version()})
     elif ns.version == VERSIONS[1]:
-        print(yaml_format({'api-version': api_version(ns)}))
+        output({'api-version': api_version(ns)})
     sys.exit(0)
 
 def hello(ns):
     response = requests.get(ns.api_url / 'hello' / ns.target)
-    print(yaml_format(response.json()))
+    output(response.json())
 
 def transform_certs(certs):
     return [ {c.certificate.common_name: c.certificate.valid_till} for c in certs ]
@@ -71,10 +74,10 @@ def certs(ns):
         response = requests.get(ns.api_url / 'certs/list')
         ad = AttrDict(response.json())
         if ns.verbose:
-            output = dict(ad)['certs']
+            results = dict(ad)['certs']
         else:
-            output = transform_certs(ad.certs)
-        print(yaml_format(output))
+            results = transform_certs(ad.certs)
+        output(results)
 
 def main():
     cli_parser = ArgumentParser(
