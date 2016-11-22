@@ -13,6 +13,12 @@ class ConfigFileError(Exception):
         super(ConfigFileError, self).__init__(message)
         self.errors = errors
 
+class ApikeyNotFoundError(Exception):
+    def __init__(d, errors=None):
+        message = 'Could not find apikey in this dict %s' % d
+        super(ApikeyNotFoundError, self).__init__(message)
+        self.errors = errors
+
 def _divine_config(pattern='config.yml*'):
     dirpath = os.path.dirname(__file__)
     matches = glob('/'.join([dirpath, pattern]))
@@ -27,5 +33,11 @@ def _load_config():
     except Exception as ex:
         raise ConfigLoadError(config, errors=[ex])
     return AttrDict(yml)
+
+
+def auth(d):
+    if 'apikey' in d:
+        return ('apikey', d['apikey'])
+    raise ApikeyNotFoundError(d)
 
 CFG = _load_config()
