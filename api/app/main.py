@@ -12,25 +12,31 @@ from ruamel import yaml
 from subprocess import check_output
 from attrdict import AttrDict
 
-from app.config import CFG
+from app.config import CFG, auth
 from app.utils import version
 
 #from flask_log import Logging
 
-import logging
-from logging.config import dictConfig
-from logging.handlers import RotatingFileHandler
 
 from pdb import set_trace as bp
 from app.utils.version import version as api_version
 
+from logging.config import dictConfig
+from logging import (
+    CRITICAL,
+    ERROR,
+    WARNING,
+    INFO,
+    DEBUG,
+    NOTSET)
+
 LOGGING_MAP = {
-    'CRITICAL': logging.CRITICAL,
-    'ERROR':    logging.ERROR,
-    'WARNING':  logging.WARNING,
-    'INFO':     logging.INFO,
-    'DEBUG':    logging.DEBUG,
-    'NOTSET':   logging.NOTSET,
+    'CRITICAL': CRITICAL,
+    'ERROR':    ERROR,
+    'WARNING':  WARNING,
+    'INFO':     INFO,
+    'DEBUG':    DEBUG,
+    'NOTSET':   NOTSET,
 }
 
 INVALID_STATUS = [
@@ -42,7 +48,7 @@ INVALID_STATUS = [
 app = Flask('api')                  #1
 app.logger                          #2
 
-def logit(msg):
+def log(msg):
     app.logger.log(app.logger.getEffectiveLevel(), msg)
 
 
@@ -53,17 +59,7 @@ def initialize():
         PID = os.getpid()
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
-        logit('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
-        LOG_LEVEL = os.getenv('LOG_LEVEL', None)
-        logit('LOG_LEVEL={LOG_LEVEL}'.format(**locals()))
-        if LOG_LEVEL in LOGGING_MAP:
-            LOG_VALUE = LOGGING_MAP[LOG_LEVEL]
-            logit('LOG_VALUE={LOG_VALUE}'.format(**locals()))
-            app.logger.setLevel(LOG_VALUE)
-            for handler in app.logger.handlers:
-                logit('hander .name = {0}'.format(handler.name))
-                handler.setLevel(LOG_VALUE)
-            logit('log level set to {LOG_LEVEL}({LOG_VALUE})'.format(**locals()))
+        app.logger.info('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
 
 def is_valid_cert(status):
     return status not in INVALID_STATUS
@@ -83,20 +79,17 @@ def hello(target='world'):
 @app.route('/certs/list', methods=['GET'])
 @app.route('/certs/list/<string:provider>', methods=['GET'])
 def listcerts(provider='digicert'):
-    logit('2 app.logger.handlers = '+ ' '.join([handler.name for handler in app.logger.handlers]))
     app.logger.info('/certs/list called with provider={provider}'.format(**locals()))
-    app.logger.log(app.logger.getEffectiveLevel(), 'LISTCERTS YO!')
     if provider == 'digicert':
-        headers = {
-            'X-DC-DEVKEY': CFG.providers.digicert.apikey,
-            'Accept': 'application/json',
-        }
         url = 'https://www.digicert.com/services/v2/order/certificate'
-        response = requests.get(url, headers=headers)
+        response = requests.get(
+            url,
+            auth=auth(CFG.providers.digicert),
+            headers={'Accept': 'application/json'})
         if response.status_code == 200:
             obj = AttrDict(response.json())
             count = len(obj.orders)
             certs = [ cert for cert in obj.orders if is_valid_cert(cert.status) ]
             return jsonify(certs=certs)
         else:
-            logging.error('failed request to /certs/list with status_code={0}'.format(response.status_code))
+            app.logger.error('failed request to /certs/list with status_code={0}'.format(response.status_code))
