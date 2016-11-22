@@ -76,14 +76,17 @@ def task_logs():
     '''
     run docker-compose logs
     '''
+
+    star80 = 'echo "{0}"'.format('*'*80)
     return {
         'actions': [
-            'echo "{0}"'.format('*'*80),
+            star80,
             'echo "logging from docker-compose"',
             'docker-compose logs',
-            'echo "{0}"'.format('*'*80),
+            star80,
             'echo "logging from /var/tmp/auto-cert/api.log"',
             'cat {LOGDIR}/api.log'.format(**globals()),
+            star80,
         ],
     }
 
@@ -93,16 +96,13 @@ def task_tidy():
     '''
     TIDY_FILES = [
         '.doit.db/',
-        '__pycache__/',
         'venv/',
         'api/VERSION',
     ]
     return {
         'actions': [
             'rm -rf ' + ' '.join(TIDY_FILES),
-            'docker-compose kill',
-            'docker-compose rm -f',
-            'rm -rf {LOGDIR}/api.log'.format(**globals()),
+            'find . | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf',
         ],
     }
 
@@ -113,6 +113,9 @@ def task_nuke():
     return {
         'task_dep': ['tidy'],
         'actions': [
+            'docker-compose kill',
+            'docker-compose rm -f',
+            'rm -rf {LOGDIR}/api.log'.format(**globals()),
             'git clean -fd',
             'git reset --hard HEAD',
         ],
