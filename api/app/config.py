@@ -6,6 +6,7 @@ import os
 from glob import glob
 from ruamel import yaml
 from attrdict import AttrDict
+from urlpath import URL
 
 class ConfigFileError(Exception):
     def __init__(pattern, errors=None):
@@ -39,5 +40,8 @@ def auth(d):
     if 'apikey' in d:
         return ('apikey', d['apikey'])
     raise ApikeyNotFoundError(d)
+
+def url(d):
+    return URL('https://{host}:{port}/{base}/{version}'.format(**d))
 
 CFG = _load_config()
