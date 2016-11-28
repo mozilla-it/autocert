@@ -12,6 +12,8 @@ DOIT_CONFIG = {
 USER = os.getenv('USER')
 LOGDIR = '/var/tmp/auto-cert'
 
+from utils.version import version
+
 class UnknownPkgmgrError(Exception):
     def __init__(self):
         super(UnknownPkgmgrError, self).__init__('unknown pkgmgr!')
@@ -167,8 +169,7 @@ def task_setup():
             'virtualenv --python=python3 venv',
             'venv/bin/pip3 install -r cli/requirements.txt',
             'venv/bin/python3 ./setup.py install',
-            #'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-0.0.dev6+gcd03869-py3.5.egg/',
-            'tree venv/lib/python3.5/site-packages/auto_cert_cli-0.0.dev6+gcd03869-py3.5.egg/',
+            'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-{0}-py3.5.egg'.format(version()),
         ],
     }
 
