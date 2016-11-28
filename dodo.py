@@ -12,6 +12,45 @@ DOIT_CONFIG = {
 USER = os.getenv('USER')
 LOGDIR = '/var/tmp/auto-cert'
 
+class UnknownPkgmgrError(Exception):
+    def __init__(self):
+        super(UnknownPkgmgrError, self).__init__('unknown pkgmgr!')
+
+def get_pkgmgr():
+    def check_hash(program):
+        from subprocess import check_call, CalledProcessError
+        try:
+            check_call('hash {program}'.format(**locals()), shell=True)
+            return True
+        except CalledProcessError as cpe:
+            return False
+    if check_hash('dpkg'):
+        return 'deb'
+    elif check_hash('rpm'):
+        return 'rpm'
+    raise UnknownPkgmgrError
+
+def task_checkreqs():
+    '''
+    check for required software
+    '''
+    DEBS = [
+        'docker-engine',
+        'libpq-dev',
+    ]
+    RPMS = [
+        'docker-engine',
+        'postgresql-devel',
+    ]
+    return {
+        'deb': {
+            'actions': ['dpkg -s ' + deb for deb in DEBS],
+        },
+        'rpm': {
+            'actions': ['rpm -q ' + rpm for rpm in RPMS],
+        }
+    }[get_pkgmgr()]
+
 def task_noroot():
     '''
     make sure script isn't run as root
@@ -65,7 +104,7 @@ def task_deploy():
     deloy flask app via docker-compose
     '''
     return {
-        'task_dep': ['noroot', 'test', 'version', 'logdir'],
+        'task_dep': ['noroot', 'test', 'version', 'logdir', 'checkreqs'],
         'actions': [
             'docker-compose build',
             'docker-compose up --remove-orphans -d',
