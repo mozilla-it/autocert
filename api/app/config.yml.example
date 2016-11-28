@@ -27,9 +27,15 @@ logging:
             format: '%(asctime)s - %(levelname)s - File: %(filename)s - %(funcName)s() - Line: %(lineno)d -  %(message)s'
 providers:
     digicert:
-        apikey: 1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ.........
+        host: digicert.com
+        port: 443
+        base: services
+        version: v2
+        apikey: ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789...82chars
 destinations:
-    zlb1.example:
-        username: auto-cert
-        password: password
-        description: zeus
+    zeus:
+        host: 10.248.29.12
+        port: 9070
+        base: api/tm
+        version: 3.9
+        apikey: abcdefghijklmnopqrstuvwxyz0123456789...82chars
