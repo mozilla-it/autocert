@@ -9,12 +9,17 @@ import sys
 import logging
 import requests
 
-from ruamel import yaml
-from urlpath import URL
-from attrdict import AttrDict
 from subprocess import check_output
-from packaging.version import parse as version_parse
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
+
+try:
+    from ruamel import yaml
+    from urlpath import URL
+    from attrdict import AttrDict
+    from packaging.version import parse as version_parse
+except ImportError as ie:
+    print(ie)
+    print('perhaps you need to install cli/requirements.txt via pip3')
 
 from cli.utils.version import version as cli_version
 
