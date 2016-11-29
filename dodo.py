@@ -12,7 +12,8 @@ DOIT_CONFIG = {
 USER = os.getenv('USER')
 LOGDIR = '/var/tmp/auto-cert'
 
-from utils.version import version
+MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
+
 
 class UnknownPkgmgrError(Exception):
     def __init__(self):
@@ -52,6 +53,29 @@ def task_checkreqs():
             'actions': ['rpm -q ' + rpm for rpm in RPMS],
         }
     }[get_pkgmgr()]
+
+def task_dockercompose():
+    '''
+    assert docker-compose version ({0}) or higher
+    '''
+    from utils.function import format_docstr
+    format_docstr(task_dockercompose, MINIMUM_DOCKER_COMPOSE_VERSION)
+    def check_docker_compose():
+        import re
+        from subprocess import check_output
+        from packaging.version import parse as version_parse
+        pattern = '(docker-compose version) ([0-9.]+)(, build [0-9]+)'
+        output = check_output('docker-compose --version', shell=True).decode('utf-8').strip()
+        regex = re.compile(pattern)
+        match = regex.search(output)
+        version = match.groups()[1]
+        assert version_parse(version) >= version_parse(MINIMUM_DOCKER_COMPOSE_VERSION)
+
+    return {
+        'actions': [
+            check_docker_compose,
+        ],
+    }
 
 def task_noroot():
     '''
@@ -106,7 +130,14 @@ def task_deploy():
     deloy flask app via docker-compose
     '''
     return {
-        'task_dep': ['noroot', 'test', 'version', 'logdir', 'checkreqs'],
+        'task_dep': [
+            'noroot',
+            'test',
+            'version',
+            'logdir',
+            'checkreqs',
+            'dockercompose'
+        ],
         'actions': [
             'docker-compose build',
             'docker-compose up --remove-orphans -d',
@@ -166,6 +197,7 @@ def task_setup():
     '''
     setup venv
     '''
+    from utils.version import version
     return {
         'actions': [
             'rm -rf auto_cert_cli.egg-info/ venv/ dist/ __pycache__/',
