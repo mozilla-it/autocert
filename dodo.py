@@ -5,7 +5,7 @@ import os
 from doit import get_var
 
 DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'logs'],
+    'default_tasks': ['deploy', 'rmimages', 'logs'],
     'verbosity': 2,
 }
 
