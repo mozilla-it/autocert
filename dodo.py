@@ -145,6 +145,19 @@ def task_deploy():
         ],
     }
 
+def task_rmimages():
+    '''
+    remove dangling docker images
+    '''
+    return {
+        'actions': [
+            'docker rmi $(docker images -q --filter "dangling=true")',
+        ],
+        'uptodate': [
+            '[ -z "`docker images -q --filter "dangling=true"`"] && exit 0 || exit 1',
+        ],
+    }
+
 def task_logs():
     '''
     run docker-compose logs
