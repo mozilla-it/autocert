@@ -97,6 +97,7 @@ def task_test():
         'task_dep': ['noroot', 'logdir'],
         'actions': [
             'virtualenv --python=$(which python3) venv',
+            'venv/bin/pip3 install --upgrade pip',
             'venv/bin/pip install -r api/requirements.txt',
             'venv/bin/pip install -r tests/requirements.txt',
             'venv/bin/pytest -v tests/',
@@ -202,6 +203,7 @@ def task_setup():
         'actions': [
             'rm -rf auto_cert_cli.egg-info/ venv/ dist/ __pycache__/',
             'virtualenv --python=python3 venv',
+            'venv/bin/pip3 install --upgrade pip',
             'venv/bin/pip3 install -r cli/requirements.txt',
             'venv/bin/python3 ./setup.py install',
             'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-{0}-py3.5.egg'.format(version()),
