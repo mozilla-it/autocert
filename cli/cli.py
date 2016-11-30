@@ -23,11 +23,6 @@ except ImportError as ie:
 
 from cli.utils.version import version as cli_version
 
-HELPS = [
-    '-h',
-    '--help',
-]
-
 VERSIONS = [
     'cli',
     'api'
@@ -114,7 +109,7 @@ def main():
         help='default=%(default)s set the api url to use')
 
     ns, rem = cli_parser.parse_known_args()
-    if not any([h in rem for h in HELPS]):
+    if not any([h in rem for h in ('-h', '--help')]):
         version_check(ns)
 
     config = {}
