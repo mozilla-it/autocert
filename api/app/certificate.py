@@ -25,6 +25,18 @@ RFC_5280_RENAME = {
     'org_state':    'stateOrProvinceName'
 }
 
+STATUS_CODES = {
+    200: (True,     ''),
+    201: (True,     'Created'),
+    204: (True,     'No content')
+    400: (False,    'General client error')
+    401: (False,    'Invalid account ID and API key combination')
+    403: (False,    'API key missing permissions required')
+    404: (False,    'Page does not exist')
+    405: (False,    'Method not found')
+    406: (False,    'Requested content type or API version is invalid')
+}
+
 def dict_to_attrs(obj, d):
     for k, v in d.items():
         setattr(obj, k, v)
