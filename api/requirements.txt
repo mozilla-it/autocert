@@ -1,5 +1,6 @@
 attrdict==2.0.0
 urlpath==1.1.2
+pathlib2==2.1.0
 requests==2.11.1
 ruamel.yaml==0.12.15
 Flask==0.10.1

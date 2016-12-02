@@ -1,4 +1,5 @@
 urlpath==1.1.2
+pathlib2==2.1.0
 packaging==16.8
 attrdict==2.0.0
 requests==2.11.1
