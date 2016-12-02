@@ -12,7 +12,7 @@ from ruamel import yaml
 from subprocess import check_output
 from attrdict import AttrDict
 
-from app.config import CFG, auth
+from app.config import CFG
 from app.utils import version
 
 #from flask_log import Logging
@@ -48,8 +48,8 @@ INVALID_STATUS = [
 app = Flask('api')                  #1
 app.logger                          #2
 
-def log(msg):
-    app.logger.log(app.logger.getEffectiveLevel(), msg)
+def log(*msgs):
+    app.logger.log(app.logger.getEffectiveLevel(), ' '.join(msgs))
 
 
 @app.before_first_request
@@ -81,11 +81,14 @@ def hello(target='world'):
 def listcerts(provider='digicert'):
     app.logger.info('/certs/list called with provider={provider}'.format(**locals()))
     if provider == 'digicert':
-        url = 'https://www.digicert.com/services/v2/order/certificate'
+        headers = {
+            'Accept': 'application/json',
+            'User-Agent': 'auto-cert',
+        }
         response = requests.get(
-            url,
-            auth=auth(CFG.providers.digicert),
-            headers={'Accept': 'application/json'})
+            CFG.providers.digicert.baseurl / 'order/certificate',
+            auth=CFG.providers.digicert.auth,
+            headers=headers)
         if response.status_code == 200:
             obj = AttrDict(response.json())
             count = len(obj.orders)
