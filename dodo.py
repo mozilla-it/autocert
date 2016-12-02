@@ -3,6 +3,7 @@
 import os
 
 from doit import get_var
+from ruamel import yaml
 
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'rmimages', 'logs'],
@@ -155,6 +156,26 @@ def task_rmimages():
         ],
         'uptodate': [
             '[ -z "`docker images -q --filter "dangling=true"`"] && exit 0 || exit 1',
+        ],
+    }
+
+def task_example():
+    '''
+    cp|strip config.yml -> config.yml.example
+    '''
+    config = 'api/app/config.yml'
+    apikey = '82_CHAR_APIKEY'
+    def strip_apikeys():
+        with open(config, 'r') as f:
+            cfg = yaml.load(f.read(), yaml.RoundTripLoader)
+        cfg['providers']['digicert']['apikey'] = apikey
+        cfg['destinations']['zeus']['apikey'] = apikey
+        with open(config +'.example', 'w') as f:
+            f.write(yaml.dump(cfg, indent=4, Dumper=yaml.RoundTripDumper))
+    return {
+        'actions': [
+            'cp {config}.example {config}.bak'.format(**locals()),
+            strip_apikeys,
         ],
     }
 
