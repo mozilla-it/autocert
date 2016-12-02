@@ -98,7 +98,7 @@ def add_sans(subject, sans):
             [x509.DNSName(dns_name) for dns_name in dns_names],
             critical=False)
 
-def create_csr(private_key, common_name, oids=None, sans=None):
+def create_csr(key, common_name, oids=None, sans=None):
     if not oids:
         oids = {}
     if not sans:
@@ -108,7 +108,7 @@ def create_csr(private_key, common_name, oids=None, sans=None):
     oids = create_oids(common_name, oids)
     subject = builder.subject_name(x509.Name(oids))
     add_sans(subject, sans)
-    csr = subject.sign(private_key, hashes.SHA256(), default_backend())
+    csr = subject.sign(key, hashes.SHA256(), default_backend())
     with open(str(csrfile), 'wb') as f:
         f.write(csr.public_bytes(ENCODING[CFG.csr.encoding]))
     return csr
