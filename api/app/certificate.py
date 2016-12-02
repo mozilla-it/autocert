@@ -14,9 +14,19 @@ try:
 except ImportError as ie:
     from config import CFG
 
+class KeyExistError(Exception):
+    def __init__(self, keyfile):
+        msg = 'key file {keyfile} does not exist'.format(**locals())
+        super(KeyExistError, self).__init__(msg)
+
+class CsrExistError(Exception):
+    def __init__(self, csrfile):
+        msg = 'csr file {csrfile} does not exist'.format(**locals())
+        super(CsrExistError, self).__init__(msg)
+
 APACHE_SERVER_TYPE = 2
 
-RFC_5280_RENAME = {
+OIDS_MAP = {
     'common_name':              NameOID.COMMON_NAME,
     'org_name':                 NameOID.ORGANIZATION_NAME,
     'org_unit':                 NameOID.ORGANIZATIONAL_UNIT_NAME,
@@ -33,6 +43,7 @@ RFC_5280_RENAME = {
 }
 
 ENCODING = {
+    'DER': serialization.Encoding.DER,
     'PEM': serialization.Encoding.PEM,
 }
 
@@ -63,32 +74,49 @@ def create_key(common_name, **kwargs):
 
 def load_key(common_name):
     keyfile = CFG.key.dirpath / '{common_name}.key'.format(**locals())
+    if not keyfile.exists():
+        raise KeyExistError(csrfile)
     with open(str(keyfile), 'rb') as f:
         data = f.read()
     return serialization.load_pem_private_key(data, None, default_backend())
 
-def create_oids(common_name, **oids):
-    oids = [x509.NameAttribute(NameOID.COMMON_NAME, common_name)]
-    for key, value in CFG.
+def create_oids(common_name, oids):
+    attrs = [x509.NameAttribute(NameOID.COMMON_NAME, common_name)]
+    for key in CFG.csr.oids:
+        oid = OIDS_MAP.get(key, None)
+        if oid:
+            if key in oids:
+                value = str(oids[key])
+            else:
+                value = str(CFG.csr.oids[key])
+            attrs += [x509.NameAttribute(oid, value)]
+    return attrs
 
-
-
-
-def create_csr(private_key, common_name, *dns_names):
-    csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
-    builder = x509.CertificateSigningRequestBuilder()
-    oids = [
-        x509.NameAttribute(NameOID.COMMON_NAME, common_name),
-        x509.NameAttribute(NameOID.COUNTRY_NAME, u'US'),
-        x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u'CA'),
-        x509.NameAttribute(NameOID.LOCALITY_NAME, u'Mountain View'),
-        x509.NameAttribute(NameOID.ORGANIZATION_NAME, u'Mozilla'),
-    ]
-    subject = builder.subject_name(x509.Name(oids))
-    if dns_names:
+def add_sans(subject, sans):
+    if sans:
         subject.add_extension(
             [x509.DNSName(dns_name) for dns_name in dns_names],
             critical=False)
+
+def create_csr(private_key, common_name, oids=None, sans=None):
+    if not oids:
+        oids = {}
+    if not sans:
+        sans = []
+    csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
+    builder = x509.CertificateSigningRequestBuilder()
+    oids = create_oids(common_name, oids)
+    subject = builder.subject_name(x509.Name(oids))
+    add_sans(subject, sans)
     csr = subject.sign(private_key, hashes.SHA256(), default_backend())
+    with open(str(csrfile), 'wb') as f:
+        f.write(csr.public_bytes(ENCODING[CFG.csr.encoding]))
     return csr
 
+def load_csr(common_name):
+    csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
+    if not csrfile.exists():
+        raise CSRFileDoesNotExistError(csrfile)
+    with open(str(csrfile), 'rb') as f:
+        csr = x509.lead_pem_x509_csr(r.read(), default_backend())
+    return csr
