@@ -96,3 +96,6 @@ api/VERSION
 
 # prevent secrets config.yml file from being checked in
 api/app/config.yml
+
+# skip .bak files
+*.bak
