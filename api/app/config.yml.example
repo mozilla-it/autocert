@@ -25,17 +25,31 @@ logging:
             format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         detail:
             format: '%(asctime)s - %(levelname)s - File: %(filename)s - %(funcName)s() - Line: %(lineno)d -  %(message)s'
+key:
+    dirpath: /var/tmp/auto-cert
+    key_size: 2048
+    public_exponent: 65537
+    encoding: PEM
+csr:
+    dirpath: /var/tmp/auto-cert
+    validity: 1
+    server_type: 2
+    org_name: Mozilla
+    org_addr1: 331 E Evelyn Ave
+    org_city: Mountain View
+    org_state: CA
+    org_zip: 94041
+    org_country: US
+    org_contact_firstname: Scott
+    org_contact_lastname: Idler
+    org_contact_email: sidler@mozilla.com
+    org_contact_telephone: 503.862.3533
 providers:
+    filepath: ~/auto-cert
     digicert:
-        host: digicert.com
-        port: 443
-        base: services
-        version: v2
-        apikey: ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789...82chars
+        baseurl: https://www.digicert.com:443/services/v2
+        apikey: 82_CHAR_APIKEY
 destinations:
     zeus:
-        host: 10.248.29.12
-        port: 9070
-        base: api/tm
-        version: 3.9
-        apikey: abcdefghijklmnopqrstuvwxyz0123456789...82chars
+        baseurl: http://10.248.29.12:9070/api/tm/3.9
+        apikey: 82_CHAR_APIKEY
