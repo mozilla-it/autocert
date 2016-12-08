@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import io
+import zipfile
+import requests
+
 from functools import partial
 
 from cryptography import x509
@@ -23,6 +27,11 @@ class CsrExistError(Exception):
     def __init__(self, csrfile):
         msg = 'csr file {csrfile} does not exist'.format(**locals())
         super(CsrExistError, self).__init__(msg)
+
+class CrtUnzipError(Exception):
+    def __init__(self):
+        msg = 'failed unzip crt from bytes content'.format(**locals())
+        super(CrtUnzipError, self).__init__(msg)
 
 APACHE_SERVER_TYPE = 2
 
@@ -116,7 +125,25 @@ def create_csr(key, common_name, oids=None, sans=None):
 def load_csr(common_name):
     csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
     if not csrfile.exists():
-        raise CSRFileDoesNotExistError(csrfile)
+        raise CsrExistError(csrfile)
     with open(str(csrfile), 'rb') as f:
         csr = x509.lead_pem_x509_csr(r.read(), default_backend())
     return csr
+
+def _unzip_digicert_crt(content):
+    zf = zipfile.ZipFile(io.BytesIO(content), 'r')
+    crts = [fi for fi in zf.infolist() if fi.filename.endswith('.crt')]
+    for crt in crts:
+        if not crt.filename.endswith('DigiCertCA.crt'):
+            return zf.read(crt).decode('utf-8')
+    raise CrtUnzipError
+
+def call_provider_api(path, provider=CFG.providers.digicert, method='GET', headers=None, data=None):
+    if not headers:
+        headers = {
+            'Content-Type': 'application/json',
+        }
+
+    url = provider.baseurl / path
+    return requests.request(method, url, auth=provider.auth, headers=headers, data=data)
+
