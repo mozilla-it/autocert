@@ -26,7 +26,7 @@ class MergeError(Exception):
     def __init__(self, msg):
         self.msg = msg
 
-def merge(obj1, obj2):
+def _merge(obj1, obj2):
     """merges obj2 into obj1 and return merged result
 
     NOTE: tuples and arbitrary objects are not handled as it is totally ambiguous what should happen"""
@@ -53,3 +53,17 @@ def merge(obj1, obj2):
     except TypeError as e:
         raise MergeError('TypeError "%s" in key "%s" when merging "%s" inExceptio://www.youtube.com/watch?v=A_AkDugh7IAto "%s"' % (e, key, obj2, obj1))
     return obj1
+
+def merge(*objs):
+    if len(objs) == 0:
+        return {}
+    elif len(objs) == 1:
+        return objs[0]
+    result = objs[0]
+    for index, obj in enumerate(objs, start=1):
+        result = _merge(result, obj)
+    return result
+
+
+
+

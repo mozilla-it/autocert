@@ -138,12 +138,7 @@ def _unzip_digicert_crt(content):
             return zf.read(crt).decode('utf-8')
     raise CrtUnzipError
 
-def call_provider_api(path, provider=CFG.providers.digicert, method='GET', headers=None, data=None):
-    if not headers:
-        headers = {
-            'Content-Type': 'application/json',
-        }
-
-    url = provider.baseurl / path
-    return requests.request(method, url, auth=provider.auth, headers=headers, data=data)
+def call_authority_api(path, authority=CFG.authorities.digicert, method='GET', headers=None, data=None):
+    url = authority.baseurl / path
+    return requests.request(method, url, auth=authority.auth, headers=authority.headers, data=data)
 

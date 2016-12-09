@@ -6,17 +6,13 @@ import pwd
 import sys
 import requests
 
+from fnmatch import fnmatch
+
 from flask import Flask, jsonify
 from flask import request, render_template
 from ruamel import yaml
 from subprocess import check_output
 from attrdict import AttrDict
-
-from app.config import CFG
-from app.utils import version
-
-#from flask_log import Logging
-
 
 from pdb import set_trace as bp
 from app.utils.version import version as api_version
@@ -29,6 +25,10 @@ from logging import (
     INFO,
     DEBUG,
     NOTSET)
+
+from app.config import CFG
+from app.utils import version
+from app.utils.dictionary import merge
 
 LOGGING_MAP = {
     'CRITICAL': CRITICAL,
@@ -76,23 +76,44 @@ def hello(target='world'):
     app.logger.info('/hello called with target={target}'.format(**locals()))
     return jsonify({'msg': 'hello %(target)s' % locals()})
 
-@app.route('/certs/list', methods=['GET'])
-@app.route('/certs/list/<string:provider>', methods=['GET'])
-def listcerts(provider='digicert'):
-    app.logger.info('/certs/list called with provider={provider}'.format(**locals()))
-    if provider == 'digicert':
-        headers = {
-            'Accept': 'application/json',
-            'User-Agent': 'auto-cert',
+def digicert_list_certs():
+    response = requests.get(
+        CFG.authorities.digicert.baseurl / 'order/certificate',
+        auth=CFG.authorities.digicert.auth,
+        headers=CFG.authorities.digicert.headers)
+    if response.status_code == 200:
+        obj = response.json()
+        certs = [cert for cert in obj['orders'] if is_valid_cert(cert['status'])]
+        return {
+            'certs': certs,
         }
-        response = requests.get(
-            CFG.providers.digicert.baseurl / 'order/certificate',
-            auth=CFG.providers.digicert.auth,
-            headers=headers)
-        if response.status_code == 200:
-            obj = AttrDict(response.json())
-            count = len(obj.orders)
-            certs = [ cert for cert in obj.orders if is_valid_cert(cert.status) ]
-            return jsonify(certs=certs)
-        else:
-            app.logger.error('failed request to /certs/list with status_code={0}'.format(response.status_code))
+#        obj = AttrDict(response.json())
+#        certs = [ cert for cert in obj.orders if is_valid_cert(cert.status) ]
+#        return {
+#            'certs': list(certs),
+#        }
+    else:
+        app.logger.error('failed request to /list/certs with status_code={0}'.format(response.status_code))
+
+def letsencrypt_list_certs():
+    return {
+        'certs': []
+    }
+
+AUTHORITIES = {
+    'digicert': digicert_list_certs,
+    'letsencrypt': letsencrypt_list_certs,
+}
+
+@app.route('/list/certs', methods=['GET'])
+@app.route('/list/certs/<string:pattern>', methods=['GET'])
+def list_certs(pattern='*'):
+    app.logger.info('/list/certs called with pattern="{pattern}"'.format(**locals()))
+    authorities = [authority for authority in AUTHORITIES.keys() if fnmatch(authority, pattern)]
+    funcs = [AUTHORITIES[authority] for authority in authorities]
+    results = [func() for func in funcs]
+    for result in results:
+        app.logger.warning('certs.count = "{0}"'.format(len(result['certs'])))
+    result = merge(*results)
+    app.logger.warning('certs.count = "{0}"'.format(len(result['certs'])))
+    return jsonify(result)
