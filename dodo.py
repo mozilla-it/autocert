@@ -5,6 +5,8 @@ import os
 from doit import get_var
 from ruamel import yaml
 
+from api.app.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'rmimages', 'logs'],
     'verbosity': 2,
@@ -14,6 +16,14 @@ USER = os.getenv('USER')
 LOGDIR = '/var/tmp/auto-cert'
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
+
+LOG_LEVELS = [
+    'DEBUG',
+    'INFO',
+    'WARNING',
+    'ERROR',
+    'CRITICAL',
+]
 
 
 class UnknownPkgmgrError(Exception):
@@ -95,7 +105,11 @@ def task_test():
     setup venv and run pytest
     '''
     return {
-        'task_dep': ['noroot', 'logdir'],
+        'task_dep': [
+            'noroot',
+            'logdir',
+            'config',
+        ],
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip3 install --upgrade pip',
@@ -134,10 +148,11 @@ def task_deploy():
     return {
         'task_dep': [
             'noroot',
-            'test',
-            'version',
-            'logdir',
             'checkreqs',
+            'logdir',
+            'version',
+            'test',
+            'config',
             'dockercompose'
         ],
         'actions': [
@@ -159,23 +174,52 @@ def task_rmimages():
         ],
     }
 
+def task_config():
+    '''
+    write config.yml -> .config.yml
+    '''
+    log_level = get_var('LOG_LEVEL', 'WARNING')
+    if log_level not in LOG_LEVELS:
+        raise UnknownLogLevelError(log_level)
+    punch = '''
+    logging:
+        loggers:
+            api:
+                level: {log_level}
+        handlers:
+            console:
+                level: {log_level}
+            logfile:
+                level: {log_level}
+    '''.format(**locals())
+    return {
+        'actions': [
+            'echo "writing {CONFIG_YML} -> {DOT_CONFIG_YML}"'.format(**globals()),
+            'echo "setting LOG_LEVEL={log_level}"'.format(**locals()),
+            'cp {CONFIG_YML} {DOT_CONFIG_YML}'.format(**globals()),
+            lambda: _update_config(DOT_CONFIG_YML, yaml.safe_load(punch)),
+        ]
+    }
+
+
 def task_example():
     '''
     cp|strip config.yml -> config.yml.example
     '''
-    config = 'api/app/config.yml'
     apikey = '82_CHAR_APIKEY'
-    def strip_apikeys():
-        with open(config, 'r') as f:
-            cfg = yaml.load(f.read(), yaml.RoundTripLoader)
-        cfg['providers']['digicert']['apikey'] = apikey
-        cfg['destinations']['zeus']['apikey'] = apikey
-        with open(config +'.example', 'w') as f:
-            f.write(yaml.dump(cfg, indent=4, Dumper=yaml.RoundTripDumper))
+    punch = '''
+    authorities:
+        digicert:
+            apikey: {apikey}
+    destinations:
+        zeus:
+            apikey: {apikey}
+    '''.format(**locals())
     return {
         'actions': [
-            'cp {config}.example {config}.bak'.format(**locals()),
-            strip_apikeys,
+            'cp {CONFIG_YML}.example {CONFIG_YML}.bak'.format(**globals()),
+            'cp {CONFIG_YML} {CONFIG_YML}.example'.format(**globals()),
+            lambda: _update_config(CONFIG_YML+'.example', yaml.safe_load(punch)),
         ],
     }
 
