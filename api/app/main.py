@@ -85,9 +85,7 @@ def digicert_list_certs():
     if response.status_code == 200:
         from pprint import pformat
         obj = AttrDict(response.json())
-        app.logger.debug('digicert_list_certs: obj.orders="{0}"'.format(pformat(obj.orders)))
-        certs = [ cert for cert in obj.orders if is_valid_cert(cert.status) ]
-        app.logger.debug('digicert_list_certs: certs="{0}"'.format(pformat(certs)))
+        certs = [cert for cert in obj.orders if is_valid_cert(cert.status)]
         return {
             'certs': list(certs),
         }
@@ -111,11 +109,4 @@ def list_certs(pattern='*'):
     app.logger.info('/list/certs called with pattern="{pattern}"'.format(**locals()))
     authorities = [authority for authority in AUTHORITIES.keys() if fnmatch(authority, pattern)]
     app.logger.debug('authorities="{authorities}"'.format(**locals()))
-    funcs = [AUTHORITIES[authority] for authority in authorities]
-    results = [func() for func in funcs]
-    app.logger.debug('len(results)={0}'.format(len(results)))
-    for result in results:
-        app.logger.debug('1) len(result["certs"])="{0}"'.format(len(result['certs'])))
-    result = merge(*results)
-    app.logger.debug('2) len(result["certs"])="{0}"'.format(len(result['certs'])))
-    return jsonify(result)
+    return jsonify(merge(*[AUTHORITIES[a]() for a in authorities]))
