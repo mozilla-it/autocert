@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from copy import deepcopy
+
 def dict_to_attrs(obj, d):
     for k, v in d.items():
         setattr(obj, k, v)
@@ -31,28 +33,29 @@ def _merge(obj1, obj2):
 
     NOTE: tuples and arbitrary objects are not handled as it is totally ambiguous what should happen"""
     key = None
+    result = deepcopy(obj1)
     try:
-        if isscalar(obj1):
-            obj1 = obj2
-        elif isinstance(obj1, list):
+        if isscalar(result):
+            result = obj2
+        elif isinstance(result, list):
             if isinstance(obj2, list):
-                obj1.extend(obj2)
+                result.extend(obj2)
             else:
-                obj1.append(obj2)
-        elif isinstance(obj1, dict):
+                result.append(obj2)
+        elif isinstance(result, dict):
             if isinstance(obj2, dict):
                 for key in obj2:
-                    if key in obj1:
-                        obj1[key] = merge(obj1[key], obj2[key])
+                    if key in result:
+                        result[key] = _merge(result[key], obj2[key])
                     else:
-                        obj1[key] = obj2[key]
+                        result[key] = obj2[key]
             else:
-                raise MergeError('Cannot merge non-dict "%s" into dict "%s"' % (obj2, obj1))
+                raise MergeError('Cannot merge non-dict "%s" into dict "%s"' % (obj2, result))
         else:
-            raise MergeError('NOT IMPLEMENTED "%s" into "%s"' % (obj2, obj1))
+            raise MergeError('NOT IMPLEMENTED "%s" into "%s"' % (obj2, result))
     except TypeError as e:
-        raise MergeError('TypeError "%s" in key "%s" when merging "%s" inExceptio://www.youtube.com/watch?v=A_AkDugh7IAto "%s"' % (e, key, obj2, obj1))
-    return obj1
+        raise MergeError('TypeError "%s" in key "%s" when merging "%s" inExceptio://www.youtube.com/watch?v=A_AkDugh7IAto "%s"' % (e, key, obj2, result))
+    return result
 
 def merge(*objs):
     if len(objs) == 0:
@@ -60,7 +63,7 @@ def merge(*objs):
     elif len(objs) == 1:
         return objs[0]
     result = objs[0]
-    for index, obj in enumerate(objs, start=1):
+    for obj in objs[1:]:
         result = _merge(result, obj)
     return result
 
