@@ -32,9 +32,7 @@ def do_list(ns):
         ad = AttrDict(obj)
         results = ad.certs
         if not ns.verbose:
-            print('certs.count =', len(ad.certs))
             results = transform_certs(ad.certs)
-            print('results.count =', len(results))
         output(results)
         return
     raise Exception('wtf do_list')
