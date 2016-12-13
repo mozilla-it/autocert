@@ -94,6 +94,9 @@ ENV/
 # prevent version file from being checked in
 api/VERSION
 
+# prevent default default LOG_LEVEL file from being checked in
+LOG_LEVEL
+
 # prevent secrets config.yml file from being checked in
 api/app/config.yml
 api/app/.config.yml
