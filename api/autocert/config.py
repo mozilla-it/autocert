@@ -11,7 +11,7 @@ from urlpath import URL
 from pathlib2 import Path
 
 try:
-    from app.utils.dictionary import merge
+    from autocert.utils.dictionary import merge
 except ImportError as ie:
     from utils.dictionary import merge
 

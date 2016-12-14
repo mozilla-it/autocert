@@ -5,7 +5,7 @@ import os
 from doit import get_var
 from ruamel import yaml
 
-from api.app.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+from api.autocert.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'rmimages', 'logs'],

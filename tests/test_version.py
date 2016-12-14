@@ -11,7 +11,7 @@ from subprocess import check_output
 from utils import docstr, jsonify
 from main import app
 
-from app.utils.version import version
+from autocert.utils.version import version
 
 def test_version():
     '''

@@ -14,8 +14,7 @@ from ruamel import yaml
 from subprocess import check_output
 from attrdict import AttrDict
 
-from pdb import set_trace as bp
-from app.utils.version import version as api_version
+from pdb import set_trace as breakpoint
 
 from logging.config import dictConfig
 from logging import (
@@ -26,9 +25,10 @@ from logging import (
     DEBUG,
     NOTSET)
 
-from app.config import CFG
-from app.utils import version
-from app.utils.dictionary import merge
+from autocert.config import CFG
+from autocert.utils import version
+from autocert.utils.dictionary import merge
+from autocert.utils.version import version as api_version
 
 LOGGING_MAP = {
     'CRITICAL': CRITICAL,

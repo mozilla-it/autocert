@@ -14,7 +14,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes, serialization
 
 try:
-    from app.config import CFG
+    from autocert.config import CFG
 except ImportError as ie:
     from config import CFG
 
