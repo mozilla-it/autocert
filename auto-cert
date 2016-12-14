@@ -5,7 +5,7 @@
 """Convenience wrapper for running cli directly from source tree."""
 
 
-from cli.cli import main
+from cli.autocert import main
 
 
 if __name__ == '__main__':
