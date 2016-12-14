@@ -48,6 +48,10 @@ INVALID_STATUS = [
 app = Flask('api')                  #1
 app.logger                          #2
 
+from autocert.hello_api import hello_api
+
+app.register_blueprint(hello_api)
+
 def log(*msgs):
     app.logger.log(app.logger.getEffectiveLevel(), ' '.join(msgs))
 
@@ -70,11 +74,11 @@ def version():
     version = api_version()
     return jsonify({'version': version})
 
-@app.route('/hello', methods=['GET'])
-@app.route('/hello/<string:target>', methods=['GET'])
-def hello(target='world'):
-    app.logger.info('/hello called with target={target}'.format(**locals()))
-    return jsonify({'msg': 'hello %(target)s' % locals()})
+#@app.route('/hello', methods=['GET'])
+#@app.route('/hello/<string:target>', methods=['GET'])
+#def hello(target='world'):
+#    app.logger.info('/hello called with target={target}'.format(**locals()))
+#    return jsonify({'msg': 'hello %(target)s' % locals()})
 
 def digicert_list_certs():
     app.logger.info('digicert_list_certs called')
