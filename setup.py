@@ -20,7 +20,7 @@ setup(
     name = 'auto-cert-cli',
     packages = ['cli'],
     entry_points = {
-        'console_scripts': ['auto-cert = cli.cli:main']
+        'console_scripts': ['auto-cert = cli.autocert:main']
     },
     version = __version__,
     description = 'auto-cert cli tool',
