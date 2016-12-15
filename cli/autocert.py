@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-cli.cli: provides entry point main().
+cli.autocert: provides entry point main().
 '''
 
 import os
