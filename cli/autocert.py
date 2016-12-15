@@ -22,6 +22,7 @@ except ImportError as ie:
     print(ie)
     print('perhaps you need to install cli/requirements.txt via pip3')
 
+from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
 from cli.output import output
 
@@ -65,10 +66,9 @@ def add_subparsers(parser):
         dest='command',
         title='commands',
         description='choose a command to run')
-    commands_path = os.path.dirname(__file__)
-    for filename in [f for f in os.listdir(commands_path) if f.endswith('_command.py')]:
-        command = imp.load_source(filename.split('.')[0], commands_path+'/'+filename)
-        command.add_parser(subparsers)
+    dirpath = os.path.dirname(__file__)
+    endswith = '_command.py'
+    [mod.add_parser(subparsers) for mod in import_modules(dirpath, endswith)]
     subparsers.required = True
     return subparsers
 
