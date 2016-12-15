@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import imp
 import pwd
 import sys
 
@@ -15,13 +16,13 @@ app.logger                          #2
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-from autocert.list_api import list_api
-from autocert.hello_api import hello_api
-from autocert.version_api import version_api
+def register_apis():
+    from autocert.utils.importer import import_modules
+    dirpath = os.path.dirname(__file__)
+    endswith = '_api.py'
+    [app.register_blueprint(mod.api) for mod in import_modules(dirpath, endswith)]
 
-app.register_blueprint(list_api)
-app.register_blueprint(hello_api)
-app.register_blueprint(version_api)
+register_apis()
 
 @app.before_first_request
 def initialize():

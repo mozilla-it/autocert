@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from flask import Blueprint, jsonify
-list_api = Blueprint('list_api', __name__)
+api = Blueprint('list_api', __name__)
 
 import requests
 
@@ -49,8 +49,8 @@ AUTHORITIES = {
     'letsencrypt': letsencrypt_list_certs,
 }
 
-@list_api.route('/list/certs', methods=['GET'])
-@list_api.route('/list/certs/<string:pattern>', methods=['GET'])
+@api.route('/list/certs', methods=['GET'])
+@api.route('/list/certs/<string:pattern>', methods=['GET'])
 def list_certs(pattern='*'):
     from flask import current_app
     current_app.logger.info('/list/certs called with pattern="{pattern}"'.format(**locals()))

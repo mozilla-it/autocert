@@ -3,10 +3,10 @@
 
 
 from flask import Blueprint, jsonify
-hello_api = Blueprint('hello_api', __name__)
+api = Blueprint('hello_api', __name__)
 
-@hello_api.route('/hello', methods=['GET'])
-@hello_api.route('/hello/<string:target>', methods=['GET'])
+@api.route('/hello', methods=['GET'])
+@api.route('/hello/<string:target>', methods=['GET'])
 def hello(target='world'):
     from flask import current_app
     current_app.logger.info('/hello called with target={target}'.format(**locals()))
