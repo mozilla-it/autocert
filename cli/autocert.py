@@ -84,7 +84,7 @@ def main():
         choices = VERSIONS,
         const=VERSIONS[0],
         nargs='?',
-        help='default=%(const)s show the version')
+        help='default=%(const)s; show the version')
     parser.add_argument(
         '--verbose',
         action='store_true',
@@ -94,7 +94,7 @@ def main():
         metavar='URL',
         type=URL,
         default=r'http://0.0.0.0',
-        help='default=%(default)s set the api url to use')
+        help='default=%(default)s; set the api url to use')
 
     ns, rem = parser.parse_known_args()
     if not any([h in rem for h in ('-h', '--help')]):
