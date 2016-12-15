@@ -3,6 +3,8 @@
 
 import os
 
+from subprocess import check_output
+
 def dirname(path, count=1):
     for x in range(count):
         path = os.path.dirname(path)

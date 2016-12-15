@@ -19,6 +19,7 @@ def test_hello_default():
     client = app.test_client()
     client.testing = True
     result = client.get('/hello')
+    assert result.status_code == 200
     actual = jsonify(result.get_data().decode('utf8'))
     assert expect == actual
 
@@ -31,5 +32,6 @@ def test_hello_param():
     client = app.test_client()
     client.testing = True
     result = client.get('/hello/auto-cert')
+    assert result.status_code == 200
     actual = jsonify(result.get_data().decode('utf8'))
     assert expect == actual

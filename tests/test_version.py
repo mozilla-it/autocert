@@ -18,7 +18,6 @@ def test_version():
     expect:
         version: git describe
     '''
-    #expect = {'version': check_output('git describe', shell=True).decode('utf-8').strip()}
     expect = {'version': version()}
     client = app.test_client()
     client.testing = True

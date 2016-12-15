@@ -35,5 +35,8 @@ def do_list(ns):
             results = transform_certs(ad.certs)
         output(results)
         return
+    else:
+        print(response)
+        print(response.text)
     raise Exception('wtf do_list')
 
