@@ -102,21 +102,17 @@ def create_oids(common_name, oids):
     return attrs
 
 def add_sans(subject, sans):
-    if sans:
-        subject.add_extension(
-            [x509.DNSName(dns_name) for dns_name in dns_names],
-            critical=False)
+    subject.add_extension(
+        [x509.DNSName(dns_name) for dns_name in dns_names],
+        critical=False)
 
 def create_csr(key, common_name, oids=None, sans=None):
-    if not oids:
-        oids = {}
-    if not sans:
-        sans = []
     csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
     builder = x509.CertificateSigningRequestBuilder()
-    oids = create_oids(common_name, oids)
+    oids = create_oids(common_name, oids if oids else {})
     subject = builder.subject_name(x509.Name(oids))
-    add_sans(subject, sans)
+    if sans:
+        add_sans(subject, sans)
     csr = subject.sign(key, hashes.SHA256(), default_backend())
     with open(str(csrfile), 'wb') as f:
         f.write(csr.public_bytes(ENCODING[CFG.csr.encoding]))
@@ -138,7 +134,10 @@ def _unzip_digicert_crt(content):
             return zf.read(crt).decode('utf-8')
     raise CrtUnzipError
 
-def call_authority_api(path, authority=CFG.authorities.digicert, method='GET', headers=None, data=None):
+def call_authority_api(path, method='GET', authority=None, headers=None, data=None):
+    if not authority:
+        authority = CFG.authorities.digicert
+    if not headers:
+        headers = authority.headers
     url = authority.baseurl / path
-    return requests.request(method, url, auth=authority.auth, headers=authority.headers, data=data)
-
+    return requests.request(method, url, auth=authority.auth, headers=headers, data=data)
