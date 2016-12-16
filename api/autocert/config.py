@@ -15,7 +15,6 @@ try:
 except ImportError as ie:
     from utils.dictionary import merge
 
-
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
 DOT_CONFIG_YML = '{0}/.config.yml'.format(CONFIG_DIR)
@@ -62,12 +61,15 @@ def _fixup(obj):
         return d
     return obj
 
-def _load_config(filename, fixup=True):
+def _load_config(filename, roundtrip=False, fixup=True):
     cfg = {}
     if os.path.isfile(filename):
         try:
             with open(filename, 'r') as f:
-                cfg = yaml.round_trip_load(f.read())
+                if roundtrip:
+                    cfg = yaml.round_trip_load(f.read())
+                else:
+                    cfg = yaml.safe_load(f.read())
             if fixup:
                 cfg = _fixup(cfg)
         except Exception as ex:
@@ -75,21 +77,24 @@ def _load_config(filename, fixup=True):
             raise ConfigLoadError(filename, errors=[ex])
     return AttrDict(cfg)
 
-def _write_config(filename, cfg):
+def _write_config(filename, cfg, roundtrip=False):
     try:
         with open(filename, 'w') as f:
-            f.write(yaml.round_trip_dump(dict(cfg), indent=4))
+            if roundtrip:
+                f.write(yaml.round_trip_dump(dict(cfg), indent=4))
+            else:
+                f.write(yaml.dump(cfg, indent=4))
     except Exception as ex:
         raise ConfigWriteError(filename, errors=[ex])
     return cfg
 
 def _update_config(filename, *cfgs):
     if cfgs:
-        updated = _load_config(filename, fixup=False)
+        updated = _load_config(filename, roundtrip=True, fixup=False)
         for cfg in cfgs:
             if not isinstance(cfg, AttrDict):
                 cfg = AttrDict(cfg)
             updated += cfg
-    return _write_config(filename, updated)
+    return _write_config(filename, updated, roundtrip=True)
 
 CFG = _load_config(DOT_CONFIG_YML)
