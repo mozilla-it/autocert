@@ -96,18 +96,27 @@ def bad_request(error):
 def unauthorized(error):
     return log_and_jsonify_error(401, error, request)
 
+@app.errorhandler(403)
+def page_not_found(error):
+    return log_and_jsonify_error(403, error, request)
+
 @app.errorhandler(404)
 def page_not_found(error):
     return log_and_jsonify_error(404, error, request)
 
 @app.errorhandler(405)
-def page_not_found(error):
+def method_not_allowed(error):
     return log_and_jsonify_error(405, error, request)
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
     return log_jsonify_error(500, error, request)
+
+@app.errorhandler(503)
+def service_unavailable(error):
+    return log_jsonify_error(503, error, request)
+
 
 @app.errorhandler(Exception)
 def unhandled_exception(ex):
