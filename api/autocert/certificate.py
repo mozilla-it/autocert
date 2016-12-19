@@ -7,11 +7,14 @@ import requests
 
 from functools import partial
 
+from pprint import pformat
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes, serialization
+
+from autocert.main import app
 
 try:
     from autocert.config import CFG
@@ -69,6 +72,7 @@ STATUS_CODES = {
 }
 
 def create_key(common_name, **kwargs):
+    app.logger.info('called create_key:\n{0}'.format(pformat(locals())))
     keyfile = CFG.key.dirpath / '{common_name}.key'.format(**locals())
     key = rsa.generate_private_key(
         public_exponent=kwargs.get('public_exponent', CFG.key.public_exponent),
@@ -82,6 +86,7 @@ def create_key(common_name, **kwargs):
     return key
 
 def load_key(common_name):
+    app.logger.info('called load_key:\n{0}'.format(pformat(locals())))
     keyfile = CFG.key.dirpath / '{common_name}.key'.format(**locals())
     if not keyfile.exists():
         raise KeyExistError(csrfile)
@@ -107,6 +112,7 @@ def add_sans(subject, sans):
         critical=False)
 
 def create_csr(key, common_name, oids=None, sans=None):
+    app.logger.info('called create_csr:\n{0}'.format(pformat(locals())))
     csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
     builder = x509.CertificateSigningRequestBuilder()
     oids = create_oids(common_name, oids if oids else {})
@@ -119,6 +125,7 @@ def create_csr(key, common_name, oids=None, sans=None):
     return csr
 
 def load_csr(common_name):
+    app.logger.info('called load_csr:\n{0}'.format(pformat(locals())))
     csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
     if not csrfile.exists():
         raise CsrExistError(csrfile)
@@ -135,6 +142,7 @@ def _unzip_digicert_crt(content):
     raise CrtUnzipError
 
 def call_authority_api(path, method='GET', authority=None, headers=None, data=None):
+    app.logger.info('called call_authority_api:\n{0}'.format(pformat(locals())))
     if not authority:
         authority = CFG.authorities.digicert
     if not headers:

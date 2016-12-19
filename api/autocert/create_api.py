@@ -32,7 +32,7 @@ def jsonified_errors(response):
 def request_digicert_certificate(common_name, key, csr, encoding='PEM', cert_type='ssl_plus'):
     from flask import current_app as app
     authority = CFG.authorities.digicert
-    app.logger.info('request_digicert_certificate called with:\n{0}'.format(pformat(locals())))
+    app.logger.info('called request_digicert_certificate:\n{0}'.format(pformat(locals())))
     path = 'order/certificate/{cert_type}'.format(**locals())
     data = json.dumps(merge(authority.template, {
         'certificate': {
@@ -48,7 +48,7 @@ def request_digicert_certificate(common_name, key, csr, encoding='PEM', cert_typ
 def approve_digicert_certificate(request_id):
     from flask import current_app as app
     authority = CFG.authorities.digicert
-    app.logger.info('approve_digicert_certificate called with:\n{0}'.format(pformat(locals())))
+    app.logger.info('called approve_digicert_certificate:\n{0}'.format(pformat(locals())))
     path = 'request/{request_id}/status'.format(**locals())
     data = json.dumps({
         'status': 'approved',
@@ -62,8 +62,7 @@ def approve_digicert_certificate(request_id):
 @api.route('/create/digicert/<string:common_name>', methods=['PUT'])
 def create(common_name):
     from flask import current_app as app
-    app.logger.info(
-        '/create/digicert called with common_name={common_name}'.format(**locals()))
+    app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
     key = create_key(common_name)
     csr = create_csr(key, common_name)
     request_response = request_digicert_certificate(common_name, key, csr)
@@ -83,6 +82,5 @@ def create(common_name):
 @api.route('/create/letsencrypt/<string:common_name>', methods=['PUT'])
 def create_letsencrypt(common_name):
     from flask import current_app as app
-    app.logger.info(
-        '/create/letsencrypt called with common_name={common_name}'.format(**locals()))
+    app.logger.info('called /create/letsencrypt:\n{0}'.format(pformat(locals())))
     raise NotImplementedError('create_letsencrypt endpoint not implemented')
