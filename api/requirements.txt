@@ -1,8 +1,8 @@
 attrdict==2.0.0
 urlpath==1.1.2
 pathlib2==2.1.0
-requests==2.11.1
 ruamel.yaml==0.12.15
+requests==2.11.1
 Flask==0.10.1
 Jinja2==2.7.3
 MarkupSafe==0.23

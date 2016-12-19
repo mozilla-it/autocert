@@ -1,2 +1,5 @@
 doit==0.29.0
+attrdict==2.0.0
+urlpath==1.1.2
+pathlib2==2.1.0
 ruamel.yaml==0.12.15
