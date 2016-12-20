@@ -8,7 +8,7 @@ from ruamel import yaml
 from api.autocert.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'rmimages', 'logs'],
+    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'logs'],
     'verbosity': 2,
 }
 
@@ -165,12 +165,27 @@ def task_rmimages():
     '''
     remove dangling docker images
     '''
+    query = '`docker images -q -f dangling=true`'
     return {
         'actions': [
-            'docker rmi $(docker images -q --filter "dangling=true")',
+            'docker rmi {query}'.format(**locals()),
         ],
         'uptodate': [
-            '[ -z "`docker images -q --filter "dangling=true"`"] && exit 0 || exit 1',
+            '[ -z "{query}" ] && exit 0 || exit 1'.format(**locals()),
+        ],
+    }
+
+def task_rmvolumes():
+    '''
+    remove dangling docker volumes
+    '''
+    query = '`docker volume ls -q -f dangling=true`'
+    return {
+        'actions': [
+            'docker volume rm {query}'.format(**locals()),
+        ],
+        'uptodate': [
+            '[ -z "{query}" ] && exit 0 || exit 1'.format(**locals()),
         ],
     }
 
