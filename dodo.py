@@ -8,12 +8,11 @@ from ruamel import yaml
 from api.autocert.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'logs'],
+    'default_tasks': ['deploy', 'rmimages', 'rmvolumes'],
     'verbosity': 2,
 }
 
 USER = os.getenv('USER')
-LOGDIR = '/var/tmp/auto-cert'
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -107,7 +106,6 @@ def task_test():
     return {
         'task_dep': [
             'noroot',
-            'logdir',
             'config',
         ],
         'actions': [
@@ -129,18 +127,6 @@ def task_version():
         ],
     }
 
-def task_logdir():
-    '''
-    setup logging directory
-    '''
-    return {
-        'actions': [
-            'mkdir -p {LOGDIR}'.format(**globals()),
-            'chown -R {USER}:{USER} {LOGDIR}'.format(**globals()),
-            'touch {LOGDIR}/api.log'.format(**globals()),
-        ],
-    }
-
 def task_deploy():
     '''
     deloy flask app via docker-compose
@@ -149,7 +135,6 @@ def task_deploy():
         'task_dep': [
             'noroot',
             'checkreqs',
-            'logdir',
             'version',
             'test',
             'config',
@@ -208,8 +193,6 @@ def task_config():
         handlers:
             console:
                 level: {log_level}
-            logfile:
-                level: {log_level}
     '''.format(**locals())
     return {
         'actions': [
@@ -242,24 +225,6 @@ def task_example():
         ],
     }
 
-def task_logs():
-    '''
-    run docker-compose logs
-    '''
-
-    star80 = 'echo "{0}"'.format('*'*80)
-    return {
-        'actions': [
-            star80,
-            'echo "logging from docker-compose"',
-            'docker-compose logs',
-            star80,
-            'echo "logging from /var/tmp/auto-cert/api.log"',
-            'cat {LOGDIR}/api.log'.format(**globals()),
-            star80,
-        ],
-    }
-
 def task_tidy():
     '''
     delete cached files
@@ -285,7 +250,6 @@ def task_nuke():
         'actions': [
             'docker-compose kill',
             'docker-compose rm -f',
-            'rm -rf {LOGDIR}/api.log'.format(**globals()),
             'git clean -fd',
             'git reset --hard HEAD',
         ],

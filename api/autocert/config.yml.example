@@ -7,7 +7,7 @@ logging:
     loggers:
         api:
             level: WARNING
-            handlers: [console, logfile]
+            handlers: [console]
             propagate: false
     handlers:
         console:
@@ -15,23 +15,35 @@ logging:
             stream: ext://sys.stdout
             formatter: simple
             level: WARNING
-        logfile:
-            class: logging.FileHandler
-            filename: /var/tmp/auto-cert/api.log
-            formatter: detail
-            level: WARNING
     formatters:
         simple:
             format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
         detail:
             format: '%(asctime)s - %(levelname)s - File: %(filename)s - %(funcName)s()
                 - Line: %(lineno)d - %(message)s'
+authorities:
+    digicert:
+        baseurl: https://www.digicert.com:443/services/v2
+        apikey: 82_CHAR_APIKEY
+        template:
+            certificate:
+                organization_units: [WebOps]
+                server_platform:
+                    id: 2 #Apache
+                signature_hash: sha256
+            organization:
+                id: 147486
+            payment_method: balance
+            validity_years: 1
+        headers:
+            Content-Type: application/json
+            User-Agent: auto-cert
 destinations:
     zeus:
         baseurl: http://10.248.29.12:9070/api/tm/3.9
         apikey: 82_CHAR_APIKEY
 csr:
-    dirpath: /var/tmp/auto-cert
+    dirpath: /data/auto-cert
     validity: 1
     server_type: 2
     encoding: PEM
@@ -46,27 +58,8 @@ csr:
         org_contact_lastname: Idler
         org_contact_email: sidler@mozilla.com
         org_contact_telephone: 503.862.3533
-authorities:
-    filepath: ~/auto-cert
-    digicert:
-        template:
-            certificate:
-                organization_units: [WebOps]
-                server_platform:
-                    id: 2 #Apache
-                signature_hash: sha256
-            organization:
-                id: 147486
-            payment_method: balance
-            validity_years: 1
-
-        baseurl: https://www.digicert.com:443/services/v2
-        headers:
-            Content-Type: application/json
-            User-Agent: auto-cert
-        apikey: 82_CHAR_APIKEY
 key:
-    dirpath: /var/tmp/auto-cert
+    dirpath: /data/auto-cert
     key_size: 2048
     public_exponent: 65537
     encoding: PEM
