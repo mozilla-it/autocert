@@ -29,7 +29,7 @@ def jsonified_errors(response):
         ],
     })
 
-def request_digicert_certificate(common_name, key, csr, encoding='PEM', cert_type='ssl_plus'):
+def request_digicert_certificate(common_name, key, csr, cert_type='ssl_plus'):
     from flask import current_app as app
     authority = CFG.authorities.digicert
     app.logger.info('called request_digicert_certificate:\n{0}'.format(pformat(locals())))
@@ -37,7 +37,7 @@ def request_digicert_certificate(common_name, key, csr, encoding='PEM', cert_typ
     data = json.dumps(merge(authority.template, {
         'certificate': {
             'common_name': common_name,
-            'csr': csr.public_bytes(ENCODING[encoding]).decode('utf-8'),
+            'csr': csr.public_bytes(ENCODING[CFG.key.encoding]).decode('utf-8'),
         }
     }))
     app.logger.debug(
