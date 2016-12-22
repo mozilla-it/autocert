@@ -12,7 +12,7 @@ from pathlib2 import Path
 
 try:
     from autocert.utils.dictionary import merge
-except ImportError as ie:
+except ImportError:
     from utils.dictionary import merge
 
 CONFIG_DIR = os.path.dirname(__file__)

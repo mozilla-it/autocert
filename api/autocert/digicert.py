@@ -12,12 +12,12 @@ from autocert.certificate import ENCODING
 
 try:
     from autocert.app import app
-except ImportError as ie:
+except ImportError:
     from app import app
 
 try:
     from autocert.config import CFG
-except ImportError as ie:
+except ImportError:
     from config import CFG
 
 def request(method, path, json=None):

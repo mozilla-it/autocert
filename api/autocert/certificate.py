@@ -10,12 +10,12 @@ from cryptography.hazmat.primitives import hashes, serialization
 
 try:
     from autocert.app import app
-except ImportError as ie:
+except ImportError:
     from app import app
 
 try:
     from autocert.config import CFG
-except ImportError as ie:
+except ImportError:
     from config import CFG
 
 class KeyExistError(Exception):
