@@ -4,7 +4,7 @@
 api for creating certificates
 '''
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 api = Blueprint('create_api', __name__)
 
 import json
@@ -40,8 +40,7 @@ def request_digicert_certificate(common_name, key, csr, cert_type='ssl_plus'):
             'csr': csr.public_bytes(ENCODING[CFG.key.encoding]).decode('utf-8'),
         }
     }))
-    app.logger.debug(
-        'calling digicert with path={path} and data={data}'.format(**locals()))
+    app.logger.debug('calling digicert with path={path} and data={data}'.format(**locals()))
     response = call_authority_api(path, authority=authority, method='POST', data=data)
     return response
 
@@ -62,9 +61,11 @@ def approve_digicert_certificate(request_id):
 @api.route('/create/digicert/<string:common_name>', methods=['PUT'])
 def create(common_name):
     from flask import current_app as app
+    data = request.get_json(silent=True)
+    sans = data['sans']
     app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
     key = create_key(common_name)
-    csr = create_csr(key, common_name)
+    csr = create_csr(key, common_name, sans)
     request_response = request_digicert_certificate(common_name, key, csr)
     if request_response.status_code != 201:
         return jsonified_errors(request_response)
