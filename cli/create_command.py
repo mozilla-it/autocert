@@ -4,6 +4,7 @@
 cli.create
 '''
 
+import json
 import requests
 
 from cli.output import output
@@ -23,11 +24,22 @@ def add_parser(subparsers):
         default=AUTHORITIES[0],
         choices=AUTHORITIES,
         help='default=%(default)s; choose which authority to use')
+    parser.add_argument(
+        '--sans',
+        nargs='+',
+        help='list of subject alternate names')
+
     parser.set_defaults(func=do_create)
 
 def do_create(ns):
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    data = {
+        'sans': ns.sans,
+    }
     url = ns.api_url / 'create' / ns.authority / ns.common_name
-    response = requests.put(url)
+    response = requests.put(url, headers=headers, data=json.dumps(data))
     print('response.status_code =', response.status_code)
     print('response.text =', response.text)
     if response.status_code != 200:
