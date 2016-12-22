@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import io
-import zipfile
-import requests
-
-from functools import partial
-
 from pprint import pformat
 from cryptography import x509
 from cryptography.x509.oid import NameOID
@@ -14,7 +8,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes, serialization
 
-from autocert.main import app
+try:
+    from autocert.app import app
+except ImportError as ie:
+    from app import app
 
 try:
     from autocert.config import CFG
@@ -35,8 +32,6 @@ class CrtUnzipError(Exception):
     def __init__(self):
         msg = 'failed unzip crt from bytes content'.format(**locals())
         super(CrtUnzipError, self).__init__(msg)
-
-APACHE_SERVER_TYPE = 2
 
 OIDS_MAP = {
     'common_name':              NameOID.COMMON_NAME,
@@ -132,20 +127,3 @@ def load_csr(common_name):
     with open(str(csrfile), 'rb') as f:
         csr = x509.lead_pem_x509_csr(r.read(), default_backend())
     return csr
-
-def _unzip_digicert_crt(content):
-    zf = zipfile.ZipFile(io.BytesIO(content), 'r')
-    crts = [fi for fi in zf.infolist() if fi.filename.endswith('.crt')]
-    for crt in crts:
-        if not crt.filename.endswith('DigiCertCA.crt'):
-            return zf.read(crt).decode('utf-8')
-    raise CrtUnzipError
-
-def call_authority_api(path, method='GET', authority=None, headers=None, data=None):
-    app.logger.info('called call_authority_api:\n{0}'.format(pformat(locals())))
-    if not authority:
-        authority = CFG.authorities.digicert
-    if not headers:
-        headers = authority.headers
-    url = authority.baseurl / path
-    return requests.request(method, url, auth=authority.auth, headers=headers, data=data)

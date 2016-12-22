@@ -53,9 +53,7 @@ STATUS_CODES = {
     511: 'network authentication required',
 }
 
-# the following statements have to be in THIS specfic order: 1, 2, 3
-app = Flask('api')                  #1
-app.logger                          #2
+from autocert.app import app #import flask app
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
