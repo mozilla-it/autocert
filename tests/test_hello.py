@@ -7,8 +7,8 @@ import inspect
 
 from ruamel import yaml
 
-from utils import docstr, jsonify
 from main import app
+from utils import docstr, jsonify
 
 def test_hello_default():
     '''
