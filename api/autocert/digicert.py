@@ -20,6 +20,11 @@ try:
 except ImportError:
     from config import CFG
 
+class CrtUnzipError(Exception):
+    def __init__(self):
+        msg = 'failed unzip crt from bytes content'.format(**locals())
+        super(CrtUnzipError, self).__init__(msg)
+
 def request(method, path, json=None):
     authority = CFG.authorities.digicert
     url = authority.baseurl / path
@@ -47,10 +52,14 @@ def unzip_digicert_crt(content):
             return zf.read(crt).decode('utf-8')
     raise CrtUnzipError
 
-def get_crt(common_name):
-    pass
-
 def get_certificate_id(common_name):
+    res1, ad1 = get('order/certificate')
+    orders = [order for order in ad1.orders if order.certificate.common_name == common_name]
+    from pprint import pprint
+    pprint({'orders': orders})
+    return orders[0].certificate.id
+
+def get_crt(common_name):
     pass
 
 def request_certificate(common_name, key, csr, cert_type='ssl_plus'):

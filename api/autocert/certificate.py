@@ -28,11 +28,6 @@ class CsrExistError(Exception):
         msg = 'csr file {csrfile} does not exist'.format(**locals())
         super(CsrExistError, self).__init__(msg)
 
-class CrtUnzipError(Exception):
-    def __init__(self):
-        msg = 'failed unzip crt from bytes content'.format(**locals())
-        super(CrtUnzipError, self).__init__(msg)
-
 OIDS_MAP = {
     'common_name':              NameOID.COMMON_NAME,
     'org_name':                 NameOID.ORGANIZATION_NAME,
