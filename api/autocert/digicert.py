@@ -44,7 +44,10 @@ def put(path, json=None):
 def post(path, json=None):
     return request('POST', path, json=json)
 
-def unzip_digicert_crt(content):
+def suffix(order_id):
+    return 'dc{order_id}'.format(**locals())
+
+def unzip_crt(content):
     zf = zipfile.ZipFile(io.BytesIO(content), 'r')
     crts = [fi for fi in zf.infolist() if fi.filename.endswith('.crt')]
     for crt in crts:
@@ -55,8 +58,6 @@ def unzip_digicert_crt(content):
 def get_certificate_id(common_name):
     res1, ad1 = get('order/certificate')
     orders = [order for order in ad1.orders if order.certificate.common_name == common_name]
-    from pprint import pprint
-    pprint({'orders': orders})
     return orders[0].certificate.id
 
 def get_crt(common_name):
@@ -73,8 +74,7 @@ def request_certificate(common_name, key, csr, cert_type='ssl_plus'):
         }
     })
     app.logger.debug('calling digicert with path={path} and json={json}'.format(**locals()))
-    response, ad = post(path, json=json)
-    return response, ad
+    return post(path, json=json)
 
 def approve_certificate(request_id):
     app.logger.info('called approve_certificate:\n{0}'.format(pformat(locals())))
@@ -84,6 +84,14 @@ def approve_certificate(request_id):
         'processor_comment': 'auto-cert',
     }
     app.logger.debug('calling digicert with path={path} and json={json}'.format(**locals()))
-    response, ad = put(path, json=json)
-    return response, ad
+    return put(path, json=json)
 
+def get_certificate_id(order_id):
+    app.logger.info('called get_certificate_id:\n{0}'.format(pformat(locals())))
+    path = 'order/certificate/{order_id}'.format(**locals())
+    return get(path)
+
+def download_certificate(certificate_id):
+    app.logger.info('called download_certificate:\n{0}'.format(pformat(locals())))
+    path = 'certificate/{certificate_id}/download/platform'.format(**locals())
+    return get(path)
