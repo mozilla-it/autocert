@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from io import BytesIO
 from pprint import pformat
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes, serialization
+
+import tarfile
 
 try:
     from autocert.app import app
@@ -49,18 +52,6 @@ ENCODING = {
     'PEM': serialization.Encoding.PEM,
 }
 
-STATUS_CODES = {
-    200: [True,     ''],
-    201: [True,     'Created'],
-    204: [True,     'No content'],
-    400: [False,    'General client error'],
-    401: [False,    'Invalid account ID and API key combination'],
-    403: [False,    'API key missing permissions required'],
-    404: [False,    'Page does not exist'],
-    405: [False,    'Method not found'],
-    406: [False,    'Requested content type or API version is invalid'],
-}
-
 def create_key(common_name, **kwargs):
     app.logger.info('called create_key:\n{0}'.format(pformat(locals())))
     keyfile = CFG.key.dirpath / '{common_name}.key'.format(**locals())
@@ -68,21 +59,7 @@ def create_key(common_name, **kwargs):
         public_exponent=kwargs.get('public_exponent', CFG.key.public_exponent),
         key_size=kwargs.get('key_size', CFG.key.key_size),
         backend=default_backend())
-    with open(str(keyfile), 'wb') as f:
-        f.write(key.private_bytes(
-            encoding=ENCODING[CFG.key.encoding],
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()))
     return key
-
-def load_key(common_name):
-    app.logger.info('called load_key:\n{0}'.format(pformat(locals())))
-    keyfile = CFG.key.dirpath / '{common_name}.key'.format(**locals())
-    if not keyfile.exists():
-        raise KeyExistError(csrfile)
-    with open(str(keyfile), 'rb') as f:
-        data = f.read()
-    return serialization.load_pem_private_key(data, None, default_backend())
 
 def create_oids(common_name, oids):
     attrs = [x509.NameAttribute(NameOID.COMMON_NAME, common_name)]
@@ -110,15 +87,31 @@ def create_csr(key, common_name, oids=None, sans=None):
     if sans:
         add_sans(subject, sans)
     csr = subject.sign(key, hashes.SHA256(), default_backend())
-    with open(str(csrfile), 'wb') as f:
-        f.write(csr.public_bytes(ENCODING[CFG.csr.encoding]))
     return csr
 
-def load_csr(common_name):
-    app.logger.info('called load_csr:\n{0}'.format(pformat(locals())))
-    csrfile = CFG.key.dirpath / '{common_name}.csr'.format(**locals())
-    if not csrfile.exists():
-        raise CsrExistError(csrfile)
-    with open(str(csrfile), 'rb') as f:
-        csr = x509.lead_pem_x509_csr(r.read(), default_backend())
-    return csr
+def key_info_and_bytes(common_name, key):
+    key_bytes = BytesIO(key.private_bytes(
+        encoding=ENCODING[CFG.key.encoding],
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption()))
+    key_info = tarfile.TarInfo(common_name+'.key')
+    key_info.size = key_bytes.getbuffer().nbytes
+    return key_info, key_bytes
+
+def csr_info_and_bytes(common_name, csr):
+    csr_bytes = BytesIO(csr.public_bytes(ENCODING[CFG.csr.encoding]))
+    csr_info = tarfile.TarInfo(common_name+'.csr')
+    csr_info.size = csr_bytes.getbuffer().nbytes
+    return csr_info, csr_bytes
+
+def create_tar(common_name, suffix, key, csr, metadata=None):
+    filename = CFG.tar.dirpath / '{common_name}.{suffix}.tar.gz'.format(**locals())
+    with tarfile.open(str(filename), 'w:gz') as tar:
+        key_info, key_bytes = key_info_and_bytes(common_name, key)
+        tar.addfile(key_info, fileobj=key_bytes)
+        csr_info, csr_bytes = csr_info_and_bytes(common_name, csr)
+        tar.addfile(csr_info, csr_bytes)
+    return filename
+
+def load_key_and_csr(filename):
+    pass
