@@ -9,7 +9,7 @@ api = Blueprint('create_api', __name__)
 
 from pprint import pformat
 
-from autocert.certificate import create_key, create_csr
+from autocert.certificate import create_key, create_csr, create_tar
 from autocert import digicert
 
 try:
@@ -29,19 +29,28 @@ def create_digicert(common_name):
     data = request.get_json(silent=True)
     sans = data['sans']
     app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
+
+    messages = []
     key = create_key(common_name)
     csr = create_csr(key, common_name, sans)
-    res1, ad1 = digicert.request_certificate(common_name, key, csr)
+
+    res1, order = digicert.request_certificate(common_name, key, csr)
     if res1.status_code != 201:
         return jsonified_errors(res1)
-    request_id = ad1.requests[0].id
-    res2, ad2 = digicert.approve_certificate(request_id)
+    messages += ['{common_name} cert requested'.format(**locals())]
+
+    res2, _ = digicert.approve_certificate(order.requests[0].id)
     if res2.status_code != 204:
         return jsonified_errors(res2)
+    messages += ['{common_name} cert approved'.format(**locals())]
+
+    filename = create_tar(common_name, digicert.suffix(order.id), key, csr)
+    messages += ['saved key and csr to {filename}'.format(**locals())]
+
     return jsonify({
-        'messages': [
-            '{common_name} cert successfully created'.format(**locals()),
-        ],
+        'messages': messages,
+        'order_id': order.id,
+        'request_id': order.requests[0].id,
     })
 
 @api.route('/create/letsencrypt/<string:common_name>', methods=['PUT'])
