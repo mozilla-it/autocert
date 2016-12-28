@@ -55,22 +55,17 @@ def unzip_crt(content):
             return zf.read(crt).decode('utf-8')
     raise CrtUnzipError
 
-def get_certificate_id(common_name):
-    res1, ad1 = get('order/certificate')
-    orders = [order for order in ad1.orders if order.certificate.common_name == common_name]
-    return orders[0].certificate.id
-
 def get_crt(common_name):
     pass
 
-def request_certificate(common_name, key, csr, cert_type='ssl_plus'):
+def request_certificate(common_name, csr, cert_type='ssl_plus'):
     app.logger.info('called request_certificate:\n{0}'.format(pformat(locals())))
     authority = CFG.authorities.digicert
     path = 'order/certificate/{cert_type}'.format(**locals())
     json = merge(authority.template, {
         'certificate': {
             'common_name': common_name,
-            'csr': csr.public_bytes(ENCODING[CFG.key.encoding]).decode('utf-8'),
+            'csr': csr,
         }
     })
     app.logger.debug('calling digicert with path={path} and json={json}'.format(**locals()))
@@ -86,12 +81,14 @@ def approve_certificate(request_id):
     app.logger.debug('calling digicert with path={path} and json={json}'.format(**locals()))
     return put(path, json=json)
 
-def get_certificate_id(order_id):
+def get_certificate_order(order_id):
     app.logger.info('called get_certificate_id:\n{0}'.format(pformat(locals())))
     path = 'order/certificate/{order_id}'.format(**locals())
     return get(path)
 
-def download_certificate(certificate_id):
-    app.logger.info('called download_certificate:\n{0}'.format(pformat(locals())))
-    path = 'certificate/{certificate_id}/download/platform'.format(**locals())
+def download_certificate(order_id, format_type='pem_all'):
+    app.logger.info('called get_certificate:\n{0}'.format(pformat(locals())))
+    response, order = get_certificate_order(order_id)
+    certificate_id = order.certificate.id
+    path = 'certificate/{certificate_id}/download/format/{format_type}'.format(**locals())
     return get(path)
