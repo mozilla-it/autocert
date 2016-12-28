@@ -26,7 +26,7 @@ def digicert_list_certs():
     response, ad = digicert.get('order/certificate')
     if ad:
         from pprint import pformat
-        certs = [{'{0}.{1}'.format(o.certificate.common_name, o.id): o.certificate} for o in ad.orders if is_valid_cert(o.status)]
+        certs = [{'{0}.dc{1}'.format(o.certificate.common_name, o.id): o.certificate} for o in ad.orders if is_valid_cert(o.status)]
         return {
             'certs': certs,
         }
