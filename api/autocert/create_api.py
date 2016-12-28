@@ -9,7 +9,7 @@ api = Blueprint('create_api', __name__)
 
 from pprint import pformat
 
-from autocert.certificate import create_key, create_csr, create_tar
+from autocert.certificate import create_key_and_csr, tar_key_and_csr
 from autocert import digicert
 
 try:
@@ -31,10 +31,9 @@ def create_digicert(common_name):
     app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
 
     messages = []
-    key = create_key(common_name)
-    csr = create_csr(key, common_name, sans)
+    key, csr = create_key_and_csr(common_name, sans=sans)
 
-    res1, order = digicert.request_certificate(common_name, key, csr)
+    res1, order = digicert.request_certificate(common_name, csr)
     if res1.status_code != 201:
         return jsonified_errors(res1)
     messages += ['{common_name} cert requested'.format(**locals())]
@@ -44,7 +43,7 @@ def create_digicert(common_name):
         return jsonified_errors(res2)
     messages += ['{common_name} cert approved'.format(**locals())]
 
-    filename = create_tar(common_name, digicert.suffix(order.id), key, csr)
+    filename = tar_key_and_csr(common_name, digicert.suffix(order.id), key, csr)
     messages += ['saved key and csr to {filename}'.format(**locals())]
 
     return jsonify({
