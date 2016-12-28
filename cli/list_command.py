@@ -22,18 +22,30 @@ def add_parser(subparsers):
         help='default="%(default)s"; limit search to an authority')
     parser.set_defaults(func=do_list)
 
+class DictHasNoHeadError(Exception):
+    def __init__(self, d):
+        msg = 'dict has no head: d={0}'.format(d)
+        super(DictHasNoHeadError, self).__init__(msg)
+
+def head(d):
+    keys = list(d.keys())
+    if len(keys) == 1:
+        return keys[0]
+    raise DictHasNoHeadError(d)
+
+def body(d):
+    return d[head(d)]
+
 def transform_certs(certs):
-    return [{c.certificate.common_name: c.certificate.valid_till} for c in certs]
+    return [{head(cert): body(cert)['valid_till']} for cert in certs]
 
 def do_list(ns):
     response = requests.get(ns.api_url / 'list/certs')
     if response.status_code == 200:
-        obj = response.json()
-        ad = AttrDict(obj)
-        results = ad.certs
+        certs = response.json()['certs']
         if not ns.verbose:
-            results = transform_certs(ad.certs)
-        output(results)
+            certs = transform_certs(certs)
+        output(certs)
         return
     else:
         print(response)

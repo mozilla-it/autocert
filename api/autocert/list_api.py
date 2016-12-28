@@ -4,13 +4,13 @@
 from flask import Blueprint, jsonify
 api = Blueprint('list_api', __name__)
 
-import requests
-
 from fnmatch import fnmatch
 from attrdict import AttrDict
 
 from autocert.config import CFG
 from autocert.utils.dictionary import merge
+
+from autocert import digicert
 
 INVALID_STATUS = [
     'expired',
@@ -23,16 +23,12 @@ def is_valid_cert(status):
 def digicert_list_certs():
     from flask import current_app
     current_app.logger.info('digicert_list_certs called')
-    response = requests.get(
-        CFG.authorities.digicert.baseurl / 'order/certificate',
-        auth=CFG.authorities.digicert.auth,
-        headers=CFG.authorities.digicert.headers)
-    if response.status_code == 200:
+    response, ad = digicert.get('order/certificate')
+    if ad:
         from pprint import pformat
-        obj = AttrDict(response.json())
-        certs = [cert for cert in obj.orders if is_valid_cert(cert.status)]
+        certs = [{'{0}.{1}'.format(o.certificate.common_name, o.id): o.certificate} for o in ad.orders if is_valid_cert(o.status)]
         return {
-            'certs': list(certs),
+            'certs': certs,
         }
     else:
         app.logger.error('failed request to /list/certs with status_code={0}'.format(response.status_code))
