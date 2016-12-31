@@ -9,7 +9,7 @@ api = Blueprint('create_api', __name__)
 
 from pprint import pformat
 
-from autocert.certificate import create_key_and_csr, tar_key_and_csr
+from autocert.certificate import create_key_and_csr, tar_cert_files
 from autocert import digicert
 
 try:
@@ -43,8 +43,9 @@ def create_digicert(common_name):
         return jsonified_errors(res2)
     messages += ['{common_name} cert approved'.format(**locals())]
 
-    filename = tar_key_and_csr(common_name, digicert.suffix(order.id), key, csr)
-    messages += ['saved key and csr to {filename}'.format(**locals())]
+    tarname = common_name + '.' + digicert.suffix(order.id)
+    tarpath = tar_cert_files(tarname, key, csr)
+    messages += ['saved key and csr to {tarpath}'.format(**locals())]
 
     return jsonify({
         'messages': messages,
