@@ -10,6 +10,8 @@ from flask import Flask, jsonify
 from flask import request, render_template
 from pdb import set_trace as breakpoint
 
+from pprint import pformat
+
 STATUS_CODES = {
     400: 'bad request',
     401: 'unauthorized',
@@ -55,6 +57,8 @@ STATUS_CODES = {
 
 from autocert.app import app #import flask app
 
+from autocert import api
+
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 def register_apis():
@@ -75,6 +79,25 @@ def initialize():
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
         app.logger.info('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
+
+@app.route('/auto-cert/version', methods=['GET'])
+def version():
+    app.logger.info('/version called')
+    return jsonify(api.version())
+
+@app.route('/auto-cert', methods=['GET'])
+@app.route('/auto-cert/<string:common_name>', methods=['GET', 'PUT', 'POST', 'DELETE'])
+def endpoint(common_name='*'):
+    json = request.json
+    app.logger.info('/auto-cert/{common_name}:'.format(**locals()))
+    app.logger.info('{0}'.format(pformat(locals())))
+    funcs = {
+        'GET': api.show,
+        'PUT': api.renew,
+        'POST': api.create,
+        'DELETE': api.revoke,
+    }
+    return funcs[request.method](common_name, json)
 
 def log_and_jsonify_error(status, error, request):
     message = STATUS_CODES[status]
