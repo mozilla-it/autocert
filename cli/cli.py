@@ -37,10 +37,11 @@ class VersionCheckFailedError(Exception):
         super(VersionCheckFailedError, self).__init__(msg)
 
 def api_version(ns):
-    response = requests.get(ns.api_url / 'version')
+    response = requests.get(ns.api_url / 'auto-cert/version')
     version = 'unknown'
     if response.status_code == 200:
-        version = response.json()['version']
+        obj = response.json()
+        version = obj['version']
     return version
 
 def version_check(ns):
