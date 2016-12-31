@@ -39,21 +39,22 @@ authorities:
             payment_method: balance
             validity_years: 1
 destinations:
-    zeus-test:
-        baseurl: http://10.248.29.12:9070/api/tm/3.9
-        apikey: APIKEY
-    zeus-scl3-ext:
-        baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
-        apikey: APIKEY
-    zeus-scl3-int:
-        baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
-        apikey: APIKEY
-    zeus-phx1-ext:
-        baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9
-        apikey: APIKEY
-    zeus-phx1-int:
-        baseurl: https://internal.zlb.ops..phx1.mozilla.com:9070/api/tm/3.9
-        apikey: APIKEY
+    zeus:
+        test:
+            baseurl: http://10.248.29.12:9070/api/tm/3.9
+            apikey: tuniegeuheiS9eiMeigh4voJoh9eeguu0se2bi6ahduj4Vu7ainahnietaiDu7ohr8pah3ahkeihahnahZ
+        scl3-ext:
+            baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
+            apikey: APIKEY
+        scl3-int:
+            baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
+            apikey: APIKEY
+        phx1-ext:
+            baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9
+            apikey: APIKEY
+        phx1-int:
+            baseurl: https://internal.zlb.ops..phx1.mozilla.com:9070/api/tm/3.9
+            apikey: APIKEY
 logging:
     version: 1
     disable_existing_loggers: true
