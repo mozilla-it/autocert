@@ -21,7 +21,7 @@ def test_version():
     expect = {'version': version()}
     client = app.test_client()
     client.testing = True
-    result = client.get('/version')
+    result = client.get('/auto-cert/version')
     assert result.status_code == 200
     actual = jsonify(result.get_data().decode('utf-8'))
     assert expect == actual
