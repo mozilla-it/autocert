@@ -5,7 +5,8 @@ import io
 import zipfile
 import requests
 from attrdict import AttrDict
-from pprint import pformat
+from pprint import pprint, pformat
+from fnmatch import fnmatch
 
 from autocert.utils.dictionary import merge
 from autocert.certificate import ENCODING
@@ -20,28 +21,35 @@ try:
 except ImportError:
     from config import CFG
 
+INVALID_STATUS = [
+    'expired',
+    'rejected',
+]
+
 class CrtUnzipError(Exception):
     def __init__(self):
         msg = 'failed unzip crt from bytes content'.format(**locals())
         super(CrtUnzipError, self).__init__(msg)
 
-def request(method, path, json=None):
+def request(method, path, json=None, attrdict=True):
     authority = CFG.authorities.digicert
     url = authority.baseurl / path
     response = requests.request(method, url, auth=authority.auth, json=json)
     try:
-        ad = AttrDict(response.json())
+        obj = response.json()
+        if attrdict:
+            obj = AttrDict(response.json())
     except ValueError:
-        ad = None
-    return response, ad
+        obj = None
+    return response, obj
 
-def get(path):
-    return request('GET', path)
+def get(path, attrdict=True):
+    return request('GET', path, attrdict=attrdict)
 
-def put(path, json=None):
-    return request('PUT', path, json=json)
+def put(path, json=None, attrdict=True):
+    return request('PUT', path, json=json, attrdict=attrdict)
 
-def post(path, json=None):
+def post(path, json=None, attrdict=True):
     return request('POST', path, json=json)
 
 def suffix(order_id):
@@ -55,9 +63,6 @@ def unzip_crt(content):
             return zf.read(crt).decode('utf-8')
     raise CrtUnzipError
 
-def get_crt(common_name):
-    pass
-
 def request_certificate(common_name, csr, cert_type='ssl_plus'):
     app.logger.info('called request_certificate:\n{0}'.format(pformat(locals())))
     authority = CFG.authorities.digicert
@@ -70,6 +75,55 @@ def request_certificate(common_name, csr, cert_type='ssl_plus'):
     })
     app.logger.debug('calling digicert with path={path} and json={json}'.format(**locals()))
     return post(path, json=json)
+
+def get_certificate_orders():
+    app.logger.info('get_certficate_orders')
+    r, o = get('order/certificate', attrdict=False)
+    return o['orders']
+
+def filter_common_name(orders, pattern):
+    return [order for order in orders if fnmatch(order['certificate']['common_name'], pattern)]
+
+def filter_active_status(orders):
+    return [order for order in orders if order['status'] not in INVALID_STATUS]
+
+def get_valid_certificate_orders(pattern='*'):
+    app.logger.info('get_valid_certificate_orders: pattern={0}'.format(pattern))
+    orders = get_certificate_orders()
+    orders = filter_active_status(orders)
+    orders = filter_common_name(orders, pattern)
+    return orders
+
+def get_certificate_details(orders):
+    details = []
+    for order in orders:
+        r, o = get('order/certificate/{0}'.format(order['id']), attrdict=False)
+        details += [o]
+    return details
+
+def get_active_certificate_orders_and_details(pattern='*'):
+    orders = get_valid_certificate_orders(pattern)
+    details = get_certificate_details(orders)
+    return [{'authority': {'digicert': {'order': order, 'detail': detail}}} for order, detail in zip(orders, details)]
+
+def transform(cert):
+    pprint(cert)
+    o = AttrDict(cert)
+    common_name = o.authority.digicert.detail.certificate.common_name
+    order_id = o.authority.digicert.order.id
+    suffix = 'dc{order_id}'.format(**locals())
+    certificate_id = o.authority.digicert.detail.certificate.id
+    expires = o.authority.digicert.order.certificate.valid_till
+    return {
+        'common_name': common_name,
+        'suffix': suffix,
+        'expires': expires,
+        'destinations': [],
+    }
+
+def show_certs(pattern='*'):
+    certs = get_active_certificate_orders_and_details(pattern)
+    return [merge(cert, transform(cert)) for cert in certs]
 
 def approve_certificate(request_id):
     app.logger.info('called approve_certificate:\n{0}'.format(pformat(locals())))
