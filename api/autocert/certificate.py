@@ -52,17 +52,6 @@ ENCODING = {
     'PEM': serialization.Encoding.PEM,
 }
 
-FILETYPE = {
-    '-----BEGIN RSA PRIVATE KEY-----':      '.key',
-    '-----BEGIN CERTIFICATE REQUEST-----':  '.csr',
-    '-----BEGIN CERTIFICATE-----':          '.crt',
-}
-
-class UnknownFileExtError(Exception):
-    def __init__(self, content):
-        msg = 'unknown filetype for this content: {0}'.format(content)
-        super(UnknownFileExtError, self).__init__(msg)
-
 def _create_key(common_name, **kwargs):
     app.logger.info('called create_key:\n{0}'.format(pformat(locals())))
     key = rsa.generate_private_key(
@@ -108,33 +97,3 @@ def create_key_and_csr(common_name, oids=None, sans=None):
             encryption_algorithm=serialization.NoEncryption()).decode('utf-8'),
         csr.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8'))
 
-def get_file_ext(content):
-    for head, ext in FILETYPE.items():
-        if content.startswith(head):
-            return ext
-    raise UnknownFileExtError(content)
-
-def tarinfo(tarname, content):
-    ext = get_file_ext(content)
-    info = tarfile.TarInfo(tarname + ext)
-    info.size = len(content)
-    return info
-
-def tar_cert_files(tarname, key, csr, crt=None):
-    tarpath = str(CFG.tar.dirpath / tarname) + '.tar.gz'
-    with tarfile.open(tarpath, 'w:gz') as tar:
-        for content in (key, csr, crt):
-            if content:
-                tar.addfile(tarinfo(tarname, content), BytesIO(content.encode('utf-8')))
-    return tarpath
-
-def untar_cert_files(tarname):
-    tarpath = str(CFG.tar.dirpath / tarname) + '.tar.gz'
-    with tarfile.open(tarpath, 'r:gz') as tar:
-        key = tar.extractfile('{tarname}.key'.format(**locals())).read().decode('utf-8')
-        csr = tar.extractfile('{tarname}.csr'.format(**locals())).read().decode('utf-8')
-        try:
-            crt = tar.extractfile('{tarname}.crt'.format(**locals())).read().decode('utf-8')
-        except KeyError:
-            crt = None
-    return key, csr, crt
