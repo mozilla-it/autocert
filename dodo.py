@@ -49,11 +49,11 @@ def task_checkreqs():
     '''
     DEBS = [
         'docker-engine',
-        'libpq-dev',
+        #'libpq-dev',
     ]
     RPMS = [
         'docker-engine',
-        'postgresql-devel',
+        #'postgresql-devel',
     ]
     return {
         'deb': {
