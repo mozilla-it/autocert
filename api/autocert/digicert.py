@@ -31,6 +31,16 @@ class CrtUnzipError(Exception):
         msg = 'failed unzip crt from bytes content'.format(**locals())
         super(CrtUnzipError, self).__init__(msg)
 
+class DigicertGetOrderDetailError(Exception):
+    def __init__(self, response):
+        msg = '{response}'.format(**locals())
+        super(DigicertGetOrderDetailError, self).__init__(msg)
+
+class DigicertDownloadCertificateError(Exception):
+    def __init__(self, response):
+        msg = '{response}'.format(**locals())
+        super(DigicertDownloadCertificateError, self).__init__(msg)
+
 def request(method, path, json=None, attrdict=True):
     authority = CFG.authorities.digicert
     url = authority.baseurl / path
@@ -38,7 +48,7 @@ def request(method, path, json=None, attrdict=True):
     try:
         obj = response.json()
         if attrdict:
-            obj = AttrDict(response.json())
+            obj = AttrDict(obj)
     except ValueError:
         obj = None
     return response, obj
@@ -81,49 +91,59 @@ def get_certificate_orders():
     r, o = get('order/certificate', attrdict=False)
     return o['orders']
 
-def filter_common_name(orders, pattern):
-    return [order for order in orders if fnmatch(order['certificate']['common_name'], pattern)]
+def filter_common_name(orders, common_name_pattern):
+    return [order for order in orders if fnmatch(order['certificate']['common_name'], common_name_pattern)]
 
 def filter_active_status(orders):
     return [order for order in orders if order['status'] not in INVALID_STATUS]
 
-def get_valid_certificate_orders(pattern='*'):
-    app.logger.info('get_valid_certificate_orders: pattern={0}'.format(pattern))
+def get_valid_certificate_orders(common_name_pattern='*'):
+    app.logger.info('get_valid_certificate_orders: common_name_pattern={0}'.format(common_name_pattern))
     orders = get_certificate_orders()
     orders = filter_active_status(orders)
-    orders = filter_common_name(orders, pattern)
+    orders = filter_common_name(orders, common_name_pattern)
     return orders
 
-def get_certificate_details(orders):
-    details = []
-    for order in orders:
-        r, o = get('order/certificate/{0}'.format(order['id']), attrdict=False)
-        details += [o]
-    return details
+def get_order_detail(order_id):
+    r, detail = get('order/certificate/{order_id}'.format(**locals()), attrdict=False)
+    if r.status_code == 200:
+        return detail
+    raise DigicertGetOrderDetailError(r)
 
-def get_active_certificate_orders_and_details(pattern='*'):
-    orders = get_valid_certificate_orders(pattern)
-    details = get_certificate_details(orders)
-    return [{'authority': {'digicert': {'order': order, 'detail': detail}}} for order, detail in zip(orders, details)]
+def get_csr(detail):
+    return detail.certificate.csr
 
-def transform(cert):
-    pprint(cert)
-    o = AttrDict(cert)
-    common_name = o.authority.digicert.detail.certificate.common_name
-    order_id = o.authority.digicert.order.id
-    suffix = 'dc{order_id}'.format(**locals())
-    certificate_id = o.authority.digicert.detail.certificate.id
-    expires = o.authority.digicert.order.certificate.valid_till
+def create_record(order):
+    common_name = order.certificate.common_name
+    record_name = '{0}.{1}'.format(common_name, suffix(order.id))
+    expires = order.certificate.valid_till
+    crt = download_certificate(order.id)
+    detail = get_order_detail(order.id)
+    csr = get_csr(AttrDict(detail))
     return {
-        'common_name': common_name,
-        'suffix': suffix,
-        'expires': expires,
-        'destinations': [],
+        '{record_name}'.format(**locals()): {
+            'common_name': common_name,
+            'suffix': suffix(order.id),
+            'expires': expires,
+            'authorities': {
+                'digicert': {
+                    'csr': csr,
+                    'crt': crt,
+                    'data': {
+                        'order': dict(order),
+                        'detail': detail,
+                    }
+                }
+            }
+        }
     }
 
-def show_certs(pattern='*'):
-    certs = get_active_certificate_orders_and_details(pattern)
-    return [merge(cert, transform(cert)) for cert in certs]
+def get_active_certificate_orders_and_details(common_name_pattern='*'):
+    orders = get_valid_certificate_orders(common_name_pattern)
+    records = []
+    for order in orders:
+        records += [create_record(AttrDict(order))]
+    return records
 
 def approve_certificate(request_id):
     app.logger.info('called approve_certificate:\n{0}'.format(pformat(locals())))
@@ -145,4 +165,7 @@ def download_certificate(order_id, format_type='pem_all'):
     response, order = get_certificate_order(order_id)
     certificate_id = order.certificate.id
     path = 'certificate/{certificate_id}/download/format/{format_type}'.format(**locals())
-    return get(path)
+    r, _ = get(path)
+    if r.status_code == 200:
+        return r.text
+    raise DigicertDownloadCertificateError(r)
