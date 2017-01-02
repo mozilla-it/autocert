@@ -40,8 +40,6 @@ def do_create(ns):
     }
     url = ns.api_url / 'create' / ns.authority / ns.common_name
     response = requests.put(url, headers=headers, data=json.dumps(data))
-    print('response.status_code =', response.status_code)
-    print('response.text =', response.text)
     if response.status_code != 200:
         output({'error': {'status_code': response.status_code}})
         return
