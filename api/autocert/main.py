@@ -12,6 +12,16 @@ from pdb import set_trace as breakpoint
 
 from pprint import pformat
 
+from autocert.app import app #import flask app
+
+from autocert.utils.version import version as api_version
+from autocert.show import show
+from autocert.renew import renew
+from autocert.create import create
+from autocert.revoke import revoke
+
+app.config['PROPAGATE_EXCEPTIONS'] = True
+
 STATUS_CODES = {
     400: 'bad request',
     401: 'unauthorized',
@@ -55,11 +65,12 @@ STATUS_CODES = {
     511: 'network authentication required',
 }
 
-from autocert.app import app #import flask app
-
-from autocert import api
-
-app.config['PROPAGATE_EXCEPTIONS'] = True
+REQUEST_METHODS = {
+    'GET':      show,
+    'PUT':      renew,
+    'POST':     create,
+    'DELETE':   revoke,
+}
 
 def register_apis():
     from autocert.utils.importer import import_modules
@@ -83,21 +94,14 @@ def initialize():
 @app.route('/auto-cert/version', methods=['GET'])
 def version():
     app.logger.info('/version called')
-    return jsonify(api.version())
+    return jsonify({'version': api_version()})
 
-@app.route('/auto-cert', methods=['GET'])
-@app.route('/auto-cert/<string:common_name>', methods=['GET', 'PUT', 'POST', 'DELETE'])
-def endpoint(common_name='*'):
+@app.route('/auto-cert', methods=['GET', 'PUT', 'POST', 'DELETE'])
+def endpoint():
     json = request.json
-    app.logger.info('/auto-cert/{common_name}:'.format(**locals()))
     app.logger.info('{0}'.format(pformat(locals())))
-    funcs = {
-        'GET': api.show,
-        'PUT': api.renew,
-        'POST': api.create,
-        'DELETE': api.revoke,
-    }
-    return funcs[request.method](common_name, json)
+    results = REQUEST_METHODS[request.method](json)
+    return jsonify(results)
 
 def log_and_jsonify_error(status, error, request):
     message = STATUS_CODES[status]
