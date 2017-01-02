@@ -9,7 +9,8 @@ api = Blueprint('create_api', __name__)
 
 from pprint import pformat
 
-from autocert.certificate import create_key_and_csr, tar_cert_files
+from autocert.tar import tar_cert_files
+from autocert.certificate import create_key_and_csr
 from autocert import digicert
 
 try:
