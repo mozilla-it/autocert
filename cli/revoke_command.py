@@ -4,8 +4,10 @@
 cli.revoke
 '''
 
+from cli.verbose import verbose_parser
+
 def add_parser(subparsers):
-    parser = subparsers.add_parser('revoke')
+    parser = subparsers.add_parser('revoke', parents=[verbose_parser])
     parser.add_argument(
         'common_name',
         help='common name')

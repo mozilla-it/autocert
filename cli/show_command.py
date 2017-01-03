@@ -10,8 +10,10 @@ from attrdict import AttrDict
 from cli.output import output
 from cli.utils.dictionary import head, body
 
+from cli.verbose import verbose_parser
+
 def add_parser(subparsers):
-    parser = subparsers.add_parser('show')
+    parser = subparsers.add_parser('show', parents=[verbose_parser])
     parser.add_argument(
         'common_name',
         default='*',
@@ -46,7 +48,6 @@ def do_show(ns):
         output(certs)
         return
     else:
-        print(response.status_code)
         print(response)
         print(response.text)
     raise Exception('wtf do_show')
