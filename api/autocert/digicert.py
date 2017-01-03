@@ -38,7 +38,7 @@ class DigicertGetOrderDetailError(Exception):
 
 class DigicertDownloadCertificateError(Exception):
     def __init__(self, response):
-        msg = '{response}'.format(**locals())
+        msg = 'response.status_code = {0} response.text = {1}'.format(response.status_code, response.text)
         super(DigicertDownloadCertificateError, self).__init__(msg)
 
 def request(method, path, json=None, attrdict=True):
@@ -91,17 +91,17 @@ def get_certificate_orders():
     r, o = get('order/certificate', attrdict=False)
     return o['orders']
 
-def filter_common_name(orders, common_name_pattern):
-    return [order for order in orders if fnmatch(order['certificate']['common_name'], common_name_pattern)]
+def filter_common_name(orders, common_name):
+    return [order for order in orders if fnmatch(order['certificate']['common_name'], common_name)]
 
 def filter_active_status(orders):
     return [order for order in orders if order['status'] not in INVALID_STATUS]
 
-def get_valid_certificate_orders(common_name_pattern='*'):
-    app.logger.info('get_valid_certificate_orders: common_name_pattern={0}'.format(common_name_pattern))
+def get_valid_certificate_orders(common_name='*'):
+    app.logger.info('get_valid_certificate_orders: common_name={0}'.format(common_name))
     orders = get_certificate_orders()
     orders = filter_active_status(orders)
-    orders = filter_common_name(orders, common_name_pattern)
+    orders = filter_common_name(orders, common_name)
     return orders
 
 def get_order_detail(order_id):
@@ -138,8 +138,8 @@ def create_record(order):
         }
     }
 
-def get_active_certificate_orders_and_details(common_name_pattern='*'):
-    orders = get_valid_certificate_orders(common_name_pattern)
+def get_active_certificate_orders_and_details(common_name='*'):
+    orders = get_valid_certificate_orders(common_name)
     records = []
     for order in orders:
         records += [create_record(AttrDict(order))]
@@ -168,4 +168,6 @@ def download_certificate(order_id, format_type='pem_all'):
     r, _ = get(path)
     if r.status_code == 200:
         return r.text
+    elif r.status_code == 404 and 'certificate has not yet been issued' in r.text:
+        return r.json()['errors'][0]['message']
     raise DigicertDownloadCertificateError(r)

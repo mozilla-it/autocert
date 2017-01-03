@@ -5,6 +5,8 @@ import os
 import glob
 import tarfile
 
+from io import BytesIO
+
 try:
     from autocert.app import app
 except ImportError:
@@ -57,9 +59,9 @@ def untar_cert_files(tarname):
             crt = None
     return key, csr, crt
 
-def get_records_from_tarfiles(common_name_pattern='*', dirpath=CFG.tar.dirpath):
+def get_records_from_tarfiles(common_name='*', dirpath=CFG.tar.dirpath):
     records = {}
-    for tarpath in glob.glob('{dirpath}/{common_name_pattern}.tar.gz'.format(**locals())):
+    for tarpath in glob.glob('{dirpath}/{common_name}.tar.gz'.format(**locals())):
         tarname = os.path.basename(tarpath).replace('.tar.gz', '')
         key, csr, crt = untar_cert_files(tarname)
         records[tarname] = {

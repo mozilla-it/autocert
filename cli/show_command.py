@@ -36,9 +36,7 @@ def transform_certs(certs):
 
 def do_show(ns):
     json = {
-        'common_name_pattern': ns.common_name,
-        'authority_pattern': ns.authority,
-        'destination_pattern': ns.destination,
+        'common_name': ns.common_name,
     }
     response = requests.get(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 200:

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from io import BytesIO
 from pprint import pformat
 from cryptography import x509
 from cryptography.x509.oid import NameOID

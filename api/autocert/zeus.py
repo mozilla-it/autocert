@@ -55,12 +55,12 @@ def put(zeusdest, path, json=None, attrdict=True):
 def post(zeusdest, path, json=None, attrdict=True):
     return request('POST', zeusdest, path, json=json, attrdict=attrdict)
 
-def get_installed_certificates_summary(zeusdest, common_name_pattern='*'):
+def get_installed_certificates_summary(zeusdest, common_name='*'):
     r, o = get(zeusdest, 'ssl/server_keys')
     if r.status_code == 200:
         summary = {}
         for child in o.children:
-            if fnmatch(child.name, common_name_pattern):
+            if fnmatch(child.name, common_name):
                 summary[child.name] = child.href
         return summary
     raise GetInstalledCertificatesSummaryError(r)
@@ -79,12 +79,11 @@ def get_installed_certificates_details(zeusdest, summary):
         raise GetInstalledCertificatesDetailsError(r)
     return details
 
-def get_installed_certificates(zeusdest_pattern='*', common_name_pattern='*'):
-    zeusdests = CFG.destinations.zeus.keys()
-    zeusdests = [zeusdest for zeusdest in zeusdests if fnmatch(zeusdest, zeusdest_pattern)]
+#def get_installed_certificates(zeusdest='*', common_name='*'):
+def get_installed_certificates(common_name='*', *zeusdests):
     installed = {}
     for zeusdest in zeusdests:
-        summary = get_installed_certificates_summary(zeusdest, common_name_pattern)
+        summary = get_installed_certificates_summary(zeusdest, common_name)
         details = get_installed_certificates_details(zeusdest, summary)
         installed = merge(installed, details)
     return installed

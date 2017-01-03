@@ -37,9 +37,9 @@ def add_parser(subparsers):
 
 def do_create(ns):
     json = {
-        'common_name_pattern': ns.common_name,
-        'authority_pattern': ns.authority,
-        'destination_pattern': ns.destination,
+        'common_name': ns.common_name,
+        'authority': ns.authority,
+        'destination': ns.destination,
     }
     response = requests.post(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 201:
