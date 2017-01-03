@@ -87,10 +87,6 @@ def main():
         nargs='?',
         help='default=%(const)s; show the version')
     parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='more verbose output')
-    parser.add_argument(
         '--api-url',
         metavar='URL',
         type=URL,
