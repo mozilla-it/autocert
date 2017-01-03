@@ -100,8 +100,8 @@ def version():
 def endpoint():
     json = request.json
     app.logger.info('{0}'.format(pformat(locals())))
-    results = REQUEST_METHODS[request.method](json)
-    return jsonify(results)
+    response = REQUEST_METHODS[request.method](json)
+    return response
 
 def log_and_jsonify_error(status, error, request):
     message = STATUS_CODES[status]
