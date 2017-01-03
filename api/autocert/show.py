@@ -5,6 +5,7 @@ from pprint import pprint, pformat
 from attrdict import AttrDict
 from fnmatch import fnmatch
 from ruamel import yaml
+from flask import jsonify
 
 from autocert import digicert
 from autocert import zeus
@@ -27,14 +28,9 @@ def show(json=None):
     for record in digicert_records:
         record_name = head(record)
         record_body = body(record)
-        print('record_name =', record_name)
         common_name = record_body['common_name']
-        print('common_name =', common_name)
         installed = zeus.get_installed_certificates(json.destination_pattern, common_name)
-        print('installed =', installed)
         zeus_record = {record_name: installed}
-        print('zeus_record =', zeus_record)
         record = merge(record, zeus_record)
-        print('record =', record)
         records += [record]
-    return {'certs': records}
+    return jsonify({'certs': records})
