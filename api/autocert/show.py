@@ -30,16 +30,18 @@ def defaults(json):
     return AttrDict(json)
 
 def show(json=None):
-    json = defaults(json)
-    digicert_records = digicert.get_active_certificate_orders_and_details(json.common_name)
+    args = defaults(json)
+    digicert_records = digicert.get_active_certificate_orders_and_details(args.common_name)
     records = []
     for record in digicert_records:
         record_name = head(record)
         record_body = body(record)
+        csr = record_body['authorities']['digicert']['csr']
         common_name = record_body['common_name']
-        #installed = zeus.get_installed_certificates(json.destination, common_name)
-        installed = zeus.get_installed_certificates(common_name, *list(CFG.destinations.zeus.keys()))
-        zeus_record = {record_name: installed}
+        installed = zeus.get_installed_certificates(csr, common_name, *list(CFG.destinations.zeus.keys()))
+        zeus_record = {record_name: installed.get(common_name, {})}
         record = merge(record, zeus_record)
+        tar_record = tar.get_records_from_tarfiles(record_name)
+        record = merge(record, tar_record)
         records += [record]
     return jsonify({'certs': records})
