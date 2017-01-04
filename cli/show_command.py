@@ -7,10 +7,10 @@ import requests
 
 from attrdict import AttrDict
 
-from cli.output import output
+from cli.utils.output import output
 from cli.utils.dictionary import head, body
-
 from cli.verbose import verbose_parser
+from cli.transform import transform
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('show', parents=[verbose_parser])
@@ -31,9 +31,6 @@ def add_parser(subparsers):
         help='default="%(default)s"; limit search to an authority')
     parser.set_defaults(func=do_show)
 
-def transform_certs(certs):
-    return [{head(cert): body(cert)['expires']} for cert in certs]
-
 def do_show(ns):
     json = {
         'common_name': ns.common_name,
@@ -41,9 +38,8 @@ def do_show(ns):
     response = requests.get(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 200:
         certs = response.json()['certs']
-        if not ns.verbose:
-            certs = transform_certs(certs)
-        output(certs)
+        xformd = transform(certs, ns.verbosity)
+        output(xformd)
         return
     else:
         print(response)

@@ -24,7 +24,7 @@ except ImportError as ie:
 
 from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
-from cli.output import output
+from cli.utils.output import output
 
 VERSIONS = [
     'cli',

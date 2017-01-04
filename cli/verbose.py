@@ -10,6 +10,7 @@ verbose_parser = ArgumentParser(add_help=False)
 verbose_parser.add_argument(
     '--verbose',
     metavar='LEVEL',
+    dest='verbosity',
     default=0,
     const=1,
     type=int,

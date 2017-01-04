@@ -7,8 +7,7 @@ cli.create
 import json
 import requests
 
-from cli.output import output
-
+from cli.utils.output import output
 from cli.verbose import verbose_parser
 
 AUTHORITIES = [
