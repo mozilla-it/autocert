@@ -59,10 +59,12 @@ def untar_cert_files(tarname):
             crt = None
     return key, csr, crt
 
-def get_records_from_tarfiles(common_name='*', dirpath=CFG.tar.dirpath):
+def get_records_from_tarfiles(tarname_pattern='*', dirpath=CFG.tar.dirpath):
     records = {}
-    for tarpath in glob.glob('{dirpath}/{common_name}.tar.gz'.format(**locals())):
+    for tarpath in glob.glob('{dirpath}/{tarname_pattern}.tar.gz'.format(**locals())):
+        print('tarpath =', tarpath)
         tarname = os.path.basename(tarpath).replace('.tar.gz', '')
+        print('tarname =', tarname)
         key, csr, crt = untar_cert_files(tarname)
         records[tarname] = {
             'tarfile': {
