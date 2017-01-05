@@ -52,13 +52,13 @@ def create_digicert(common_name, sans):
     return {'certs': records}
 
 def create(json=None):
-    json = defaults(json)
+    args = defaults(json)
 
-    if json.authority == 'digicert':
-        results = create_digicert(json.common_name, json.sans)
-    elif json.authority == 'letsencrypt':
+    if args.authority == 'digicert':
+        results = create_digicert(args.common_name, args.sans)
+    elif args.authority == 'letsencrypt':
         results = {'certs': []}
     else:
-        raise UnknownCertificateAuthorityError(json.authority)
+        raise UnknownCertificateAuthorityError(args.authority)
     return make_response(jsonify(results), 201)
 
