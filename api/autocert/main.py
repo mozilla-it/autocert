@@ -16,7 +16,7 @@ from autocert.app import app #import flask app
 
 from autocert.utils.version import version as api_version
 from autocert.show import show
-from autocert.renew import renew
+from autocert.update import update
 from autocert.create import create
 from autocert.revoke import revoke
 
@@ -67,7 +67,7 @@ STATUS_CODES = {
 
 REQUEST_METHODS = {
     'GET':      show,
-    'PUT':      renew,
+    'PUT':      update,
     'POST':     create,
     'DELETE':   revoke,
 }
