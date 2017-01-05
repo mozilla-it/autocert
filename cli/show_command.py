@@ -34,6 +34,7 @@ def add_parser(subparsers):
 def do_show(ns):
     json = {
         'common_name': ns.common_name,
+        'verbosity': ns.verbosity,
     }
     response = requests.get(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 200:

@@ -39,6 +39,7 @@ def do_create(ns):
         'common_name': ns.common_name,
         'authority': ns.authority,
         'destination': ns.destination,
+        'verbosity': ns.verbosity,
     }
     response = requests.post(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 201:
