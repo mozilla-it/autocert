@@ -8,6 +8,7 @@ from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
 
+from autocert.utils.newline import windows2unix
 from autocert.utils.dictionary import merge
 from autocert.certificate import ENCODING
 
@@ -167,7 +168,7 @@ def download_certificate(order_id, format_type='pem_all'):
     path = 'certificate/{certificate_id}/download/format/{format_type}'.format(**locals())
     r, _ = get(path)
     if r.status_code == 200:
-        return r.text
+        return windows2unix(r.text)
     elif r.status_code == 404 and 'certificate has not yet been issued' in r.text:
         return r.json()['errors'][0]['message']
     raise DigicertDownloadCertificateError(r)
