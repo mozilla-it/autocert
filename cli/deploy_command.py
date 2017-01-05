@@ -20,8 +20,8 @@ DESTINATIONS = [
 def add_parser(subparsers):
     parser = subparsers.add_parser('deploy', parents=[verbose_parser])
     parser.add_argument(
-        'common_name',
-        help='common name')
+        'cert_name',
+        help='common_name + suffix')
     parser.add_argument(
         '-d', '--destinations',
         metavar='DEST',
@@ -40,7 +40,7 @@ def dictify(destinations, sep=':'):
 
 def do_deploy(ns):
     json = {
-        'common_name': ns.common_name,
+        'cert_name': ns.cert_name,
         'destinations': dictify(ns.destinations),
         'verbosity': ns.verbosity,
     }

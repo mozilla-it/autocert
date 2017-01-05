@@ -30,22 +30,18 @@ def defaults(json):
 def create_digicert(common_name, sans):
     app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
 
-    messages = []
     key, csr = create_key_and_csr(common_name, sans=sans)
 
     res1, order = digicert.request_certificate(common_name, csr)
     if res1.status_code != 201:
         return jsonified_errors(res1)
-    messages += ['{common_name} cert requested'.format(**locals())]
 
     res2, _ = digicert.approve_certificate(order.requests[0].id)
     if res2.status_code != 204:
         return jsonified_errors(res2)
-    messages += ['{common_name} cert approved'.format(**locals())]
 
-    tarname = common_name + '.' + digicert.suffix(order.id)
-    tarpath = tar_cert_files(tarname, key, csr)
-    messages += ['saved key and csr to {tarpath}'.format(**locals())]
+    cert_name = common_name + '.' + digicert.suffix(order.id)
+    cert_path = tar_cert_files(cert_name, key, csr)
 
     records = digicert.get_active_certificate_orders_and_details(common_name)
 

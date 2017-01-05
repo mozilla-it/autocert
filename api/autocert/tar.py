@@ -34,44 +34,43 @@ def get_file_ext(content):
             return ext
     raise UnknownFileExtError(content)
 
-def tarinfo(tarname, content):
+def tarinfo(cert_name, content):
     ext = get_file_ext(content)
-    info = tarfile.TarInfo(tarname + ext)
+    info = tarfile.TarInfo(cert_name + ext)
     info.size = len(content)
     return info
 
-def tar_cert_files(tarname, key, csr, crt=None):
-    tarpath = str(CFG.tar.dirpath / tarname) + '.tar.gz'
+def tar_cert_files(cert_name, key, csr, crt=None):
+    tarpath = str(CFG.tar.dirpath / cert_name) + '.tar.gz'
     with tarfile.open(tarpath, 'w:gz') as tar:
         for content in (key, csr, crt):
             if content:
-                tar.addfile(tarinfo(tarname, content), BytesIO(content.encode('utf-8')))
+                tar.addfile(tarinfo(cert_name, content), BytesIO(content.encode('utf-8')))
     return tarpath
 
-def untar_cert_files(tarname):
-    tarpath = str(CFG.tar.dirpath / tarname) + '.tar.gz'
+def untar_cert_files(cert_name):
+    tarpath = str(CFG.tar.dirpath / cert_name) + '.tar.gz'
     with tarfile.open(tarpath, 'r:gz') as tar:
-        key = tar.extractfile('{tarname}.key'.format(**locals())).read().decode('utf-8')
-        csr = tar.extractfile('{tarname}.csr'.format(**locals())).read().decode('utf-8')
+        key = tar.extractfile('{cert_name}.key'.format(**locals())).read().decode('utf-8')
+        csr = tar.extractfile('{cert_name}.csr'.format(**locals())).read().decode('utf-8')
         try:
-            crt = tar.extractfile('{tarname}.crt'.format(**locals())).read().decode('utf-8')
+            crt = tar.extractfile('{cert_name}.crt'.format(**locals())).read().decode('utf-8')
         except KeyError:
             crt = None
     return key, csr, crt
 
-def get_records_from_tarfiles(tarname_pattern='*', dirpath=CFG.tar.dirpath):
-    records = {}
-    for tarpath in glob.glob('{dirpath}/{tarname_pattern}.tar.gz'.format(**locals())):
-        print('tarpath =', tarpath)
-        tarname = os.path.basename(tarpath).replace('.tar.gz', '')
-        print('tarname =', tarname)
-        key, csr, crt = untar_cert_files(tarname)
-        records[tarname] = {
-            'tarfile': {
-                tarpath: {
-                    tarname + '.key': key,
-                    tarname + '.csr': csr,
-                }
-            }
+def get_record_from_tarfile(cert_name, dirpath=CFG.tar.dirpath):
+    key, csr, crt = untar_cert_files(cert_name)
+    return {
+        'tarfile': {
+            cert_name + '.key': key,
+            cert_name + '.csr': csr,
         }
+    }
+
+def get_records_from_tarfiles(cert_name_pattern='*', dirpath=CFG.tar.dirpath):
+    records = {}
+    for cert_path in glob.glob('{dirpath}/{cert_name_pattern}.tar.gz'.format(**locals())):
+        cert_name = os.path.basename(cert_path).replace('.tar.gz', '')
+        records[cert_name] = get_record_from_tarfile(cert_name)
     return records
