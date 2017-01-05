@@ -68,17 +68,17 @@ def put(zeusdest, path, json=None, attrdict=True):
 def post(zeusdest, path, json=None, attrdict=True):
     return request('POST', zeusdest, path, json=json, attrdict=attrdict)
 
-def put_certificate(common_name, key, csr, crt, *zeusdests):
+def put_certificate(common_name, crt, csr, key, note, *zeusdests):
     print('common_name =', common_name)
     for zeusdest in zeusdests:
         print('zeusdest =', zeusdest)
         json = {
             'properties': {
                 'public': {
-                    'note': 'auto-cert deploy',
-                    'private': key,
-                    'request': csr,
                     'public': crt,
+                    'request': csr,
+                    'private': key,
+                    'note': note,
                 }
             }
         }
@@ -100,6 +100,9 @@ def get_installed_certificates_summary(zeusdest, common_name='*'):
     raise GetInstalledCertificatesSummaryError(r)
 
 def get_installed_certificates_details(zeusdest, csr, summary):
+    '''
+    get installed certificates details matching the csr
+    '''
     details = {}
     for common_name, href in summary.items():
         r, o = get(zeusdest, 'ssl/server_keys/' + common_name)
@@ -109,10 +112,10 @@ def get_installed_certificates_details(zeusdest, csr, summary):
                     'destinations': {
                         'zeus': [{
                             zeusdest: {
-                                'note': o.properties.basic.note,
-                                'key': windows2unix(o.properties.basic.private),
-                                'csr': windows2unix(o.properties.basic.request),
                                 'crt': windows2unix(o.properties.basic.public),
+                                'csr': windows2unix(o.properties.basic.request),
+                                'key': windows2unix(o.properties.basic.private),
+                                'note': o.properties.basic.note,
                             }
                         }]
                     }
@@ -122,6 +125,9 @@ def get_installed_certificates_details(zeusdest, csr, summary):
     return details
 
 def get_installed_certificates(csr, common_name='*', *zeusdests):
+    '''
+    get installed certificates matching the csr
+    '''
     installed = {}
     for zeusdest in zeusdests:
         summary = get_installed_certificates_summary(zeusdest, common_name)
