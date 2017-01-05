@@ -106,14 +106,16 @@ def get_installed_certificates_details(zeusdest, csr, summary):
         if r.status_code == 200:
             if o.properties.basic.request == csr:
                 details[common_name] = {
-                    'destinations': [{
-                        zeusdest: {
-                            'note': o.properties.basic.note,
-                            'key': windows2unix(o.properties.basic.private),
-                            'csr': windows2unix(o.properties.basic.request),
-                            'crt': windows2unix(o.properties.basic.public),
-                        }
-                    }]
+                    'destinations': {
+                        'zeus': [{
+                            zeusdest: {
+                                'note': o.properties.basic.note,
+                                'key': windows2unix(o.properties.basic.private),
+                                'csr': windows2unix(o.properties.basic.request),
+                                'crt': windows2unix(o.properties.basic.public),
+                            }
+                        }]
+                    }
                 }
             continue
         raise GetInstalledCertificatesDetailsError(r)
