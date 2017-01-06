@@ -19,42 +19,27 @@ class UnknownCertificateAuthorityError(Exception):
         msg = 'unknown certificate authority: {0}'.format(authority)
         super(UnknownCertificateAuthorityError, self).__init__(msg)
 
-def defaults(json):
-    if not json:
-        json = {}
-    json['common_name'] = json.get('common_name', '*')
-    json['sans'] = json.get('sans', None)
-    json['authority'] = json.get('authority', 'digicert')
-    return AttrDict(json)
-
 def create_digicert(common_name, sans):
     app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
-
     key, csr = create_key_and_csr(common_name, sans=sans)
-
     res1, order = digicert.request_certificate(common_name, csr)
     if res1.status_code != 201:
         return jsonified_errors(res1)
-
     res2, _ = digicert.approve_certificate(order.requests[0].id)
     if res2.status_code != 204:
         return jsonified_errors(res2)
-
     cert_name = common_name + '.' + digicert.suffix(order.id)
     cert_path = tar_cert_files(cert_name, key, csr)
-
     records = digicert.get_active_certificate_orders_and_details(common_name)
-
     return {'certs': records}
 
-def create(json=None):
-    args = defaults(json)
-
-    if args.authority == 'digicert':
-        results = create_digicert(args.common_name, args.sans)
-    elif args.authority == 'letsencrypt':
+def create(common_name, sans, authority, **kwargs):
+    app.logger.info('create: {0}'.format(locals()))
+    if authority == 'digicert':
+        results = create_digicert(common_name, sans)
+    elif authority == 'letsencrypt':
         results = {'certs': []}
     else:
-        raise UnknownCertificateAuthorityError(args.authority)
-    return make_response(jsonify(results), 201)
+        raise UnknownCertificateAuthorityError(authority)
+    return results, 201
 

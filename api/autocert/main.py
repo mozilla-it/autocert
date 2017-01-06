@@ -6,8 +6,7 @@ import imp
 import pwd
 import sys
 
-from flask import Flask, jsonify
-from flask import request, render_template
+from flask import Flask, request, jsonify, make_response
 from pdb import set_trace as breakpoint
 
 from pprint import pformat
@@ -98,10 +97,10 @@ def version():
 
 @app.route('/auto-cert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def endpoint():
-    json = request.json
-    app.logger.info('{0}'.format(pformat(locals())))
-    response = REQUEST_METHODS[request.method](json)
-    return response
+    app.logger.info('{0}'.format(request.json))
+    func = REQUEST_METHODS[request.method]
+    json, status_code = func(**request.json)
+    return make_response(jsonify(json), status_code)
 
 def log_and_jsonify_error(status, error, request):
     message = STATUS_CODES[status]

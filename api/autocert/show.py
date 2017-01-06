@@ -23,15 +23,9 @@ try:
 except ImportError:
     from config import CFG
 
-def defaults(json):
-    if not json:
-        json = {}
-    json['common_name'] = json.get('common_name', '*')
-    return AttrDict(json)
-
-def show(json=None):
-    args = defaults(json)
-    digicert_records = digicert.get_active_certificate_orders_and_details(args.common_name)
+def show(common_name, verbosity, **kwargs):
+    app.logger.info('show: {0}'.format(locals()))
+    digicert_records = digicert.get_active_certificate_orders_and_details(common_name)
     records = []
     for record in digicert_records:
         record_name = head(record)
@@ -44,4 +38,4 @@ def show(json=None):
         tar_record = tar.get_records_from_tarfiles(record_name)
         record = merge(record, tar_record)
         records += [record]
-    return jsonify({'certs': records})
+    return {'certs': records}, 200

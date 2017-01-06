@@ -69,12 +69,10 @@ def post(zeusdest, path, json=None, attrdict=True):
     return request('POST', zeusdest, path, json=json, attrdict=attrdict)
 
 def put_certificate(common_name, crt, csr, key, note, *zeusdests):
-    print('common_name =', common_name)
     for zeusdest in zeusdests:
-        print('zeusdest =', zeusdest)
         json = {
             'properties': {
-                'public': {
+                'basic': {
                     'public': crt,
                     'request': csr,
                     'private': key,
@@ -82,9 +80,13 @@ def put_certificate(common_name, crt, csr, key, note, *zeusdests):
                 }
             }
         }
-        print('json =', json)
+        print('put_certificate: ', locals())
         r, o = put(zeusdest, 'ssl/server_keys/' + common_name, json=json)
-        if r.status_code != 201:
+        if r.status_code == 201:
+            app.logger.info('{common_name} installed in {zeusdest}'.format(**locals()))
+        elif r.status_code == 200:
+            app.logger.info('{common_name} already installed in {zeusdest}'.format(**locals()))
+        else:
             print(r.status_code)
             print(r.text)
             raise ZeusCertificateInstallError(r)
