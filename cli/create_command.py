@@ -9,6 +9,7 @@ import requests
 
 from cli.utils.output import output
 from cli.verbose import verbose_parser
+from cli.transform import transform
 
 AUTHORITIES = [
     'digicert',
@@ -27,10 +28,9 @@ def add_parser(subparsers):
         choices=AUTHORITIES,
         help='default="%(default)s"; choose which authority to use')
     parser.add_argument(
-        '-d', '--destination',
-        metavar='DEST',
-        default='*',
-        help='default="%(default)s"; choose which destinations for install')
+        '-s', '--sans',
+        nargs='+',
+        help='default="%(default)s"; add additional sans')
 
     parser.set_defaults(func=do_create)
 
@@ -38,14 +38,13 @@ def do_create(ns):
     json = {
         'common_name': ns.common_name,
         'authority': ns.authority,
-        'destination': ns.destination,
+        'sans': ns.sans,
         'verbosity': ns.verbosity,
     }
     response = requests.post(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 201:
         certs = response.json()['certs']
-        if not ns.verbose:
-            pass
+        xformd = transform(certs, ns.verbosity)
         output(certs)
         return
     else:
