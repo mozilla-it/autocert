@@ -196,7 +196,7 @@ def task_config():
     '''.format(**locals())
     return {
         'actions': [
-            'echo "writing {CONFIG_YML} -> {DOT_CONFIG_YML}"'.format(**globals()),
+            'echo "cp {CONFIG_YML}\n-> {DOT_CONFIG_YML}"'.format(**globals()),
             'echo "setting LOG_LEVEL={log_level}"'.format(**locals()),
             'cp {CONFIG_YML} {DOT_CONFIG_YML}'.format(**globals()),
             lambda: _update_config(DOT_CONFIG_YML, yaml.safe_load(punch)),
