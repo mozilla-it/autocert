@@ -8,7 +8,7 @@ from ruamel import yaml
 from api.autocert.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'rmimages', 'rmvolumes'],
+    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
     'verbosity': 2,
 }
 
@@ -29,19 +29,41 @@ class UnknownPkgmgrError(Exception):
     def __init__(self):
         super(UnknownPkgmgrError, self).__init__('unknown pkgmgr!')
 
+def check_hash(program):
+    from subprocess import check_call, CalledProcessError
+    try:
+        check_call('hash {program}'.format(**locals()), shell=True)
+        return True
+    except CalledProcessError as cpe:
+        return False
+
 def get_pkgmgr():
-    def check_hash(program):
-        from subprocess import check_call, CalledProcessError
-        try:
-            check_call('hash {program}'.format(**locals()), shell=True)
-            return True
-        except CalledProcessError as cpe:
-            return False
     if check_hash('dpkg'):
         return 'deb'
     elif check_hash('rpm'):
         return 'rpm'
     raise UnknownPkgmgrError
+
+def task_count():
+    '''
+    use the cloc utility to count lines of code
+    '''
+    excludes = [
+        'dist',
+        'venv',
+        '__pycache__',
+        'auto_cert_cli.egg-info',
+    ]
+    excludes = '--exclude-dir=' + ','.join(excludes)
+    scandir = os.path.dirname(__file__)
+    return {
+        'actions': [
+            'cloc {excludes} {scandir}'.format(**locals()),
+        ],
+        'uptodate': [
+            lambda: not check_hash('cloc'),
+        ],
+    }
 
 def task_checkreqs():
     '''
