@@ -8,6 +8,7 @@ import requests
 
 from cli.utils.output import output
 from cli.verbose import verbose_parser
+from cli.transform import transform
 
 DESTINATIONS = [
     'zeus:scl3-ext',
@@ -28,7 +29,13 @@ def add_parser(subparsers):
         required=True,
         choices=DESTINATIONS,
         nargs='+',
-        help='default="%(default)s"; choose which destinations for install')
+        help='default="%(default)s"; choose which destinations for install; "%(choices)s"')
+    parser.add_argument(
+        '-w', '--within',
+        metavar='DAYS',
+        default=14,
+        type=int,
+        help='default="%(default)s"; within number of days from expiring')
     parser.set_defaults(func=do_deploy)
 
 def dictify(destinations, sep=':'):
@@ -42,17 +49,20 @@ def do_deploy(ns):
     json = {
         'cert_name': ns.cert_name,
         'destinations': dictify(ns.destinations),
+        'within': ns.within,
         'verbosity': ns.verbosity,
     }
     response = requests.put(ns.api_url / 'auto-cert', json=json)
-    if response.status_code == 201:
-        certs = response.json()['certs']
-        if not ns.verbose:
-            pass
-        output(certs)
-        return
+    if response.status_code == 200:
+        certs = response.json().get('certs', [])
+        xformd = transform(certs, ns.verbosity)
+        output(xformd)
+    elif response.status_code == 201:
+        certs = response.json().get('certs', [])
+        xformd = transform(certs, ns.verbosity)
+        output(xformd)
     else:
         print(response)
         print(response.text)
-    raise Exception('wtf do_deploy')
+        raise Exception('wtf do_deploy')
 
