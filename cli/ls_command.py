@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-cli.list_parser
+cli.ls
 '''
 import requests
 
@@ -9,16 +9,12 @@ from attrdict import AttrDict
 
 from cli.utils.output import output
 from cli.utils.dictionary import head, body
-from cli.verbose import verbose_parser
 from cli.transform import transform
+from cli.verbose import verbose_parser
+from cli.cert import cert_parser
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('show', parents=[verbose_parser])
-    parser.add_argument(
-        'common_name',
-        default='*',
-        nargs='?',
-        help='default="%(default)s"; common name pattern')
+    parser = subparsers.add_parser('ls', parents=[cert_parser, verbose_parser])
     parser.add_argument(
         '-a', '--authority',
         metavar='AUTH',
@@ -29,11 +25,11 @@ def add_parser(subparsers):
         metavar='DEST',
         default='*',
         help='default="%(default)s"; limit search to an authority')
-    parser.set_defaults(func=do_show)
+    parser.set_defaults(func=do_ls)
 
-def do_show(ns):
+def do_ls(ns):
     json = {
-        'common_name': ns.common_name,
+        'cert_name': ns.cert_name,
         'verbosity': ns.verbosity,
     }
     response = requests.get(ns.api_url / 'auto-cert', json=json)
@@ -45,5 +41,5 @@ def do_show(ns):
     else:
         print(response)
         print(response.text)
-    raise Exception('wtf do_show')
+    raise Exception('wtf do_ls')
 
