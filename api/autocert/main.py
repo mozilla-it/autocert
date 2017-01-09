@@ -19,6 +19,8 @@ from autocert.update import update
 from autocert.create import create
 from autocert.revoke import revoke
 
+from autocert.certificate import decompose_cert_name
+
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
 STATUS_CODES = {
@@ -99,7 +101,17 @@ def version():
 def endpoint():
     app.logger.info('{0}'.format(request.json))
     func = REQUEST_METHODS[request.method]
-    json, status_code = func(**request.json)
+    args = request.json
+    print('endpoint:', locals())
+    common_name, suffix, authority_code, order_id = decompose_cert_name(args.get('cert_name', args.get('common_name', None)))
+    if common_name:
+        args.update(dict(
+            common_name=common_name,
+            suffix=suffix,
+            authority_code=authority_code,
+            order_id=order_id))
+    app.logger.info('args = {0}'.format(pformat(args)))
+    json, status_code = func(**args)
     return make_response(jsonify(json), status_code)
 
 def log_and_jsonify_error(status, error, request):

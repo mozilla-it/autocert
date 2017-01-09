@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import re
 from pprint import pformat
 from cryptography import x509
 from cryptography.x509.oid import NameOID
@@ -30,6 +31,11 @@ class CsrExistError(Exception):
         msg = 'csr file {csrfile} does not exist'.format(**locals())
         super(CsrExistError, self).__init__(msg)
 
+class CertNameDecomposeError(Exception):
+    def __init__(self, pattern, cert_name):
+        msg = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
+        super(CertNameDecomposeError, self).__init__(msg)
+
 OIDS_MAP = {
     'common_name':              NameOID.COMMON_NAME,
     'org_name':                 NameOID.ORGANIZATION_NAME,
@@ -50,6 +56,13 @@ ENCODING = {
     'DER': serialization.Encoding.DER,
     'PEM': serialization.Encoding.PEM,
 }
+
+def decompose_cert_name(cert_name, regex=re.compile('([A-Za-z0-9\.\-_]+)\.((dc|le)([0-9]+))')):
+    print('decompose_cert_name:',locals())
+    match = regex.search(cert_name)
+    if match:
+        return match.groups()
+    return cert_name, None, None, None
 
 def _create_key(common_name, **kwargs):
     app.logger.info('called create_key:\n{0}'.format(pformat(locals())))

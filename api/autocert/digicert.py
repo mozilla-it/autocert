@@ -114,22 +114,22 @@ def get_order_detail(order_id):
 def get_csr(detail):
     return detail.certificate.csr
 
-def create_record(order):
+def create_cert(order):
     common_name = order.certificate.common_name
-    record_name = '{0}.{1}'.format(common_name, suffix(order.id))
+    cert_name = '{0}.{1}'.format(common_name, suffix(order.id))
     expires = order.certificate.valid_till
     crt = download_certificate(order.id)
     detail = get_order_detail(order.id)
     csr = get_csr(AttrDict(detail))
     return {
-        '{record_name}'.format(**locals()): {
+        cert_name: {
             'common_name': common_name,
             'suffix': suffix(order.id),
             'expires': expires,
             'authorities': {
                 'digicert': {
-                    'csr': csr,
-                    'crt': crt,
+                    'csr': windows2unix(csr),
+                    'crt': windows2unix(crt),
                     'data': {
                         'order': dict(order),
                         'detail': detail,
@@ -143,7 +143,7 @@ def get_active_certificate_orders_and_details(common_name='*'):
     orders = get_valid_certificate_orders(common_name)
     records = []
     for order in orders:
-        records += [create_record(AttrDict(order))]
+        records += [create_cert(AttrDict(order))]
     return records
 
 def approve_certificate(request_id):

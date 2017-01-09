@@ -13,6 +13,8 @@ from autocert import zeus
 from autocert import tar
 from autocert import show
 
+from autocert.certificate import decompose_cert_name
+
 try:
     from autocert.app import app
 except ImportError:
@@ -28,23 +30,10 @@ class MissingUpdateArgumentsError(Exception):
         msg = 'missing arguments to update; args = {0}'.format(args)
         super(MissingUpdateArgumentsError, self).__init__(msg)
 
-class CertNameDecomposeError(Exception):
-    def __init__(self, pattern, cert_name):
-        msg = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
-        super(CertNameDecomposeError, self).__init__(msg)
-
 class DeployError(Exception):
     def __init__(self):
         msg = 'deploy error; deployment didnt happen'
         super(DeployError, self).__init__(msg)
-
-def decompose_cert_name(cert_name):
-    import re
-    pattern = '([A-Za-z0-9\.\-_]+)\.((dc|le)([0-9]+))'
-    match = re.search(pattern, cert_name)
-    if match:
-        return match.groups()
-    raise CertNameDecomposeError(pattern, cert_name)
 
 def renew(cert_name, authority, **kwargs):
     app.logger.info('update.renew:\n{0}'.format(pformat(locals())))

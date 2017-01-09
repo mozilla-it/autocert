@@ -49,14 +49,16 @@ def tar_cert_files(cert_name, key, csr, crt=None):
     return tarpath
 
 def untar_cert_files(cert_name):
+    key, csr, crt = [None] * 3
     tarpath = str(CFG.tar.dirpath / cert_name) + '.tar.gz'
     with tarfile.open(tarpath, 'r:gz') as tar:
-        key = tar.extractfile('{cert_name}.key'.format(**locals())).read().decode('utf-8')
-        csr = tar.extractfile('{cert_name}.csr'.format(**locals())).read().decode('utf-8')
-        try:
-            crt = tar.extractfile('{cert_name}.crt'.format(**locals())).read().decode('utf-8')
-        except KeyError:
-            crt = None
+        for info in tar.getmembers():
+            if info.name.endswith('.key'):
+                key = tar.extractfile(info.name).read().decode('utf-8')
+            elif info.name.endswith('.csr'):
+                csr = tar.extractfile(info.name).read().decode('utf-8')
+            elif info.name.endswith('.crt'):
+                crt = tar.extractfile(info.name).read().decode('utf-8')
     return key, csr, crt
 
 def get_record_from_tarfile(cert_name, dirpath=CFG.tar.dirpath):
