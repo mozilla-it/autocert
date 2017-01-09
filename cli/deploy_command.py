@@ -7,8 +7,9 @@ cli.deploy
 import requests
 
 from cli.utils.output import output
-from cli.verbose import verbose_parser
 from cli.transform import transform
+from cli.verbose import verbose_parser
+from cli.cert import cert_parser
 
 DESTINATIONS = [
     'zeus:scl3-ext',
@@ -19,10 +20,7 @@ DESTINATIONS = [
 ]
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('deploy', parents=[verbose_parser])
-    parser.add_argument(
-        'cert_name',
-        help='common_name + suffix')
+    parser = subparsers.add_parser('deploy', parents=[cert_parser, verbose_parser])
     parser.add_argument(
         '-d', '--destinations',
         metavar='DEST',

@@ -20,6 +20,7 @@ def add_parser(subparsers):
     parser = subparsers.add_parser('create', parents=[verbose_parser])
     parser.add_argument(
         'common_name',
+        metavar='common-name',
         help='common name')
     parser.add_argument(
         '-a', '--authority',

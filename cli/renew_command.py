@@ -7,7 +7,9 @@ cli.renew
 import requests
 
 from cli.utils.output import output
+from cli.transform import transform
 from cli.verbose import verbose_parser
+from cli.cert import cert_parser
 
 AUTHORITIES = [
     'digicert',
@@ -15,10 +17,7 @@ AUTHORITIES = [
 ]
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('renew', parents=[verbose_parser])
-    parser.add_argument(
-        'common_name',
-        help='common name')
+    parser = subparsers.add_parser('renew', parents=[cert_parser, verbose_parser])
     parser.add_argument(
         '-a', '--authority',
         metavar='AUTH',
