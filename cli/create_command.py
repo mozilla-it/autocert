@@ -46,7 +46,7 @@ def do_create(ns):
     if response.status_code == 201:
         certs = response.json()['certs']
         xformd = transform(certs, ns.verbosity)
-        output(certs)
+        output(xformd)
         return
     else:
         print(response)
