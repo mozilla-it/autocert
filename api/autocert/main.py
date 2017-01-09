@@ -94,7 +94,7 @@ def initialize():
 
 @app.route('/auto-cert/version', methods=['GET'])
 def version():
-    app.logger.info('/version called')
+    app.logger.info('/auto-cert/version called')
     return jsonify({'version': api_version()})
 
 @app.route('/auto-cert', methods=['GET', 'PUT', 'POST', 'DELETE'])
@@ -102,7 +102,6 @@ def endpoint():
     app.logger.info('{0}'.format(request.json))
     func = REQUEST_METHODS[request.method]
     args = request.json
-    print('endpoint:', locals())
     common_name, suffix, authority_code, order_id = decompose_cert_name(args.get('cert_name', args.get('common_name', None)))
     if common_name:
         args.update(dict(
