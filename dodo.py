@@ -34,7 +34,7 @@ def check_hash(program):
     try:
         check_call('hash {program}'.format(**locals()), shell=True)
         return True
-    except CalledProcessError as cpe:
+    except CalledProcessError:
         return False
 
 def get_pkgmgr():
