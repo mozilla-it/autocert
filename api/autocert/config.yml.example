@@ -1,4 +1,5 @@
 csr:
+    # location where .key files are stored
     dirpath: /data/auto-cert
     validity: 1
     server_type: 2
@@ -14,20 +15,29 @@ csr:
         org_contact_lastname: Idler
         org_contact_email: sidler@mozilla.com
         org_contact_telephone: 503.862.3533
+
 key:
+    # location where .key files are stored
     dirpath: /data/auto-cert
     key_size: 2048
     public_exponent: 65537
     encoding: PEM
+
 tar:
+    # location where the <cert_name>.tar.gz files are stored on the api server
     dirpath: /data/auto-cert
+
+# list of available authorities from which we get our .crt files
 authorities:
     digicert:
+        # this url will have the REST api endpoint appended to it
         baseurl: https://www.digicert.com:443/services/v2
+        # default headers used on digicert calls
         headers:
             Content-Type: application/json
             User-Agent: auto-cert
-        apikey: 82_CHAR_APIKEY
+        apikey: APIKEY
+        # this is some default values, used when requesting a cert from digicert
         template:
             certificate:
                 organization_units: [WebOps]
@@ -38,11 +48,13 @@ authorities:
                 id: 147486
             payment_method: balance
             validity_years: 1
+
+# list of available destinations where the .key, .csr and .crt can be installed
 destinations:
     zeus:
         test:
             baseurl: http://10.248.29.12:9070/api/tm/3.9
-            apikey: tuniegeuheiS9eiMeigh4voJoh9eeguu0se2bi6ahduj4Vu7ainahnietaiDu7ohr8pah3ahkeihahnahZ
+            apikey: APIKEY
         scl3-ext:
             baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
             apikey: APIKEY
@@ -55,6 +67,9 @@ destinations:
         phx1-int:
             baseurl: https://internal.zlb.ops..phx1.mozilla.com:9070/api/tm/3.9
             apikey: APIKEY
+
+# this section becomes a nested dict that is then used in logging.config.dictConfig
+# https://docs.python.org/3/library/logging.config.html
 logging:
     version: 1
     disable_existing_loggers: true
