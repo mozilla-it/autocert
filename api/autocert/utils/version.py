@@ -12,7 +12,8 @@ def dirname(path, count=1):
 
 def describe():
     from subprocess import check_output
-    return check_output('git describe', shell=True).decode('utf-8').strip()
+    cwd=os.path.dirname(__file__)
+    return check_output('git describe', cwd=cwd, shell=True).decode('utf-8').strip()
 
 
 _version = None
