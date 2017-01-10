@@ -12,6 +12,7 @@ from autocert import zeus
 from autocert import tar
 
 from autocert.utils.dictionary import merge, head, body
+from autocert.certificate import decompose_cert_name
 
 try:
     from autocert.app import app
@@ -40,3 +41,13 @@ def show(common_name, verbosity, suffix=None, **kwargs):
             cert = merge(cert, tar.get_records_from_tarfiles(cert_name))
             certs += [cert]
     return {'certs': certs}, 200
+
+#def show(cert_name, verbosity, **kwargs):
+#    app.logger.info('show: {0}'.format(locals()))
+#    certs = tar.get_records_from_tarfiles(cert_name)
+#    for cert in certs:
+#        cert_name = head(cert)
+#        cert_body = body(cert)
+#        common_name, suffix, code, order_id = decompose_cert_name(cert_name)
+
+
