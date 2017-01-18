@@ -4,6 +4,8 @@
 cli.parsers: support class for adding parent parsers
 '''
 
+from argparse import ArgumentParser
+
 AUTHORITIES = [
     'digicert',
     'letsencrypt',
