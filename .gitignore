@@ -98,8 +98,8 @@ api/VERSION
 LOG_LEVEL
 
 # prevent secrets config.yml file from being checked in
-api/autocert/config.yml
-api/autocert/.config.yml
+api/config.yml
+api/.config.yml
 
 # skip .bak files
 *.bak
