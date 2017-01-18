@@ -3,6 +3,7 @@
 
 import re
 from pprint import pformat
+from datetime import datetime
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from cryptography.hazmat.backends import default_backend
@@ -11,15 +12,11 @@ from cryptography.hazmat.primitives import hashes, serialization
 
 import tarfile
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from utils.format import fmt
 
-try:
-    from autocert.config import CFG
-except ImportError:
-    from config import CFG
+from app import app
+
+from config import CFG
 
 class KeyExistError(Exception):
     def __init__(self, keyfile):
@@ -36,33 +33,32 @@ class CertNameDecomposeError(Exception):
         msg = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
         super(CertNameDecomposeError, self).__init__(msg)
 
-OIDS_MAP = {
-    'common_name':              NameOID.COMMON_NAME,
-    'org_name':                 NameOID.ORGANIZATION_NAME,
-    'org_unit':                 NameOID.ORGANIZATIONAL_UNIT_NAME,
-    'org_country':              NameOID.COUNTRY_NAME,
-    'org_city':                 NameOID.LOCALITY_NAME,
-    'org_state':                NameOID.STATE_OR_PROVINCE_NAME,
-    'org_zip':                  NameOID.POSTAL_CODE,
-    'org_addr1':                NameOID.STREET_ADDRESS,
-    'org_addr2':                NameOID.STREET_ADDRESS,
-    'org_contact_job_title':    NameOID.TITLE,
-    'org_contact_firstname':    NameOID.GIVEN_NAME,
-    'org_contact_lastname':     NameOID.SURNAME,
-    'org_contact_email':        NameOID.EMAIL_ADDRESS,
-}
+OIDS_MAP = dict(
+    common_name =              NameOID.COMMON_NAME,
+    org_name =                 NameOID.ORGANIZATION_NAME,
+    org_unit =                 NameOID.ORGANIZATIONAL_UNIT_NAME,
+    org_country =              NameOID.COUNTRY_NAME,
+    org_city =                 NameOID.LOCALITY_NAME,
+    org_state =                NameOID.STATE_OR_PROVINCE_NAME,
+    org_zip =                  NameOID.POSTAL_CODE,
+    org_addr1 =                NameOID.STREET_ADDRESS,
+    org_addr2 =                NameOID.STREET_ADDRESS,
+    org_contact_job_title =    NameOID.TITLE,
+    org_contact_firstname =    NameOID.GIVEN_NAME,
+    org_contact_lastname =     NameOID.SURNAME,
+    org_contact_email =        NameOID.EMAIL_ADDRESS,
+)
 
-ENCODING = {
-    'DER': serialization.Encoding.DER,
-    'PEM': serialization.Encoding.PEM,
-}
+ENCODING = dict(
+    DER = serialization.Encoding.DER,
+    PEM = serialization.Encoding.PEM,
+)
 
-def decompose_cert_name(cert_name, regex=re.compile('([A-Za-z0-9\.\-_]+)\.((dc|le)([0-9]+))')):
-    print('decompose_cert_name:',locals())
-    match = regex.search(cert_name)
-    if match:
-        return match.groups()
-    return cert_name, None, None, None
+def create_cert_name(common_name, timestamp, sep='@'):
+    return fmt('{common_name}{sep}{timestamp}')
+
+def decompose_cert_name(cert_name, sep='@'):
+    return cert_name.split(sep)
 
 def _create_key(common_name, **kwargs):
     app.logger.info('called create_key:\n{0}'.format(pformat(locals())))

@@ -4,20 +4,16 @@
 cli.revoke
 '''
 
-from cli.verbose import verbose_parser
+from cli.namespace import jsonify
+from cli.arguments import add_argument
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('revoke', parents=[verbose_parser])
-    parser.add_argument(
-        'common_name',
-        help='common name')
+    parser = subparsers.add_parser('revoke')
+    add_argument(parser, '-d', '--destinations')
+    add_argument(parser, '-c', '--calls')
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, 'cert_name_pns')
     parser.set_defaults(func=do_revoke)
 
 def do_revoke(ns):
-    json = {
-        'common_name': ns.common_name,
-        'authority': ns.authority,
-        'destination': ns.destination,
-        'verbosity': ns.verbosity,
-    }
     print('do_revoke')

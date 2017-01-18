@@ -11,9 +11,9 @@ from urlpath import URL
 from pathlib2 import Path
 
 try:
-    from autocert.utils.dictionary import merge
-except ImportError:
     from utils.dictionary import merge
+except ImportError:
+    from dictionary import merge
 
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
@@ -52,10 +52,6 @@ def _fixup(obj):
                     d[k] = URL(v)
                 elif 'path' in k:
                     d[k] = Path(v)
-                elif 'apikey' in k:
-                    if 'auth' in d or 'auth' in obj:
-                        raise AuthKeyNotAllowedError(d)
-                    d['auth'] = (k, v)
             elif isinstance(v, dict):
                 d[k] = _fixup(v)
         return d

@@ -8,8 +8,6 @@ import os
 import imp
 import sys
 import logging
-import requests
-
 from subprocess import check_output
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
@@ -25,10 +23,18 @@ except ImportError as ie:
 from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
 from cli.utils.output import output
+from cli import requests
+
 
 VERSIONS = [
     'cli',
     'api'
+]
+
+SORTING = [
+    'default',
+    'timestamp',
+    'expiry',
 ]
 
 class VersionCheckFailedError(Exception):
@@ -77,21 +83,28 @@ def main():
     parser = ArgumentParser(
         add_help=False)
     parser.add_argument(
-        '--debug',
+        '-D', '--debug',
         action='store_true',
         help='turn on debug mode')
     parser.add_argument(
-        '--version',
+        '-V', '--version',
         choices = VERSIONS,
         const=VERSIONS[0],
         nargs='?',
         help='default=%(const)s; show the version')
     parser.add_argument(
-        '--api-url',
+        '-U', '--api-url',
         metavar='URL',
         type=URL,
         default=r'http://0.0.0.0',
         help='default=%(default)s; set the api url to use')
+    parser.add_argument(
+        '-S', '--sort',
+        dest='sorting',
+        metavar='SORT',
+        default=SORTING[0],
+        choices=SORTING,
+        help='default="%(default)s"; set the sorting method; choices=[%(choices)s]')
 
     ns, rem = parser.parse_known_args()
     if not any([h in rem for h in ('-h', '--help')]):

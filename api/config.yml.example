@@ -36,7 +36,9 @@ authorities:
         headers:
             Content-Type: application/json
             User-Agent: auto-cert
-        apikey: APIKEY
+        auth:
+          - apikey
+          - APIKEY
         # this is some default values, used when requesting a cert from digicert
         template:
             certificate:
@@ -52,21 +54,54 @@ authorities:
 # list of available destinations where the .key, .csr and .crt can be installed
 destinations:
     zeus:
-        test:
-            baseurl: http://10.248.29.12:9070/api/tm/3.9
-            apikey: APIKEY
+        test1:
+            baseurl: https://10.248.28.246:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
+        test2:
+            baseurl: https://10.0.0.90:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         scl3-ext:
-            baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         scl3-int:
-            baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         phx1-ext:
-            baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         phx1-int:
-            baseurl: https://internal.zlb.ops..phx1.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            baseurl: https://internal.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
 
 # this section becomes a nested dict that is then used in logging.config.dictConfig
 # https://docs.python.org/3/library/logging.config.html

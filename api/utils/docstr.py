@@ -1,13 +1,7 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 import inspect
-
-from pprint import pprint
-
-import json
-
-def jsonify(string):
-    return json.loads(str(string))
 
 def docstr():
     frame = inspect.currentframe().f_back

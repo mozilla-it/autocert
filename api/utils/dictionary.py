@@ -69,7 +69,8 @@ def merge(*objs):
 
 class DictDoesntHaveHeadError(Exception):
     def __init__(self, d):
-        msg = 'dictionary: {0} does not have a single key to be considered a head'.format(d)
+        keys = list(d.keys())
+        msg = 'dictionary.keys(): {keys} does not have a single key to be considered a head'.format(**locals())
         super(DictDoesntHaveHeadError, self).__init__(msg)
 
 def head(d):
@@ -81,4 +82,19 @@ def head(d):
 
 def body(d):
     return d[head(d)]
+
+def head_body(d):
+    head_ = head(d)
+    return head_, d[head_]
+
+def keys_ending(d, suffix):
+    return [k for k in d.keys() if k.endswith(suffix)]
+
+def dictify(items, sep=':'):
+    result = {}
+    if items:
+        for item in items:
+            key, value = item.split(sep)
+            result[key] = result.get(key, []) + [value]
+    return result
 

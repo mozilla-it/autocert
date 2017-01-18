@@ -8,10 +8,11 @@ import inspect
 from ruamel import yaml
 from subprocess import check_output
 
-from utils import docstr, jsonify
+from utils.docstr import docstr
+from utils.json import jsonify
 from main import app
 
-from autocert.utils.version import version
+from utils.version import version
 
 def test_version():
     '''

@@ -22,6 +22,15 @@ def str_presenter(dumper, data):
 
 yaml.add_representer(str, str_presenter)
 
+def list_presenter(dumper, data):
+    list_tag = 'tag:yaml.org,2002:seq'
+    if len(data) > 1:
+        if all([isinstance(item, str) for item in data]):
+            return dumper.represent_sequence(list_tag, data, flow_style=False)
+    return dumper.represent_sequence(list_tag, data)
+
+yaml.add_representer(list, list_presenter)
+
 def yaml_format(obj):
     class MyDumper(yaml.Dumper):
         def represent_mapping(self, tag, mapping, flow_style=False):

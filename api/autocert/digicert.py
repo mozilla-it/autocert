@@ -8,19 +8,15 @@ from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
 
-from autocert.utils.newline import windows2unix
-from autocert.utils.dictionary import merge
-from autocert.certificate import ENCODING
+from utils.newline import windows2unix
+from utils.dictionary import merge
 
 try:
     from autocert.app import app
 except ImportError:
     from app import app
 
-try:
-    from autocert.config import CFG
-except ImportError:
-    from config import CFG
+from config import CFG
 
 INVALID_STATUS = [
     'expired',
@@ -117,7 +113,7 @@ def get_csr(detail):
 def create_cert(order):
     common_name = order.certificate.common_name
     cert_name = '{0}.{1}'.format(common_name, suffix(order.id))
-    expires = order.certificate.valid_till
+    expiry = order.certificate.valid_till
     crt = download_certificate(order.id)
     detail = get_order_detail(order.id)
     csr = get_csr(AttrDict(detail))
@@ -125,7 +121,7 @@ def create_cert(order):
         cert_name: {
             'common_name': common_name,
             'suffix': suffix(order.id),
-            'expires': expires,
+            'expiry': expiry,
             'authorities': {
                 'digicert': {
                     'csr': windows2unix(csr),

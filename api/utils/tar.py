@@ -6,16 +6,11 @@ import glob
 import tarfile
 
 from io import BytesIO
+from ruamel import yaml
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
-
-try:
-    from autocert.config import CFG
-except ImportError:
-    from config import CFG
+from utils.format import fmt
+from utils.output import yaml_format
+from utils.dictionary import merge
 
 FILETYPE = {
     '-----BEGIN RSA PRIVATE KEY-----':      '.key',
@@ -25,14 +20,14 @@ FILETYPE = {
 
 class UnknownFileExtError(Exception):
     def __init__(self, content):
-        msg = 'unknown filetype for this content: {0}'.format(content)
+        msg = fmt('unknown filetype for this content: {content}')
         super(UnknownFileExtError, self).__init__(msg)
 
 def get_file_ext(content):
     for head, ext in FILETYPE.items():
         if content.startswith(head):
             return ext
-    raise UnknownFileExtError(content)
+    return '.yml'
 
 def tarinfo(cert_name, content):
     ext = get_file_ext(content)
@@ -40,17 +35,20 @@ def tarinfo(cert_name, content):
     info.size = len(content)
     return info
 
-def tar_cert_files(cert_name, key, csr, crt=None):
-    tarpath = str(CFG.tar.dirpath / cert_name) + '.tar.gz'
+def bundle(dirpath, cert_name, key, csr, crt, yml):
+    if not yml:
+        yml = {}
+    yml = yaml_format(yml)
+    tarpath = fmt('{dirpath}/{cert_name}.tar.gz')
     with tarfile.open(tarpath, 'w:gz') as tar:
-        for content in (key, csr, crt):
+        for content in (key, csr, crt, yml):
             if content:
                 tar.addfile(tarinfo(cert_name, content), BytesIO(content.encode('utf-8')))
     return tarpath
 
-def untar_cert_files(cert_name):
-    key, csr, crt = [None] * 3
-    tarpath = str(CFG.tar.dirpath / cert_name) + '.tar.gz'
+def unbundle(dirpath, cert_name):
+    key, csr, crt, yml = [None] * 4
+    tarpath = fmt('{dirpath}/{cert_name}.tar.gz')
     with tarfile.open(tarpath, 'r:gz') as tar:
         for info in tar.getmembers():
             if info.name.endswith('.key'):
@@ -59,20 +57,7 @@ def untar_cert_files(cert_name):
                 csr = tar.extractfile(info.name).read().decode('utf-8')
             elif info.name.endswith('.crt'):
                 crt = tar.extractfile(info.name).read().decode('utf-8')
-    return key, csr, crt
-
-def get_record_from_tarfile(cert_name, dirpath=CFG.tar.dirpath):
-    key, csr, crt = untar_cert_files(cert_name)
-    return {
-        'tarfile': {
-            cert_name + '.key': key,
-            cert_name + '.csr': csr,
-        }
-    }
-
-def get_records_from_tarfiles(cert_name_pattern='*', dirpath=CFG.tar.dirpath):
-    records = {}
-    for cert_path in glob.glob('{dirpath}/{cert_name_pattern}.tar.gz'.format(**locals())):
-        cert_name = os.path.basename(cert_path).replace('.tar.gz', '')
-        records[cert_name] = get_record_from_tarfile(cert_name)
-    return records
+            elif info.name.endswith('.yml'):
+                yml = tar.extractfile(info.name).read().decode('utf-8')
+                yml = yaml.safe_load(yml)
+    return key, csr, crt, yml

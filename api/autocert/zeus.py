@@ -12,18 +12,15 @@ from fnmatch import fnmatch
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-from autocert.utils.dictionary import merge
-from autocert.utils.newline import windows2unix
+from utils.dictionary import merge
+from utils.newline import windows2unix
 
 try:
     from autocert.app import app
 except ImportError:
     from app import app
 
-try:
-    from autocert.config import CFG
-except ImportError:
-    from config import CFG
+from config import CFG
 
 class ZeusRequiresHttpsForPutsError(Exception):
     def __init__(self, url):

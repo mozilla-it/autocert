@@ -19,7 +19,7 @@ def describe():
 _version = None
 def version():
     global _version
-    versionfile = dirname(__file__, 3) + '/VERSION'
+    versionfile = dirname(__file__, 2) + '/VERSION'
     if not _version:
         _version = open(versionfile).read() if os.path.exists(versionfile) else describe()
         _version, *suffix = _version.split('-')

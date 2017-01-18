@@ -7,7 +7,7 @@ services:
           - "8000"
         volumes:
           - /data/auto-cert:/data/auto-cert
-        command: /usr/local/bin/gunicorn -w 2 -b :8000 main:app
+        command: python3 -u /usr/local/bin/gunicorn -t 120 -w 2 -b :8000 main:app
 
     nginx:
         restart: always

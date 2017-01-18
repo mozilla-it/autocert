@@ -5,7 +5,7 @@ import os
 from doit import get_var
 from ruamel import yaml
 
-from api.autocert.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
@@ -96,7 +96,7 @@ def task_dockercompose():
         import re
         from subprocess import check_output
         from packaging.version import parse as version_parse
-        pattern = '(docker-compose version) ([0-9.]+)(, build [0-9]+)'
+        pattern = '(docker-compose version) ([0-9.]+)(, build [a-z0-9]+)'
         output = check_output('docker-compose --version', shell=True).decode('utf-8').strip()
         regex = re.compile(pattern)
         match = regex.search(output)
