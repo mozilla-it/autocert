@@ -8,19 +8,15 @@ from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
 
-from autocert.utils.newline import windows2unix
-from autocert.utils.dictionary import merge
-from autocert.certificate import ENCODING
+from utils.newline import windows2unix
+from utils.dictionary import merge
 
 try:
     from autocert.app import app
 except ImportError:
     from app import app
 
-try:
-    from autocert.config import CFG
-except ImportError:
-    from config import CFG
+from config import CFG
 
 INVALID_STATUS = [
     'expired',

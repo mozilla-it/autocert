@@ -13,13 +13,15 @@ from pprint import pformat
 
 from autocert.app import app #import flask app
 
-from autocert.utils.version import version as api_version
-from autocert.show import show
-from autocert.update import update
-from autocert.create import create
-from autocert.revoke import revoke
+from utils.version import version as api_version
+from utils.format import fmt
+#from autocert.show import show
+#from autocert.update import update
+#from autocert.create import create
+#from autocert.revoke import revoke
+#from utils import pki
 
-from autocert.certificate import decompose_cert_name
+from endpoint.factory import create_endpoint
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
@@ -66,15 +68,15 @@ STATUS_CODES = {
     511: 'network authentication required',
 }
 
-REQUEST_METHODS = {
-    'GET':      show,
-    'PUT':      update,
-    'POST':     create,
-    'DELETE':   revoke,
-}
+#REQUEST_METHODS = {
+#    'GET':      show,
+#    'PUT':      update,
+#    'POST':     create,
+#    'DELETE':   revoke,
+#}
 
 def register_apis():
-    from autocert.utils.importer import import_modules
+    from utils.importer import import_modules
     dirpath = os.path.dirname(__file__)
     endswith = '_api.py'
     [app.register_blueprint(mod.api) for mod in import_modules(dirpath, endswith)]
@@ -84,7 +86,7 @@ register_apis()
 @app.before_first_request
 def initialize():
     from logging.config import dictConfig
-    from autocert.config import CFG
+    from config import CFG
     if sys.argv[0] != 'venv/bin/pytest':
         dictConfig(CFG.logging)     #3
         PID = os.getpid()
@@ -98,30 +100,40 @@ def version():
     return jsonify({'version': api_version()})
 
 @app.route('/auto-cert', methods=['GET', 'PUT', 'POST', 'DELETE'])
-def endpoint():
-    app.logger.info('{0}'.format(request.json))
-    func = REQUEST_METHODS[request.method]
+def route():
+    method = request.method
     args = request.json
-    common_name, suffix, authority_code, order_id = decompose_cert_name(args.get('cert_name', args.get('common_name', None)))
-    if common_name:
-        args.update(dict(
-            common_name=common_name,
-            suffix=suffix,
-            authority_code=authority_code,
-            order_id=order_id))
-    app.logger.info('args = {0}'.format(pformat(args)))
-    json, status_code = func(**args)
-    return make_response(jsonify(json), status_code)
+    cfg = args.get('cfg', None)
+    verbosity = args.get('verbosity', 0)
+    app.logger.debug(fmt('route:\n{0}', locals()))
+    endpoint = create_endpoint(method, cfg, verbosity)
+    endpoint.execute(**args)
+    return endpoint.respond(**args)
 
-def log_and_jsonify_error(status, error, request):
-    message = STATUS_CODES[status]
-    request_path = request.path
-    app.logger.error('{message}: {request_path}'.format(**locals()))
-    return jsonify({
-        'errors': [
-            '{status}: {message}, {request_path}'.format(**locals()),
-        ],
-    })
+#def endpoint():
+#    app.logger.info('{0}'.format(request.json))
+#    func = REQUEST_METHODS[request.method]
+#    args = request.json
+#    common_name, suffix, authority_code, order_id = pki.decompose_cert_name(args.get('cert_name', args.get('common_name', None)))
+#    if common_name:
+#        args.update(dict(
+#            common_name=common_name,
+#            suffix=suffix,
+#            authority_code=authority_code,
+#            order_id=order_id))
+#    app.logger.info('args = {0}'.format(pformat(args)))
+#    json, status_code = func(**args)
+#    return make_response(jsonify(json), status_code)
+
+#def log_and_jsonify_error(status, error, request):
+#    message = STATUS_CODES[status]
+#    request_path = request.path
+#    app.logger.error('{message}: {request_path}'.format(**locals()))
+#    return jsonify({
+#        'errors': [
+#            '{status}: {message}, {request_path}'.format(**locals()),
+#        ],
+#    })
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -143,7 +155,6 @@ def page_not_found(error):
 def method_not_allowed(error):
     return log_and_jsonify_error(405, error, request)
 
-
 @app.errorhandler(500)
 def internal_server_error(error):
     return log_jsonify_error(500, error, request)
@@ -151,7 +162,6 @@ def internal_server_error(error):
 @app.errorhandler(503)
 def service_unavailable(error):
     return log_jsonify_error(503, error, request)
-
 
 @app.errorhandler(Exception)
 def unhandled_exception(ex):

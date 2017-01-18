@@ -11,9 +11,9 @@ from urlpath import URL
 from pathlib2 import Path
 
 try:
-    from autocert.utils.dictionary import merge
-except ImportError:
     from utils.dictionary import merge
+except ImportError:
+    from dictionary import merge
 
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
