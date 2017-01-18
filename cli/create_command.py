@@ -8,8 +8,8 @@ import json
 import requests
 
 from cli.utils.output import output
-from cli.verbose import verbose_parser
 from cli.transform import transform
+from cli.parsers import verbose_parser
 
 AUTHORITIES = [
     'digicert',
@@ -51,5 +51,5 @@ def do_create(ns):
     else:
         print(response)
         print(response.text)
-    raise Exception('wtf do_show')
+    raise Exception('wtf do_create')
 

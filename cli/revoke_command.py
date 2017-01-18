@@ -4,7 +4,7 @@
 cli.revoke
 '''
 
-from cli.verbose import verbose_parser
+from cli.parsers import verbose_parser
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('revoke', parents=[verbose_parser])

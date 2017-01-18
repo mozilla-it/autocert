@@ -8,8 +8,7 @@ import requests
 
 from cli.utils.output import output
 from cli.transform import transform
-from cli.verbose import verbose_parser
-from cli.cert import cert_parser
+from cli.parsers import verbose_parser, cert_parser
 
 AUTHORITIES = [
     'digicert',
