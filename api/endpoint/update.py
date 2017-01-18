@@ -6,7 +6,6 @@ autocert.update
 
 from pprint import pformat
 from attrdict import AttrDict
-from flask import make_response, jsonify, request
 
 from utils import tar
 
@@ -14,10 +13,7 @@ from utils import tar
 
 from utils import pki
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 from config import CFG
 

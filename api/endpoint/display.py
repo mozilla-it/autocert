@@ -13,10 +13,7 @@ from utils import tar
 
 from utils.dictionary import merge, head, body
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 from config import CFG
 
@@ -27,11 +24,11 @@ class DisplayEndpoint(EndpointBase):
         super(DisplayEndpoint, self).__init__(cfg, verbosity)
 
     def execute(self, **kwargs):
+        print('self.authorities.digicert.cfg =', self.authorities['digicert'].cfg)
         #raise NotImplementedError
         pass
 
     def respond(self, **kwargs):
-        raise NotImplementedError
         return { 'certs': []}, 200
 
 #def display(common_name, verbosity, suffix=None, **kwargs):

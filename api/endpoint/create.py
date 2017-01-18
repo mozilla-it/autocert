@@ -3,7 +3,6 @@
 
 from pprint import pformat
 from attrdict import AttrDict
-from flask import make_response, jsonify, request
 from datetime import timedelta
 
 from utils.tar import tar_cert_files
@@ -11,10 +10,7 @@ from utils.format import fmt
 
 from endpoint.base import EndpointBase
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 class UnknownCertificateAuthorityError(Exception):
     def __init__(self, authority):

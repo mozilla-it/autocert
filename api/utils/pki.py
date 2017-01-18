@@ -14,10 +14,7 @@ import tarfile
 
 from utils.format import fmt
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 from config import CFG
 

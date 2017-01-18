@@ -14,6 +14,8 @@ class AuthorityFactoryError(Exception):
 class AuthorityBase(AsyncRequests):
     def __init__(self, cfg, verbosity):
         self.cfg = cfg
+        for k, v in cfg.items():
+            setattr(self, k, v)
         self.verbosity = verbosity
 
     def display_certificate(self, cert_name):

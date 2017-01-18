@@ -12,10 +12,7 @@ from utils.format import fmt
 from utils.output import yaml_format
 from utils.dictionary import merge
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 from config import CFG
 

@@ -5,10 +5,7 @@ from utils.format import fmt
 
 from config import CFG
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 from endpoint.create import CreateEndpoint
 from endpoint.display import DisplayEndpoint

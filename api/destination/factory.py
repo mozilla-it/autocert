@@ -6,10 +6,7 @@ destination.factory
 
 from utils.format import fmt
 
-try:
-    from autocert.app import app
-except ImportError:
-    from app import app
+from app import app
 
 from destination.aws import AwsDestination
 from destination.zeus import ZeusDestination
