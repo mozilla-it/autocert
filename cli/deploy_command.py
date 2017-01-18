@@ -8,25 +8,14 @@ import requests
 
 from cli.utils.output import output
 from cli.transform import transform
-from cli.parsers import verbose_parser, cert_parser
-
-DESTINATIONS = [
-    'zeus:scl3-ext',
-    'zeus:scl3-int',
-    'zeus:phx1-ext',
-    'zeus:phx1-int',
-    'zeus:test',
-]
+from cli import parsers
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('deploy', parents=[cert_parser, verbose_parser])
-    parser.add_argument(
-        '-d', '--destinations',
-        metavar='DEST',
-        required=True,
-        choices=DESTINATIONS,
-        nargs='+',
-        help='default="%(default)s"; choose which destinations for install; "%(choices)s"')
+    parser = subparsers.add_parser('deploy', parents=[
+        parsers.get('verbosity'),
+        parsers.get('destinations'),
+        parsers.get('cert'),
+    ])
     parser.add_argument(
         '-w', '--within',
         metavar='DAYS',

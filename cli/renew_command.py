@@ -8,21 +8,14 @@ import requests
 
 from cli.utils.output import output
 from cli.transform import transform
-from cli.parsers import verbose_parser, cert_parser
-
-AUTHORITIES = [
-    'digicert',
-    'letsencrypt',
-]
+from cli import parsers
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('renew', parents=[cert_parser, verbose_parser])
-    parser.add_argument(
-        '-a', '--authority',
-        metavar='AUTH',
-        choices=AUTHORITIES,
-        default=AUTHORITIES[0],
-        help='default="%(default)s"; choose which authority to use')
+    parser = subparsers.add_parser('renew', parents=[
+        parsers.get('verbosity'),
+        parsers.get('authority'),
+        parsers.get('cert'),
+    ])
     parser.set_defaults(func=do_renew)
 
 def do_renew(ns):

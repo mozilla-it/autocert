@@ -10,22 +10,15 @@ from attrdict import AttrDict
 from cli.utils.output import output
 from cli.utils.dictionary import head, body
 from cli.transform import transform
-from cli.parsers import verbose_parser, cert_parser
+from cli import parsers
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('ls', parents=[cert_parser, verbose_parser])
-    parser.add_argument(
-        '-a', '--authorities',
-        metavar='AUTH',
-        default=['*'],
-        nargs='*',
-        help='default="%(default)s"; limit search to an authority')
-    parser.add_argument(
-        '-d', '--destinations',
-        metavar='DEST',
-        default=['*'],
-        nargs='*',
-        help='default="%(default)s"; limit search to an authority')
+    parser = subparsers.add_parser('ls', parents=[
+        parsers.get('verbosity'),
+        parsers.get('authorities'),
+        parsers.get('destinations'),
+        parsers.get('cert'),
+    ])
     parser.set_defaults(func=do_ls)
 
 def do_ls(ns):

@@ -9,25 +9,18 @@ import requests
 
 from cli.utils.output import output
 from cli.transform import transform
-from cli.parsers import verbose_parser
-
-AUTHORITIES = [
-    'digicert',
-    'letsencrypt',
-]
+from cli import parsers
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('create', parents=[verbose_parser])
+    parser = subparsers.add_parser('create', parents=[
+        parsers.get('verbosity'),
+        parsers.get('authority'),
+        parsers.get('destinations'),
+    ])
     parser.add_argument(
         'common_name',
         metavar='common-name',
         help='common name')
-    parser.add_argument(
-        '-a', '--authority',
-        metavar='AUTH',
-        default=AUTHORITIES[0],
-        choices=AUTHORITIES,
-        help='default="%(default)s"; choose which authority to use')
     parser.add_argument(
         '-s', '--sans',
         nargs='+',
