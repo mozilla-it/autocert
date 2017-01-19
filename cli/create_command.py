@@ -9,25 +9,16 @@ import requests
 
 from cli.utils.output import output
 from cli.transform import transform
-from cli import parsers
-
 from cli.namespace import jsonify
+from cli.arguments import add_argument
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('create', parents=[
-        parsers.get('verbosity'),
-        parsers.get('authority'),
-        parsers.get('destinations'),
-    ])
-    parser.add_argument(
-        'common_name',
-        metavar='common-name',
-        help='common name')
-    parser.add_argument(
-        '-s', '--sans',
-        nargs='+',
-        help='default="%(default)s"; add additional sans')
-
+    parser = subparsers.add_parser('create')
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '-a', '--authority')
+    add_argument(parser, '-d', '--destinations')
+    add_argument(parser, '-s', '--sans')
+    add_argument(parser, 'common_name')
     parser.set_defaults(func=do_create)
 
 def do_create(ns):

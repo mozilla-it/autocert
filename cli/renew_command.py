@@ -8,14 +8,13 @@ import requests
 
 from cli.utils.output import output
 from cli.transform import transform
-from cli import parsers
+from cli.arguments import add_argument
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('renew', parents=[
-        parsers.get('verbosity'),
-        parsers.get('authority'),
-        parsers.get('cert'),
-    ])
+    parser = subparsers.add_parser('renew')
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '-a', '--authority')
+    add_argument(parser, 'cert_name')
     parser.set_defaults(func=do_renew)
 
 def do_renew(ns):

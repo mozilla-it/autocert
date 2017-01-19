@@ -10,16 +10,15 @@ from attrdict import AttrDict
 from cli.utils.output import output
 from cli.utils.dictionary import head, body
 from cli.transform import transform
-from cli import parsers
 from cli.namespace import jsonify
+from cli.arguments import add_argument
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('ls', parents=[
-        parsers.get('verbosity'),
-        parsers.get('authorities', required=False, default=[]),
-        parsers.get('destinations', required=False, default=[]),
-        parsers.get('cert'),
-    ])
+    parser = subparsers.add_parser('ls')
+    add_argument(parser, 'cert_name')
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '-a', '--authorities', required=False, default=[])
+    add_argument(parser, '-d', '--destinations', required=False, default=[])
     parser.set_defaults(func=do_ls)
 
 def do_ls(ns):

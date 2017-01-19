@@ -10,19 +10,14 @@ from cli.utils.output import output
 from cli.transform import transform
 from cli import parsers
 from cli.namespace import jsonify
+from cli.arguments import add_argument
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('deploy', parents=[
-        parsers.get('verbosity'),
-        parsers.get('destinations'),
-        parsers.get('cert'),
-    ])
-    parser.add_argument(
-        '-w', '--within',
-        metavar='DAYS',
-        default=14,
-        type=int,
-        help='default="%(default)s"; within number of days from expiring')
+    parser = subparsers.add_parser('deploy')
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '-d', '--destinations')
+    add_argument(parser, 'cert_name')
+    add_argument(parser, '-w', '--within')
     parser.set_defaults(func=do_deploy)
 
 def dictify(destinations, sep=':'):

@@ -6,15 +6,13 @@ cli.revoke
 
 from cli import parsers
 from cli.namespace import jsonify
+from cli.arguments import add_argument
 
 def add_parser(subparsers):
-    parser = subparsers.add_parser('revoke', parents=[
-        parsers.get('verbosity'),
-        parsers.get('destinations'),
-    ])
-    parser.add_argument(
-        'common_name',
-        help='common name')
+    parser = subparsers.add_parser('revoke')
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '-d', '--destinations')
+    add_argument(parser, 'common_name')
     parser.set_defaults(func=do_revoke)
 
 def do_revoke(ns):
