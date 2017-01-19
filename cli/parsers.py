@@ -27,7 +27,7 @@ def _get_cert_parser(parser, **kwargs):
         default=kwargs.get('default', '*'),
         nargs=kwargs.get('nargs', '?'),
         help=kwargs.get('help',
-            'default="%(default)s"; <common-name>.<suffix>; glob expressions '
+            'default="%(default)s"; <common-name>@<timestamp>; glob expressions '
             'also accepted; if only a common-name is given, ".*" '
             'will be appended'))
     return parser

@@ -32,7 +32,16 @@ class AsyncRequests(object):
             return self.calls[-1]
         return None
 
-    async def _request(self, method, path=None, json=None, raise_if=None, raise_ex=None, repeat_if=None, repeat_wait=3, repeat_delta=None):
+    async def _request(self,
+        method,
+        path=None,
+        json=None,
+        raise_if=None,
+        raise_ex=None,
+        repeat_if=None,
+        repeat_wait=3,
+        repeat_delta=None):
+
         start = datetime.now()
         url = str(self.config.baseurl / path)
         async with aiohttp.ClientSession(loop=self._loop) as session:

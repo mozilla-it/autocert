@@ -11,6 +11,8 @@ from cli.utils.output import output
 from cli.transform import transform
 from cli import parsers
 
+from cli.namespace import jsonify
+
 def add_parser(subparsers):
     parser = subparsers.add_parser('create', parents=[
         parsers.get('verbosity'),
@@ -29,13 +31,7 @@ def add_parser(subparsers):
     parser.set_defaults(func=do_create)
 
 def do_create(ns):
-    json = {
-        'common_name': ns.common_name,
-        'authority': ns.authority,
-        'sans': ns.sans,
-        'verbosity': ns.verbosity,
-    }
-    response = requests.post(ns.api_url / 'auto-cert', json=json)
+    response = requests.post(ns.api_url / 'auto-cert', json=jsonify(ns))
     if response.status_code == 201:
         certs = response.json()['certs']
         xformd = transform(certs, ns.verbosity)

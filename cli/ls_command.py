@@ -11,23 +11,20 @@ from cli.utils.output import output
 from cli.utils.dictionary import head, body
 from cli.transform import transform
 from cli import parsers
+from cli.namespace import jsonify
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('ls', parents=[
         parsers.get('verbosity'),
-        parsers.get('authorities'),
-        parsers.get('destinations'),
+        parsers.get('authorities', required=False, default=[]),
+        parsers.get('destinations', required=False, default=[]),
         parsers.get('cert'),
     ])
     parser.set_defaults(func=do_ls)
 
 def do_ls(ns):
-    json = {
-        'cert_name': ns.cert_name,
-        'verbosity': ns.verbosity,
-        'authorities': ns.authorities,
-        'destinations': ns.destinations,
-    }
+    json = jsonify(ns)
+    print('json =', json)
     response = requests.get(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 200:
         certs = response.json()['certs']

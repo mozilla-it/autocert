@@ -5,6 +5,7 @@ cli.revoke
 '''
 
 from cli import parsers
+from cli.namespace import jsonify
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('revoke', parents=[
@@ -17,10 +18,4 @@ def add_parser(subparsers):
     parser.set_defaults(func=do_revoke)
 
 def do_revoke(ns):
-    json = {
-        'common_name': ns.common_name,
-        'authority': ns.authority,
-        'destination': ns.destination,
-        'verbosity': ns.verbosity,
-    }
     print('do_revoke')

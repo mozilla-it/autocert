@@ -9,6 +9,7 @@ import requests
 from cli.utils.output import output
 from cli.transform import transform
 from cli import parsers
+from cli.namespace import jsonify
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('deploy', parents=[
@@ -32,13 +33,7 @@ def dictify(destinations, sep=':'):
     return result
 
 def do_deploy(ns):
-    json = {
-        'cert_name': ns.cert_name,
-        'destinations': dictify(ns.destinations),
-        'within': ns.within,
-        'verbosity': ns.verbosity,
-    }
-    response = requests.put(ns.api_url / 'auto-cert', json=json)
+    response = requests.put(ns.api_url / 'auto-cert', json=jsonify(ns, destinations=dictify(ns.destinations)))
     if response.status_code == 200:
         certs = response.json().get('certs', [])
         xformd = transform(certs, ns.verbosity)
