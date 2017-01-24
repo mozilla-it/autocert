@@ -20,24 +20,12 @@ DESTINATIONS = [
 
 # these are the default values for these arguments
 
-    parser.add_argument(
-        'common_name',
-        metavar='common-name',
-        help='common name')
-    parser.add_argument(
-        '-s', '--sans',
-        nargs='+',
-        help='default="%(default)s"; add additional sans')
 DEFAULTS = {
-    ('-s', '--sans'): dict(
-        nargs='+',
-        help='add additional [s]ubject [a]lternative [n]ame'
-    ),
     ('common_name',): dict(
         metavar='common-name',
         help='the commmon-name to be used for the certificate',
     ),
-    ('cert_name',): dict(
+    ('cert_name_pns',): dict(
         metavar='cert-name',
         default='*',
         nargs='*',
@@ -79,6 +67,17 @@ DEFAULTS = {
         default=14,
         type=int,
         help='default="%(default)s"; within number of days from expiring'
+    ),
+    ('-s', '--sans'): dict(
+        nargs='+',
+        help='add additional [s]ubject [a]lternative [n]ame'
+    ),
+    ('--repeat-delta',): dict(
+        dest='repeat_delta',
+        metavar='SECS',
+        default=60,
+        type=int,
+        help='default="%(default)s"; repeat delta when getting cert from digicert'
     ),
 }
 
