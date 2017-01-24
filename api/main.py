@@ -94,21 +94,39 @@ def initialize():
         USER = pwd.getpwuid(os.getuid())[0]
         app.logger.info('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
 
+def log_request(user, hostname, ip, method, path, json):
+    app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with "{json}"'))
+
 @app.route('/auto-cert/version', methods=['GET'])
 def version():
-    app.logger.info('/auto-cert/version called')
+    args = request.json
+    args = args if args else {}
+    cfg = args.get('cfg', None)
+    verbosity = args.get('verbosity', 0)
+    log_request(
+        args.get('user', 'unknown'),
+        args.get('hostname', 'unknown'),
+        request.remote_addr,
+        request.method,
+        request.path,
+        args)
+    version = api_version()
     return jsonify({'version': api_version()})
 
 @app.route('/auto-cert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():
-    method = request.method
     args = request.json
     cfg = args.get('cfg', None)
     verbosity = args.get('verbosity', 0)
-    app.logger.debug(fmt('route:\n{0}', locals()))
-    endpoint = create_endpoint(method, cfg, verbosity)
-    endpoint.execute(**args)
-    json, status = endpoint.respond(**args)
+    log_request(
+        args.get('user', 'unknown'),
+        args.get('hostname', 'unknown'),
+        request.remote_addr,
+        request.method,
+        request.path,
+        args)
+    endpoint = create_endpoint(request.method, cfg, args)
+    json, status = endpoint.execute()
     return make_response(jsonify(json), status)
 
 #def endpoint():
