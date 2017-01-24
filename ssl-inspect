@@ -1,9 +1,25 @@
 #!/bin/bash
 # based off of src: https://gist.github.com/gene1wood/6530100
 
+if ! hash host 2> /dev/null; then
+    echo "host not installed..."
+    exit 1
+fi
+
 if ! hash openssl 2> /dev/null; then
     echo "openssl not installed..."
     exit 1
+fi
+
+if [ -t 0 ]; then
+    if [[ `host "$1"` != *"not found"* ]]; then
+        echo "web: $1"
+        echo -n | openssl s_client -connect $1:443 | openssl x509 -text
+        exit 0
+    elif [ ! -f "$1" ]; then
+        echo "invalid: $1"
+        exit 1
+    fi
 fi
 
 while read line; do
@@ -19,10 +35,11 @@ while read line; do
     else
         TEXT="$TEXT$line\n"
     fi
-done < `"${1:-/dev/stdin}" > /dev/null 2>&1`
+done < "${1:-/dev/stdin}"
 
 if [ -n "$TEXT" ] && [ -n "$action" ]; then
     printf '%b' "$TEXT" | openssl $action -in /dev/stdin -noout -text
 else
-    echo -n | openssl s_client -connect $1:443 | openssl x509 -text
+    echo "ERROR"
+    exit 1
 fi
