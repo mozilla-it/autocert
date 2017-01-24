@@ -8,8 +8,6 @@ import os
 import imp
 import sys
 import logging
-import requests
-
 from subprocess import check_output
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
@@ -25,6 +23,8 @@ except ImportError as ie:
 from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
 from cli.utils.output import output
+from cli import requests
+
 
 VERSIONS = [
     'cli',
