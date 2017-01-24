@@ -36,7 +36,9 @@ authorities:
         headers:
             Content-Type: application/json
             User-Agent: auto-cert
-        apikey: APIKEY
+        auth:
+          - apikey
+          - APIKEY
         # this is some default values, used when requesting a cert from digicert
         template:
             certificate:
@@ -54,19 +56,29 @@ destinations:
     zeus:
         test:
             baseurl: http://10.248.29.12:9070/api/tm/3.9
-            apikey: APIKEY
+            auth:
+              - apikey
+              - APIKEY
         scl3-ext:
             baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            auth:
+              - apikey
+              - APIKEY
         scl3-int:
             baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            auth:
+              - apikey
+              - APIKEY
         phx1-ext:
             baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            auth:
+              - apikey
+              - APIKEY
         phx1-int:
             baseurl: https://internal.zlb.ops..phx1.mozilla.com:9070/api/tm/3.9
-            apikey: APIKEY
+            auth:
+              - apikey
+              - APIKEY
 
 # this section becomes a nested dict that is then used in logging.config.dictConfig
 # https://docs.python.org/3/library/logging.config.html

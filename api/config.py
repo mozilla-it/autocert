@@ -52,10 +52,6 @@ def _fixup(obj):
                     d[k] = URL(v)
                 elif 'path' in k:
                     d[k] = Path(v)
-                elif 'apikey' in k:
-                    if 'auth' in d or 'auth' in obj:
-                        raise AuthKeyNotAllowedError(d)
-                    d['auth'] = (k, v)
             elif isinstance(v, dict):
                 d[k] = _fixup(v)
         return d
