@@ -4,27 +4,26 @@
 import aiohttp
 import asyncio
 
+
 from json import dumps as json_dumps
 from pprint import pprint, pformat
 from attrdict import AttrDict
 from datetime import datetime
 
+from utils.format import fmt, pfmt
 from utils.newline import windows2unix
 from utils.dictionary import merge
+from utils.singleton import Singleton
 
 class RaiseIfError(Exception):
     def __init__(self, call):
-        msg = 'raise if error with {0}'.format(call)
+        msg = fmt('raise if error with {call}')
         super(RaiseIfError, self).__init__(msg)
 
-class AsyncRequests(object):
-    def __init__(self, verbosity, config):
+class AsyncRequests(Singleton):
+    def __init__(self):
         self._loop = asyncio.get_event_loop()
         self.calls = []
-        self.verbosity = verbosity
-        self.config = config
-        self.auth = config.auth
-        self.headers = config.headers
 
     @property
     def call(self):
@@ -34,7 +33,9 @@ class AsyncRequests(object):
 
     async def _request(self,
         method,
-        path=None,
+        url=None,
+        auth=None,
+        headers=None,
         json=None,
         raise_if=None,
         raise_ex=None,
@@ -43,7 +44,6 @@ class AsyncRequests(object):
         repeat_delta=None):
 
         start = datetime.now()
-        url = str(self.config.baseurl / path)
         async with aiohttp.ClientSession(loop=self._loop) as session:
             repeat = 0
             while True:
@@ -51,8 +51,8 @@ class AsyncRequests(object):
                 async with session.request(
                     method,
                     url,
-                    headers=self.headers,
-                    auth=aiohttp.helpers.BasicAuth(*self.auth),
+                    headers=headers,
+                    auth=aiohttp.helpers.BasicAuth(*auth),
                     data=json_dumps(json) if json else None) as response:
 
                     text = await response.text()
@@ -61,7 +61,7 @@ class AsyncRequests(object):
                         method=method,
                         url=url,
                         json=json,
-                        headers=self.headers,
+                        headers=headers,
                         datetime=send_datetime)
                     call = {}
                     json = None
@@ -77,14 +77,17 @@ class AsyncRequests(object):
                         json=json,
                         repeat=repeat,
                         datetime=datetime.utcnow())
+                    #FIXME: im not sure we dont want to just confine the results to recv.json
                     call = AttrDict(merge(call, dict(
                         send=send,
                         recv=recv)))
                 self.calls += [call]
                 if repeat_if and repeat_if(call):
+                    print('repeating...')
                     delta = datetime.now() - start
                     if repeat_delta and delta < repeat_delta:
                         repeat += 1
+                        print(fmt('{delta} < {repeat_delta}; repeat {repeat}'))
                         await asyncio.sleep(repeat_wait)
                         continue
                 if raise_if and raise_if(call):
@@ -129,4 +132,3 @@ class AsyncRequests(object):
 
     def deletes(self, *kws):
         return self.requests('DELETE', *kws)
-
