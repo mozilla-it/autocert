@@ -13,7 +13,6 @@ fi
 
 if [ -t 0 ]; then
     if [[ `host "$1"` != *"not found"* ]]; then
-        echo "web: $1"
         echo -n | openssl s_client -connect $1:443 | openssl x509 -text
         exit 0
     elif [ ! -f "$1" ]; then
