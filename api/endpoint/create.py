@@ -5,12 +5,14 @@ from pprint import pformat
 from attrdict import AttrDict
 from datetime import timedelta
 
-from utils.tar import tar_cert_files
 from utils.format import fmt
+from utils import tar, pki
 
 from endpoint.base import EndpointBase
 
 from app import app
+
+from flask import make_response, jsonify
 
 class UnknownCertificateAuthorityError(Exception):
     def __init__(self, authority):
@@ -18,26 +20,34 @@ class UnknownCertificateAuthorityError(Exception):
         super(UnknownCertificateAuthorityError, self).__init__(msg)
 
 class CreateEndpoint(EndpointBase):
-    def __init__(self, cfg, verbosity):
-        super(CreateEndpoint, self).__init__(cfg, verbosity)
+    def __init__(self, cfg, args):
+        super(CreateEndpoint, self).__init__(cfg, args)
 
-    def execute(self, **kwargs):
-        key, csr = create_key_csr(self.common_name, self.sans)
+    @property
+    def authority(self):
+        return self.authorities[self.args.authority]
+
+    def execute(self):
+        key, csr = pki.create_key_and_csr(self.args.common_name, self.args.sans)
         crt, yml = self.authority.create_certificate(
-            self.common_name,
+            self.args.common_name,
             csr,
-            self.sans,
-            self.repeat_delta)
-        self.cert_name = create_cert_name(self.common_name)
-        tar_cert_files(cert_name, key, csr, crt, yml)
-        status = 201
-        return self.json(cert_name, status)
-
-    def respond(self, **kwargs):
-        return {
-            'certs': [],
-            'calls': [],
+            self.args.sans,
+            self.args.repeat_delta)
+        cert_name, timestamp = pki.create_cert_name(self.args.common_name)
+        tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, yml)
+        json = {
+            'certs': [{
+                cert_name: {
+                    'common_name': self.args.common_name,
+                    'timestamp': timestamp,
+                    'sans': self.args.sans,
+                }
+            }]
         }
+        status = 201
+        return json, status
+
 
 #def create_digicert(common_name, sans, verbosity):
 #    app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
