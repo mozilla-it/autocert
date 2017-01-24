@@ -3,18 +3,16 @@
 
 import io
 import zipfile
-import requests
 from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
+from datetime import timedelta #FIXME: do we import this here?
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge
-from utils.format import fmt
+from utils.format import fmt, pfmt
 
 from app import app
-
-from config import CFG
 
 def not_200(call):
     return call.recv.status != 200
@@ -35,21 +33,29 @@ class DownloadCertificateError(Exception):
         super(DownloadCertificateError, self).__init__(msg)
 
 class DigicertAuthority(AuthorityBase):
-    def __init__(self, cfg, verbosity):
-        super(DigicertAuthority, self).__init__(cfg, verbosity)
+    def __init__(self, ar, cfg, verbosity):
+        super(DigicertAuthority, self).__init__(ar, cfg, verbosity)
 
     def display(self, cert_name):
         raise NotImplementedError
 
     def create_certificate(self, common_name, csr, sans=None, repeat_delta=None):
-        app.logger.info(fmt('create_certificate:\n{0}', locals()))
-        order_id, request_id = self._order_certificate(common, csr, sans)
+        app.logger.info(fmt('create_certificate:\n{locals}'))
+        order_id, request_id = self._order_certificate(common_name, csr, sans)
         self._approve_certificate(request_id)
-        crt = self._download_certificate(order_id, repeat_delta=repeat_delta)
+        detail = self._get_certificate_order_detail(order_id)
+        try:
+            crt = self._download_certificate(detail.certificate.id, repeat_delta=repeat_delta)
+            detail = self._get_certificate_order_detail(order_id)
+            expires = detail.certificate.valid_till
+        except DownloadCertificateError as dce:
+            crt = None
+            expires = None
         yml = dict(
             authority=dict(
                 digicert=dict(
-                    order_id=order_id)))
+                    order_id=order_id,
+                    expires=expires)))
         return crt, yml
 
     def renew_certificate(self, cert_name):
@@ -62,9 +68,9 @@ class DigicertAuthority(AuthorityBase):
         return fmt('{common_name}.dc{order_id}')
 
     def _order_certificate(self, common_name, csr, sans=None):
-        app.logger.info(fmt('_order_certificate:\n{0}', locals()))
+        app.logger.info(fmt('_order_certificate:\n{locals}'))
         path = 'order/certificate/ssl_plus'
-        json = merge(self.config.template, {
+        json = merge(self.cfg.template, {
             'certificate': {
                 'common_name': common_name,
                 'csr': csr,
@@ -84,7 +90,7 @@ class DigicertAuthority(AuthorityBase):
         raise OrderCertificateError(call)
 
     def _approve_certificate(self, request_id):
-        app.logger.info(fmt('_approve_certificate:\n{0}', locals()))
+        app.logger.info(fmt('_approve_certificate:\n{locals}'))
         path = fmt('request/{request_id}/status')
         json = {
             'status': 'approved',
@@ -92,24 +98,26 @@ class DigicertAuthority(AuthorityBase):
         }
         app.logger.debug(fmt('calling digicert api with path={path} and json={json}'))
         call = self.put(path=path, json=json)
-        if call.recv.status == 200:
+        if call.recv.status == 204:
             return True
         raise ApproveCertificateError(call)
 
-    def _download_certificate(self, order_id, format_type='pem_all', repeat_delta=None):
-        app.logger.info(fmt('_download_certificate:\n{0}', locals()))
-        call = self._get_certificate_order_detail(order_id)
-        certificate_id = call.certificate.id
+    def _get_certificate_order_detail(self, order_id):
+        app.logger.info(fmt('_get_certificate_order_detail:\n{locals}'))
+        path = fmt('order/certificate/{order_id}')
+        return self.get(path=path)
+
+    def _download_certificate(self, certificate_id, format_type='pem_all', repeat_delta=None):
+        app.logger.info(fmt('_download_certificate:\n{locals}'))
+        if repeat_delta is not None and isinstance(repeat_delta, int):
+            repeat_delta = timedelta(seconds=repeat_delta)
+
         path = fmt('certificate/{certificate_id}/download/format/{format_type}')
         call = self.get(path=path, repeat_delta=repeat_delta, repeat_if=not_200)
         if call.recv.status == 200:
             return call.recv.text
         raise DownloadCertificateError(call)
 
-    def _get_certificate_order_detail(self, order_id):
-        app.logger.info(fmt('_get_certificate_order_detail:\n{0}', locals()))
-        path = fmt('order/certificate/{order_id}')
-        return self.get(path=path)
 
 
 

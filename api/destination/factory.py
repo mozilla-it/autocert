@@ -4,18 +4,18 @@
 destination.factory
 '''
 
-from utils.format import fmt
-
 from app import app
 
 from destination.aws import AwsDestination
 from destination.zeus import ZeusDestination
 
-def create_destination(destination, cfg, verbosity):
-    app.logger.debug('create_destination:\n{0}', locals())
+def create_destination(destination, ar, cfg, verbosity):
+    from pprint import pprint
+    print('create_destination:')
+    pprint(list(cfg.keys()))
     if destination == 'aws':
-        return AwsDestination(cfg, verbosity)
+        return AwsDestination(ar, cfg, verbosity)
     elif destination == 'zeus':
-        return ZeusDestination(cfg, verbosity)
+        return ZeusDestination(ar, cfg, verbosity)
     return None #FIXME should be error
 

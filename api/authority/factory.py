@@ -11,10 +11,9 @@ from app import app
 from authority.digicert import DigicertAuthority
 from authority.letsencrypt import LetsEncryptAuthority
 
-def create_authority(authority, cfg, verbosity):
-    app.logger.debug('create_auhtority:\n{0}', locals())
+def create_authority(authority, ar, cfg, verbosity):
     if authority == 'digicert':
-        return DigicertAuthority(cfg, verbosity)
+        return DigicertAuthority(ar, cfg, verbosity)
     elif authority == 'letsencrypt':
-        return LetsEncryptAuthority(cfg, verbosity)
+        return LetsEncryptAuthority(ar, cfg, verbosity)
     return None #FIXME should be error

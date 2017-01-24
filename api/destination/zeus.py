@@ -5,10 +5,8 @@ from destination.base import DestinationBase
 from config import CFG
 
 class ZeusDestination(DestinationBase):
-    def __init__(self, verbosity=0, config=None):
-        if config == None:
-            config = CFG.destinations.zeus
-        super(ZeusDestination, self).__init__(verbosity, config)
+    def __init__(self, ar, cfg, verbosity):
+        super(ZeusDestination, self).__init__(ar, cfg, verbosity)
 
     def fetch_certificate(self, common_name, *dests, csr=None):
         raise NotImplementedError

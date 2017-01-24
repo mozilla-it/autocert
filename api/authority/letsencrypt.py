@@ -3,14 +3,12 @@
 
 import io
 import zipfile
-import requests
 from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge
-from utils.format import fmt
 
 from app import app
 
@@ -20,8 +18,8 @@ def not_200(call):
     return call.recv.status != 200
 
 class LetsEncryptAuthority(AuthorityBase):
-    def __init__(self, cfg, verbosity):
-        super(LetsEncryptAuthority, self).__init__(cfg, verbosity)
+    def __init__(self, ar, cfg, verbosity):
+        super(LetsEncryptAuthority, self).__init__(ar, cfg, verbosity)
 
     def display(self, cert_name):
         raise NotImplementedError
