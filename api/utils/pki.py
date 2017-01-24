@@ -56,7 +56,7 @@ ENCODING = dict(
 
 def create_cert_name(common_name, sep='@'):
     timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    return fmt('{common_name}{sep}{timestamp}')
+    return fmt('{common_name}{sep}{timestamp}'), timestamp
 
 def decompose_cert_name(cert_name, sep='@'):
     return cert_name.split(sep)
