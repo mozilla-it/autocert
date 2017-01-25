@@ -13,9 +13,10 @@ from cli.arguments import add_argument
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('ls')
-    add_argument(parser, '-v', '--verbose')
     add_argument(parser, '-a', '--authorities', required=False, default=[])
     add_argument(parser, '-d', '--destinations', required=False, default=[])
+    add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '--calls')
     add_argument(parser, 'cert_name_pns')
     parser.set_defaults(func=do_ls)
 
@@ -23,8 +24,8 @@ def do_ls(ns):
     json = jsonify(ns)
     response = requests.get(ns.api_url / 'auto-cert', json=json)
     if response.status_code == 200:
-        certs = response.json()['certs']
-        output(certs)
+        json = response.json()
+        output(json)
         return
     else:
         print(response)

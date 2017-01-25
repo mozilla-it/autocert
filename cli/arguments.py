@@ -79,6 +79,10 @@ DEFAULTS = {
         type=int,
         help='default="%(default)s"; repeat delta when getting cert from digicert'
     ),
+    ('--calls',): dict(
+        action='store_true',
+        help='flag to enable returning all http calls made'
+    ),
 }
 
 # they can be overridden by supplying kwargs to this function
