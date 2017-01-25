@@ -72,6 +72,6 @@ class Tardata(object):
 
     def get_certdata_from_tarfiles(self, *cert_name_pns):
         certdata = []
-        for cert_name in sift.fnmatches(self.cert_names, cert_name_pns):
+        for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
             certdata += [self.get_certdata_from_tarfile(cert_name)]
         return certdata
