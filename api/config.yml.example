@@ -54,11 +54,22 @@ authorities:
 # list of available destinations where the .key, .csr and .crt can be installed
 destinations:
     zeus:
-        test:
-            baseurl: http://10.248.29.12:9070/api/tm/3.9
+        test1:
+            baseurl: https://10.248.28.246:9070/api/tm/3.9/config/active
             auth:
               - apikey
               - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
+        test2:
+            baseurl: https://10.0.0.90:9070/api/tm/3.9/config/active
+            auth:
+              - apikey
+              - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         scl3-ext:
             baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
             auth:
