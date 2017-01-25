@@ -71,25 +71,37 @@ destinations:
                 Content-Type: application/json
                 User-Agent: auto-cert
         scl3-ext:
-            baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
+            baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9/config/active
             auth:
               - apikey
               - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         scl3-int:
-            baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9
+            baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9/config/active
             auth:
               - apikey
               - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         phx1-ext:
-            baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9
+            baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9/config/active
             auth:
               - apikey
               - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
         phx1-int:
-            baseurl: https://internal.zlb.ops..phx1.mozilla.com:9070/api/tm/3.9
+            baseurl: https://internal.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9/config/active
             auth:
               - apikey
               - APIKEY
+            headers:
+                Content-Type: application/json
+                User-Agent: auto-cert
 
 # this section becomes a nested dict that is then used in logging.config.dictConfig
 # https://docs.python.org/3/library/logging.config.html
