@@ -15,7 +15,8 @@ DESTINATIONS = [
     'zeus:scl3-int',
     'zeus:phx1-ext',
     'zeus:phx1-int',
-    'zeus:test',
+    'zeus:test1',
+    'zeus:test2',
 ]
 
 # these are the default values for these arguments
