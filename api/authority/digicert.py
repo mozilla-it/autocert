@@ -43,11 +43,11 @@ class DigicertAuthority(AuthorityBase):
         app.logger.info(fmt('create_certificate:\n{locals}'))
         order_id, request_id = self._order_certificate(common_name, csr, sans)
         self._approve_certificate(request_id)
-        detail = self._get_certificate_order_detail(order_id)
+        call = self._get_certificate_order_detail(order_id)
         try:
-            crt = self._download_certificate(detail.certificate.id, repeat_delta=repeat_delta)
-            detail = self._get_certificate_order_detail(order_id)
-            expires = detail.certificate.valid_till
+            crt = self._download_certificate(call.recv.json.certificate.id, repeat_delta=repeat_delta)
+            call = self._get_certificate_order_detail(order_id)
+            expires = call.recv.json.certificate.valid_till
         except DownloadCertificateError as dce:
             crt = None
             expires = None
@@ -55,7 +55,8 @@ class DigicertAuthority(AuthorityBase):
             authority=dict(
                 digicert=dict(
                     order_id=order_id,
-                    expires=expires)))
+                    expires=expires,
+                    sans=list(sans) if sans else [])))
         return crt, yml
 
     def renew_certificate(self, cert_name):
@@ -86,7 +87,7 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('calling digicert api with path={path} and json={json}'))
         call = self.post(path=path, json=json)
         if call.recv.status == 201:
-            return call.id, call.requests[0].id
+            return call.recv.json.id, call.recv.json.requests[0].id
         raise OrderCertificateError(call)
 
     def _approve_certificate(self, request_id):

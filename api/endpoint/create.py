@@ -12,7 +12,7 @@ from endpoint.base import EndpointBase
 
 from app import app
 
-from flask import make_response, jsonify
+from endpoint.transform import transform, sanitize, callify
 
 class UnknownCertificateAuthorityError(Exception):
     def __init__(self, authority):
@@ -28,6 +28,7 @@ class CreateEndpoint(EndpointBase):
         return self.authorities[self.args.authority]
 
     def execute(self):
+        status = 201
         key, csr = pki.create_key_and_csr(self.args.common_name, self.args.sans)
         crt, yml = self.authority.create_certificate(
             self.args.common_name,
@@ -45,37 +46,9 @@ class CreateEndpoint(EndpointBase):
                 }
             }]
         }
-        status = 201
+        if self.args.calls:
+            calls = [callify(call) for call in self.ar.calls]
+            if calls:
+                json['calls'] = calls
         return json, status
-
-
-#def create_digicert(common_name, sans, verbosity):
-#    app.logger.info('called /create/digicert:\n{0}'.format(pformat(locals())))
-#    key, csr = create_key_and_csr(common_name, sans=sans)
-#    res1, order = digicert.request_certificate(common_name, csr)
-#    if res1.status_code != 201:
-#        return jsonified_errors(res1)
-#    res2, _ = digicert.approve_certificate(order.requests[0].id)
-#    if res2.status_code != 204:
-#        return jsonified_errors(res2)
-#    cert_name = common_name + '.' + digicert.suffix(order.id)
-#    cert_path = tar_cert_files(cert_name, key, csr)
-#    certs = digicert.get_active_certificate_orders_and_details(common_name)
-#    return {'certs': certs}, 201
-
-#def create(common_name, sans, authority, verbosity, **kwargs):
-#    app.logger.info('create: {0}'.format(locals()))
-#    if authority == 'digicert':
-#        json, status_code = create_digicert(common_name, sans, verbosity)
-#        if status_code == 201:
-#            json, status_code = show.show(common_name, verbosity)
-#    elif authority == 'letsencrypt':
-#        json = {'certs': []}
-#    else:
-#        raise UnknownCertificateAuthorityError(authority)
-#    return json, 201
-
-
-
-
 

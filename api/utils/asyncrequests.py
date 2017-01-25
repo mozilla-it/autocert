@@ -63,27 +63,22 @@ class AsyncRequests(Singleton):
                         json=json,
                         headers=headers,
                         datetime=send_datetime)
-                    call = {}
                     json = None
                     if response.headers['Content-Type'] == 'application/json':
                         json = await response.json()
-                        if json:
-                            call = json
                     recv = AttrDict(
-                        response=response,
                         headers=dict(response.headers.items()),
                         status=response.status,
                         text=windows2unix(text),
                         json=json,
                         repeat=repeat,
                         datetime=datetime.utcnow())
-                    #FIXME: im not sure we dont want to just confine the results to recv.json
-                    call = AttrDict(merge(call, dict(
+                    call = AttrDict(
+                        response=response,
                         send=send,
-                        recv=recv)))
+                        recv=recv)
                 self.calls += [call]
                 if repeat_if and repeat_if(call):
-                    print('repeating...')
                     delta = datetime.now() - start
                     if repeat_delta and delta < repeat_delta:
                         repeat += 1
