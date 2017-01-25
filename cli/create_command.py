@@ -17,8 +17,8 @@ def add_parser(subparsers):
     add_argument(parser, '-d', '--destinations', required=False)
     add_argument(parser, '-s', '--sans')
     add_argument(parser, '--repeat-delta')
+    add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
-    add_argument(parser, '--calls')
     add_argument(parser, 'common_name')
     parser.set_defaults(func=do_create)
 

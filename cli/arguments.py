@@ -19,30 +19,14 @@ DESTINATIONS = [
     'zeus:test2',
 ]
 
+CALLS_STYLE = [
+    'simple',
+    'detail',
+]
+
 # these are the default values for these arguments
 
 DEFAULTS = {
-    ('common_name',): dict(
-        metavar='common-name',
-        help='the commmon-name to be used for the certificate',
-    ),
-    ('cert_name_pns',): dict(
-        metavar='cert-name',
-        default='*',
-        nargs='*',
-        help='default="%(default)s"; <common-name>@<timestamp>; glob expressions '
-            'also accepted; if only a common-name is given, ".*" '
-            'will be appended',
-    ),
-    ('-v', '--verbose'): dict(
-        metavar='LEVEL',
-        dest='verbosity',
-        default=0,
-        const=1,
-        type=int,
-        nargs='?',
-        help='set verbosity level',
-    ),
     ('-a', '--authority'): dict(
         metavar='AUTH',
         default=AUTHORITIES[0],
@@ -80,9 +64,31 @@ DEFAULTS = {
         type=int,
         help='default="%(default)s"; repeat delta when getting cert from digicert'
     ),
-    ('--calls',): dict(
-        action='store_true',
-        help='flag to enable returning all http calls made'
+    ('-c', '--calls'): dict(
+        const=CALLS_STYLE[0],
+        choices=CALLS_STYLE,
+        nargs='?',
+        help='const="%(const)s"; toggle and choose the call output format'
+    ),
+    ('-v', '--verbose'): dict(
+        metavar='LEVEL',
+        dest='verbosity',
+        default=0,
+        const=1,
+        type=int,
+        nargs='?',
+        help='set verbosity level',
+    ),
+    ('common_name',): dict(
+        metavar='common-name',
+        help='the commmon-name to be used for the certificate',
+    ),
+    ('cert_name_pns',): dict(
+        metavar='cert-name',
+        default='*',
+        nargs='*',
+        help='default="%(default)s"; <common-name>@<timestamp>; glob expressions '
+            'also accepted; if only a common-name is given, "*" will be appended',
     ),
 }
 
