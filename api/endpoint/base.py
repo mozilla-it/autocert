@@ -8,9 +8,11 @@ from tardata import Tardata
 from authority.factory import create_authority
 from destination.factory import create_destination
 from utils.asyncrequests import AsyncRequests
+from utils import timestamp
 
 class EndpointBase(object):
     def __init__(self, cfg, args):
+        self.timestamp = timestamp.utcnow()
         self.ar = AsyncRequests()
         self.cfg = AttrDict(cfg)
         self.args = AttrDict(args)
