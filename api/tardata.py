@@ -59,7 +59,7 @@ class Tardata(object):
 
         cert = {
             cert_name: {
-                'tarfile': {
+                'tardata': {
                     self.cert_name_to_tarfile(cert_name): files
                 }
             }

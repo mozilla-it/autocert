@@ -37,7 +37,9 @@ def sanitize(cert_name_pn, ext='.tar.gz'):
         return common_name + '*'
     return cert_name_pn
 
-def callify(call):
+def callify(call, style):
+    if style == 'simple':
+        return '{0} {1} {2}'.format(call.recv.status, call.send.method, call.send.url)
     return dict(send=call.send, recv=call.recv)
 
 def transform(cert, verbosity=0):
@@ -46,16 +48,16 @@ def transform(cert, verbosity=0):
         authority, auth_body = head_body(cert_body['authority'])
         return {cert_name: auth_body.get('expires', None)}
     elif verbosity == 1:
-        tarfile = head(cert_body['tarfile'])
-        cert_body['tarfile'] = tarfile
+        tardata = head(cert_body['tardata'])
+        cert_body['tardata'] = tardata
         return {cert_name: cert_body}
     elif verbosity == 2:
-        tarfile, filenames = head_body(cert_body['tarfile'])
-        cert_body['tarfile'] = {tarfile: {filename: filename[-3:].upper() for filename in filenames}}
+        tardata, filenames = head_body(cert_body['tardata'])
+        cert_body['tardata'] = {tardata: {filename: filename[-3:].upper() for filename in filenames}}
         return {cert_name: cert_body}
     elif verbosity == 3:
-        tarfile, filenames = head_body(cert_body['tarfile'])
-        cert_body['tarfile'] = {tarfile: {filename: content[:60] for filename, content in filenames.items()}}
+        tardata, filenames = head_body(cert_body['tardata'])
+        cert_body['tardata'] = {tardata: {filename: content[:60] for filename, content in filenames.items()}}
         return {cert_name: cert_body}
     return cert
 
