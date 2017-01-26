@@ -54,9 +54,8 @@ ENCODING = dict(
     PEM = serialization.Encoding.PEM,
 )
 
-def create_cert_name(common_name, sep='@'):
-    timestamp = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    return fmt('{common_name}{sep}{timestamp}'), timestamp
+def create_cert_name(common_name, timestamp, sep='@'):
+    return fmt('{common_name}{sep}{timestamp}')
 
 def decompose_cert_name(cert_name, sep='@'):
     return cert_name.split(sep)
