@@ -60,7 +60,7 @@ DEFAULTS = {
     ('--repeat-delta',): dict(
         dest='repeat_delta',
         metavar='SECS',
-        default=60,
+        default=90,
         type=int,
         help='default="%(default)s"; repeat delta when getting cert from digicert'
     ),
@@ -78,6 +78,10 @@ DEFAULTS = {
         type=int,
         nargs='?',
         help='set verbosity level',
+    ),
+    ('--verify',): dict(
+        action='store_true',
+        help='force verification with authority'
     ),
     ('common_name',): dict(
         metavar='common-name',

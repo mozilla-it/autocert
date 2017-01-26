@@ -77,17 +77,17 @@ def main():
     parser = ArgumentParser(
         add_help=False)
     parser.add_argument(
-        '--debug',
+        '-D', '--debug',
         action='store_true',
         help='turn on debug mode')
     parser.add_argument(
-        '--version',
+        '-V', '--version',
         choices = VERSIONS,
         const=VERSIONS[0],
         nargs='?',
         help='default=%(const)s; show the version')
     parser.add_argument(
-        '--api-url',
+        '-U', '--api-url',
         metavar='URL',
         type=URL,
         default=r'http://0.0.0.0',
