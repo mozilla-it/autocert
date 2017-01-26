@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#two random words
+ONE=`shuf -n1 /usr/share/dict/words`
+TWO=`shuf -n1 /usr/share/dict/words`
+
+#trim apostrophes
+ONE="${ONE%\'*}"
+TWO="${TWO%\'*}"
+
+#lowercase and add tercotua domain
+COMMON_NAME="${ONE,,}-${TWO,,}.tercotua.org"
+
+./auto-cert create $COMMON_NAME "$@"
