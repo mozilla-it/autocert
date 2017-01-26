@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+
 from pprint import pformat
 from attrdict import AttrDict
 from datetime import timedelta
@@ -35,19 +37,24 @@ class CreateEndpoint(EndpointBase):
             csr,
             self.args.sans,
             self.args.repeat_delta)
-        cert_name, timestamp = pki.create_cert_name(self.args.common_name)
-        tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, yml)
-        json = {
-            'certs': [{
-                cert_name: {
-                    'common_name': self.args.common_name,
-                    'timestamp': timestamp,
-                    'sans': self.args.sans,
-                }
-            }]
+        cert_name = pki.create_cert_name(self.args.common_name, self.timestamp)
+        tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, yml)
+        cert_body = yml
+        cert_body['tardata'] = {
+            tarfile: {
+                os.path.basename(tarfile).replace('tar.gz', 'key'): key,
+                os.path.basename(tarfile).replace('tar.gz', 'csr'): csr,
+                os.path.basename(tarfile).replace('tar.gz', 'crt'): crt,
+            }
         }
+        cert = {
+            cert_name: cert_body,
+        }
+        json = dict(
+            certs=[transform(cert, self.verbosity)],
+        )
         if self.args.calls:
-            calls = [callify(call) for call in self.ar.calls]
+            calls = [callify(call, self.args.calls) for call in self.ar.calls]
             if calls:
                 json['calls'] = calls
         return json, status

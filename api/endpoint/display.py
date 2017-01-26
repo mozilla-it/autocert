@@ -34,7 +34,7 @@ class DisplayEndpoint(EndpointBase):
             certs=[transform(cert, self.verbosity) for cert in certs],
         )
         if self.args.calls:
-            calls = [callify(call) for call in self.ar.calls]
+            calls = [callify(call, self.args.calls) for call in self.ar.calls]
             if calls:
                 json['calls'] = calls
         return json, status

@@ -11,6 +11,7 @@ from datetime import timedelta #FIXME: do we import this here?
 from authority.base import AuthorityBase
 from utils.dictionary import merge
 from utils.format import fmt, pfmt
+from utils import timestamp
 
 from app import app
 
@@ -48,15 +49,19 @@ class DigicertAuthority(AuthorityBase):
             crt = self._download_certificate(call.recv.json.certificate.id, repeat_delta=repeat_delta)
             call = self._get_certificate_order_detail(order_id)
             expires = call.recv.json.certificate.valid_till
+            if expires and expires != 'null':
+                expires = timestamp.string2int(expires)
         except DownloadCertificateError as dce:
             crt = None
             expires = None
         yml = dict(
+            common_name=common_name,
             authority=dict(
                 digicert=dict(
                     order_id=order_id,
-                    expires=expires,
-                    sans=list(sans) if sans else [])))
+                    expires=expires)))
+        if sans:
+            yml['sans'] = list(sans)
         return crt, yml
 
     def renew_certificate(self, cert_name):
