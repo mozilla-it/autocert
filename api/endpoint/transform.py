@@ -61,3 +61,19 @@ def transform(cert, verbosity=0):
         return {cert_name: cert_body}
     return cert
 
+def default_sorting(cert):
+    head, body = head_body(cert)
+    return body.get('common_name', '')
+
+def timestamp_sorting(cert):
+    head, body = head_body(cert)
+    return body.get('timestamp', 0)
+
+def expiration_sorting(cert):
+    head, body = head_body(cert)
+    return body.get('expires', 0)
+
+SORTING_FUNCS = dict(
+    default=default_sorting,
+    timestamp=timestamp_sorting,
+    expiration=expiration_sorting)

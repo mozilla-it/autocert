@@ -31,6 +31,12 @@ VERSIONS = [
     'api'
 ]
 
+SORTING = [
+    'default',
+    'timestamp',
+    'expiration',
+]
+
 class VersionCheckFailedError(Exception):
     def __init__(self, version, required):
         msg = 'auto-cert/api {version} is not at least {required}'.format(**locals())
@@ -92,6 +98,13 @@ def main():
         type=URL,
         default=r'http://0.0.0.0',
         help='default=%(default)s; set the api url to use')
+    parser.add_argument(
+        '-S', '--sort',
+        dest='sorting',
+        metavar='SORT',
+        default=SORTING[0],
+        choices=SORTING,
+        help='default="%(default)s"; set the sorting method; choices=[%(choices)s]')
 
     ns, rem = parser.parse_known_args()
     if not any([h in rem for h in ('-h', '--help')]):
