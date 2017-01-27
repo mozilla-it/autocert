@@ -39,17 +39,7 @@ class CreateEndpoint(EndpointBase):
             self.args.repeat_delta)
         cert_name = pki.create_cert_name(self.args.common_name, self.timestamp)
         tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, yml)
-        cert_body = yml
-        cert_body['tardata'] = {
-            tarfile: {
-                os.path.basename(tarfile).replace('tar.gz', 'key'): key,
-                os.path.basename(tarfile).replace('tar.gz', 'csr'): csr,
-                os.path.basename(tarfile).replace('tar.gz', 'crt'): crt,
-            }
-        }
-        cert = {
-            cert_name: cert_body,
-        }
+        cert = self.tardata.create_certdata(cert_name, key, csr, crt, {cert_name: yml})
         json = dict(
             certs=[transform(cert, self.verbosity)],
         )
