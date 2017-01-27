@@ -4,7 +4,7 @@
 import os
 import re
 
-from pprint import pprint, pformat
+from pprint import pformat
 from attrdict import AttrDict
 from fnmatch import fnmatch
 from ruamel import yaml
