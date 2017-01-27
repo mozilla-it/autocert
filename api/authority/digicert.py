@@ -11,7 +11,7 @@ from datetime import timedelta #FIXME: do we import this here?
 from authority.base import AuthorityBase
 from utils.dictionary import merge
 from utils.format import fmt, pfmt
-from utils import timestamp
+from utils.timestamp import string2int
 
 from app import app
 
@@ -40,7 +40,7 @@ class DigicertAuthority(AuthorityBase):
     def display(self, cert_name):
         raise NotImplementedError
 
-    def create_certificate(self, common_name, csr, sans=None, repeat_delta=None):
+    def create_certificate(self, common_name, timestamp, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
         order_id, request_id = self._order_certificate(common_name, csr, sans)
         self._approve_certificate(request_id)
@@ -50,12 +50,13 @@ class DigicertAuthority(AuthorityBase):
             call = self._get_certificate_order_detail(order_id)
             expires = call.recv.json.certificate.valid_till
             if expires and expires != 'null':
-                expires = timestamp.string2int(expires)
+                expires = string2int(expires)
         except DownloadCertificateError as dce:
             crt = None
             expires = None
         yml = dict(
             common_name=common_name,
+            timestamp=timestamp,
             authority=dict(
                 digicert=dict(
                     order_id=order_id,
