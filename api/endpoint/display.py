@@ -20,7 +20,6 @@ from app import app
 from config import CFG
 
 from endpoint.base import EndpointBase
-from endpoint.transform import transform, sanitize, callify, SORTING_FUNCS
 
 class DisplayEndpoint(EndpointBase):
     def __init__(self, cfg, verbosity):
@@ -28,15 +27,7 @@ class DisplayEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         status = 200
-        cert_name_pns = [sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
+        cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
         certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
-        sorting_func = SORTING_FUNCS[self.args.sorting]
-        certs = sorted(certs, key=sorting_func)
-        json = dict(
-            certs=[transform(cert, self.verbosity) for cert in certs],
-        )
-        if self.args.calls:
-            calls = [callify(call, self.args.calls) for call in self.ar.calls]
-            if calls:
-                json['calls'] = calls
+        json = self.transform(certs)
         return json, status

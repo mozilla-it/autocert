@@ -10,11 +10,9 @@ from datetime import timedelta
 from utils.format import fmt
 from utils import tar, pki
 
-from endpoint.base import EndpointBase
-
 from app import app
 
-from endpoint.transform import transform, sanitize, callify
+from endpoint.base import EndpointBase
 
 class UnknownCertificateAuthorityError(Exception):
     def __init__(self, authority):
@@ -41,12 +39,6 @@ class CreateEndpoint(EndpointBase):
         yml['timestamp'] = self.timestamp
         tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, yml)
         cert = self.tardata.create_certdata(cert_name, key, csr, crt, {cert_name: yml})
-        json = dict(
-            certs=[transform(cert, self.verbosity)],
-        )
-        if self.args.calls:
-            calls = [callify(call, self.args.calls) for call in self.ar.calls]
-            if calls:
-                json['calls'] = calls
+        json = self.transform([cert])
         return json, status
 
