@@ -56,15 +56,13 @@ class Tardata(object):
             if content:
                 ext = tar.get_file_ext(content)
                 files[fmt('{cert_name}{ext}')] = content
-
-        cert = {
-            cert_name: {
-                'tardata': {
-                    self.cert_name_to_tarfile(cert_name): files
-                }
-            }
+        cert = yml
+        tarfile = self.cert_name_to_tarfile(cert_name)
+        cert[cert_name]['tardata'] = {
+            tarfile: files
         }
-        return merge(cert, yml)
+
+        return cert
 
     def get_certdata_from_tarfile(self, cert_name):
         key, csr, crt, yml = tar.unbundle(self.tarpath, cert_name)
