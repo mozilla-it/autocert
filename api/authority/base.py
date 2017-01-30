@@ -13,15 +13,10 @@ class AuthorityFactoryError(Exception):
         msg = fmt('authority factory error {authority}')
         super(AuthorityFactoryError, self).__init__(msg)
 
-class AuthorityPathNotSetError(Exception):
-    def __init__(self):
-        msg = 'authority path not set'
-        super(AuthorityPathNotSetError, self).__init__(msg)
-
-class AuthorityPathsNotSetError(Exception):
-    def __init__(self):
-        msg = 'authority paths not set'
-        super(AuthorityPathsNotSetError, self).__init__(msg)
+class AuthorityPathError(Exception):
+    def __init__(self, path_or_paths):
+        msg = fmt('error with AuthorityBase param path(s) = {path_or_paths}')
+        super(AuthorityPathError, self).__init__(msg)
 
 class AuthorityBase(object):
     def __init__(self, ar, cfg, verbosity):
@@ -31,7 +26,7 @@ class AuthorityBase(object):
 
     def keywords(self, path=None, **kw):
         if not path:
-            raise AuthorityPathNotSetError
+            raise AuthorityPathError(path)
         kw['url'] = str(self.cfg.baseurl / path)
         kw['auth'] = kw.get('auth', self.cfg.auth)
         kw['headers'] = kw.get('headers', self.cfg.headers)
@@ -54,7 +49,7 @@ class AuthorityBase(object):
 
     def requests(self, method, paths=None, **kw):
         if not paths or not isinstance(paths, list):
-            raise AuthorityPathsNotSetError
+            raise AuthorityPathsError(paths)
         kws = [self.keywords(path=path, **kw) for path in paths]
         return self.ar.requests(method, *kws)
 
