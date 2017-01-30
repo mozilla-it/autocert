@@ -24,14 +24,16 @@ class AuthorityBase(object):
         self.cfg = AttrDict(cfg)
         self.verbosity = verbosity
 
-    def request(self, method, path=None, **kw):
+    def keywords(self, path=None, **kw):
         if not path:
             raise AuthorityPathNotSetError
-        url = str(self.cfg.baseurl / path)
-        auth = kw.pop('auth', self.cfg.auth)
-        headers = kw.pop('headers', self.cfg.headers)
-        print(fmt('AuthorityBase.request: method={method} path={path}\n{kw}'))
-        return self.ar.request(method, url=url, auth=auth, headers=headers, **kw)
+        kw['url'] = str(self.cfg.baseurl / path)
+        kw['auth'] = kw.get('auth', self.cfg.auth)
+        kw['headers'] = kw.get('headers', self.cfg.headers)
+        return kw
+
+    def request(self, method, **kw):
+        return self.ar.request(method, **self.keywords(**kw))
 
     def get(self, path=None, **kw):
         return self.request('GET', path=path, **kw)
@@ -45,15 +47,31 @@ class AuthorityBase(object):
     def delete(self, path=None, **kw):
         return self.request('DELETE', path=path, **kw)
 
-    def display_certificate(self, cert_name):
+    def requests(self, method, *kws):
+        kws = [self.keywords(**kw) for kw in kws]
+        return self.ar.requests(method, *kws)
+
+    def gets(self, *kws):
+        return self.requests('GET', *kws)
+
+    def puts(self, *kws):
+        return self.requests('PUT', *kws)
+
+    def posts(self, *kws):
+        return self.requests('POST', *kws)
+
+    def deletes(self, *kws):
+        return self.requests('DELETE', *kws)
+
+    def display_certificates(self, certs):
         raise NotImplementedError
 
     def create_certificate(self, common_name, sans=None):
         raise NotImplementedError
 
-    def renew_certificate(self, cert_name):
+    def renew_certificates(self, certs):
         raise NotImplementedError
 
-    def revoke_certificate(self, cert_name):
+    def revoke_certificates(self, certs):
         raise NotImplementedError
 
