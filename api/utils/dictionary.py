@@ -80,6 +80,9 @@ def head(d):
         return keys[0]
     raise DictDoesntHaveHeadError(d)
 
+def body(d):
+    return d[head(d)]
+
 def head_body(d):
     head_ = head(d)
     return head_, d[head_]
