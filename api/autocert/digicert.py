@@ -113,7 +113,7 @@ def get_csr(detail):
 def create_cert(order):
     common_name = order.certificate.common_name
     cert_name = '{0}.{1}'.format(common_name, suffix(order.id))
-    expires = order.certificate.valid_till
+    expiry = order.certificate.valid_till
     crt = download_certificate(order.id)
     detail = get_order_detail(order.id)
     csr = get_csr(AttrDict(detail))
@@ -121,7 +121,7 @@ def create_cert(order):
         cert_name: {
             'common_name': common_name,
             'suffix': suffix(order.id),
-            'expires': expires,
+            'expiry': expiry,
             'authorities': {
                 'digicert': {
                     'csr': windows2unix(csr),
