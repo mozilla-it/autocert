@@ -4,7 +4,7 @@
 import os
 import re
 
-from pprint import pformat
+from pprint import pformat, pprint
 from attrdict import AttrDict
 from fnmatch import fnmatch
 from ruamel import yaml
@@ -20,6 +20,7 @@ from app import app
 from config import CFG
 
 from endpoint.base import EndpointBase
+from authority.factory import create_authority
 
 class DisplayEndpoint(EndpointBase):
     def __init__(self, cfg, verbosity):
@@ -27,7 +28,10 @@ class DisplayEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         status = 200
+        authority = create_authority('digicert', self.ar, self.cfg['authorities']['digicert'], self.verbosity) #FIXME: this should be better
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
         certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
+        if self.verbosity > 3:
+            certs = authority.display_certificates(certs)
         json = self.transform(certs)
         return json, status
