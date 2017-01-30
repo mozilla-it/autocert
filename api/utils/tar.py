@@ -59,5 +59,5 @@ def unbundle(dirpath, cert_name):
                 crt = tar.extractfile(info.name).read().decode('utf-8')
             elif info.name.endswith('.yml'):
                 yml = tar.extractfile(info.name).read().decode('utf-8')
-                yml = {cert_name: yaml.safe_load(yml)}
+                yml = yaml.safe_load(yml)
     return key, csr, crt, yml
