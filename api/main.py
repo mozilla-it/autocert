@@ -15,12 +15,6 @@ from app import app
 
 from utils.version import version as api_version
 from utils.format import fmt
-#from autocert.show import show
-#from autocert.update import update
-#from autocert.create import create
-#from autocert.revoke import revoke
-#from utils import pki
-
 from endpoint.factory import create_endpoint
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
@@ -67,21 +61,6 @@ STATUS_CODES = {
     510: 'not extended',
     511: 'network authentication required',
 }
-
-#REQUEST_METHODS = {
-#    'GET':      show,
-#    'PUT':      update,
-#    'POST':     create,
-#    'DELETE':   revoke,
-#}
-
-def register_apis():
-    from utils.importer import import_modules
-    dirpath = os.path.dirname(__file__)
-    endswith = '_api.py'
-    [app.register_blueprint(mod.api) for mod in import_modules(dirpath, endswith)]
-
-register_apis()
 
 @app.before_first_request
 def initialize():
