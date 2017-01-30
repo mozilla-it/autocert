@@ -47,16 +47,15 @@ class Tardata(object):
         _, cert_name, _ = self.decompose_tarfile(tarfile)
         return cert_name
 
-    def create_certdata(self, cert_name, key, csr, crt, yml):
-        if not yml:
-            yml = {cert_name: {}}
+    def create_certdata(self, cert_name, key, csr, crt, cert):
+        if not cert:
+            cert = {cert_name: {}}
 
         files = {}
         for content in (key, csr, crt):
             if content:
                 ext = tar.get_file_ext(content)
                 files[fmt('{cert_name}{ext}')] = content
-        cert = yml
         tarfile = self.cert_name_to_tarfile(cert_name)
         cert[cert_name]['tardata'] = {
             tarfile: files
@@ -65,8 +64,8 @@ class Tardata(object):
         return cert
 
     def get_certdata_from_tarfile(self, cert_name):
-        key, csr, crt, yml = tar.unbundle(self.tarpath, cert_name)
-        return self.create_certdata(cert_name, key, csr, crt, yml)
+        key, csr, crt, cert = tar.unbundle(self.tarpath, cert_name)
+        return self.create_certdata(cert_name, key, csr, crt, cert)
 
     def get_certdata_from_tarfiles(self, *cert_name_pns):
         certdata = []
