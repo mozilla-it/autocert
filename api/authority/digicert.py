@@ -128,8 +128,7 @@ class DigicertAuthority(AuthorityBase):
     def _get_certificate_order_detail(self, *order_ids):
         app.logger.info(fmt('_get_certificate_order_detail:\n{locals}'))
         paths = [fmt('order/certificate/{order_id}') for order_id in order_ids]
-        kws = [dict(path=path) for path in paths]
-        calls = self.gets(*kws)
+        calls = self.gets(paths=paths)
         return calls
 
     def _download_certificate(self, *certificate_ids, format_type='pem_all', repeat_delta=None):
@@ -138,8 +137,7 @@ class DigicertAuthority(AuthorityBase):
             repeat_delta = timedelta(seconds=repeat_delta)
 
         paths = [fmt('certificate/{certificate_id}/download/format/{format_type}') for certificate_id in certificate_ids]
-        kws = [dict(path=path, repeat_delta=repeat_delta, repeat_if=not_200) for path in paths]
-        calls = self.gets(*kws)
+        calls = self.gets(paths=paths, repeat_delta=repeat_delta, repeat_if=not_200)
         texts = [call.recv.text if call.recv.status == 200 else DownloadCertificateError(call) for call in calls]
         return texts
 

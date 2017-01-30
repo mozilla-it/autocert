@@ -18,6 +18,11 @@ class AuthorityPathNotSetError(Exception):
         msg = 'authority path not set'
         super(AuthorityPathNotSetError, self).__init__(msg)
 
+class AuthorityPathsNotSetError(Exception):
+    def __init__(self):
+        msg = 'authority paths not set'
+        super(AuthorityPathsNotSetError, self).__init__(msg)
+
 class AuthorityBase(object):
     def __init__(self, ar, cfg, verbosity):
         self.ar = ar
@@ -47,21 +52,23 @@ class AuthorityBase(object):
     def delete(self, path=None, **kw):
         return self.request('DELETE', path=path, **kw)
 
-    def requests(self, method, *kws):
-        kws = [self.keywords(**kw) for kw in kws]
+    def requests(self, method, paths=None, **kw):
+        if not paths or not isinstance(paths, list):
+            raise AuthorityPathsNotSetError
+        kws = [self.keywords(path=path, **kw) for path in paths]
         return self.ar.requests(method, *kws)
 
-    def gets(self, *kws):
-        return self.requests('GET', *kws)
+    def gets(self, paths=None, **kw):
+        return self.requests('GET', paths=paths, **kw)
 
-    def puts(self, *kws):
-        return self.requests('PUT', *kws)
+    def puts(self, paths=None, **kw):
+        return self.requests('PUT', paths=paths, **kw)
 
-    def posts(self, *kws):
-        return self.requests('POST', *kws)
+    def posts(self, paths=None, **kw):
+        return self.requests('POST', paths=paths, **kw)
 
-    def deletes(self, *kws):
-        return self.requests('DELETE', *kws)
+    def deletes(self, paths=None, **kw):
+        return self.requests('DELETE', paths=paths, **kw)
 
     def display_certificates(self, certs):
         raise NotImplementedError
