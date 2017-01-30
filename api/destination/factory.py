@@ -10,9 +10,6 @@ from destination.aws import AwsDestination
 from destination.zeus import ZeusDestination
 
 def create_destination(destination, ar, cfg, verbosity):
-    from pprint import pprint
-    print('create_destination:')
-    pprint(list(cfg.keys()))
     if destination == 'aws':
         return AwsDestination(ar, cfg, verbosity)
     elif destination == 'zeus':
