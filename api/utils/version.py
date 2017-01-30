@@ -20,9 +20,6 @@ _version = None
 def version():
     global _version
     versionfile = dirname(__file__, 2) + '/VERSION'
-    #print('cwd =', os.getcwd())
-    #print('versionfile =', versionfile)
-    #print('ls =', os.listdir())
     if not _version:
         _version = open(versionfile).read() if os.path.exists(versionfile) else describe()
         _version, *suffix = _version.split('-')
