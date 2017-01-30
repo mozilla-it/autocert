@@ -27,6 +27,9 @@ def _fmt(string, args, kwargs, do_print=False):
         gl = dict(locals=frame.f_locals, globals=frame.f_globals)
         gl.update(frame.f_globals)
         gl.update(frame.f_locals)
+        if frame.f_code.co_name == '<listcomp>':
+            frame = frame.f_back
+            gl.update(frame.f_locals)
         s = string.format(**{k:fmt_dict(v) for k,v in gl.items()})
     except KeyError as ke:
         print('keyerror not found in following keys of gl dict:')
