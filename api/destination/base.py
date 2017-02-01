@@ -53,20 +53,20 @@ class DestinationBase(object):
             raise DestinationPathsError(paths)
         if not dests or not isinstance(paths, list):
             raise DestinationDestsError(dests)
-        kws = [self.keywords(path=path, dest=dest, *kw) for path, dest in product(paths, dests)]
-        self.ar.requests(method, *kws)
+        kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in product(paths, dests)]
+        return self.ar.requests(method, *kws)
 
     def gets(self, paths=None, dests=None, **kw):
-        self.requests('GET', paths=paths, dests=dests, **kw)
+        return self.requests('GET', paths=paths, dests=dests, **kw)
 
     def puts(self, paths=None, dests=None, **kw):
-        self.requests('PUT', paths=paths, dests=dests, **kw)
+        return self.requests('PUT', paths=paths, dests=dests, **kw)
 
     def posts(self, paths=None, dests=None, **kw):
-        self.requests('POST', paths=paths, dests=dests, **kw)
+        return self.requests('POST', paths=paths, dests=dests, **kw)
 
     def deletes(self, paths=None, dests=None, **kw):
-        self.requests('DELETE', paths=paths, dests=dests, **kw)
+        return self.requests('DELETE', paths=paths, dests=dests, **kw)
 
     def fetch_certificate(self, common_name, *dests, csr=None):
         raise NotImplementedError
