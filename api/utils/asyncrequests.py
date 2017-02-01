@@ -41,10 +41,13 @@ class AsyncRequests(Singleton):
         raise_ex=None,
         repeat_if=None,
         repeat_wait=3,
-        repeat_delta=None):
+        repeat_delta=None,
+        verify_ssl=True,
+        **kwargs):
 
         start = datetime.now()
-        async with aiohttp.ClientSession(loop=self._loop) as session:
+        connector = aiohttp.TCPConnector(verify_ssl=verify_ssl)
+        async with aiohttp.ClientSession(connector=connector, loop=self._loop) as session:
             repeat = 0
             while True:
                 send_datetime = datetime.utcnow()
@@ -53,7 +56,8 @@ class AsyncRequests(Singleton):
                     url,
                     headers=headers,
                     auth=aiohttp.helpers.BasicAuth(*auth),
-                    data=json_dumps(json) if json else None) as response:
+                    data=json_dumps(json) if json else None,
+                    **kwargs) as response:
 
                     text = await response.text()
                     recv_datetime = datetime.utcnow()
