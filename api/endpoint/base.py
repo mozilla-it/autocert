@@ -36,14 +36,14 @@ def timestamp_sorting(cert):
     head, body = head_body(cert)
     return body.get('timestamp', 0)
 
-def expiration_sorting(cert):
+def expiry_sorting(cert):
     head, body = head_body(cert)
     return body.get('expiry', 0)
 
 SORTING_FUNCS = dict(
     default=default_sorting,
     timestamp=timestamp_sorting,
-    expiration=expiration_sorting)
+    expiry=expiry_sorting)
 
 class EndpointBase(object):
     def __init__(self, cfg, args):
@@ -88,7 +88,7 @@ class EndpointBase(object):
         cert_name, cert_body = head_body(cert)
         if self.verbosity == 0:
             auth_name, auth_body = head_body(cert_body['authority'])
-            return {cert_name: auth_body.get('expiry', None)}
+            return {cert_name: cert_body.get('expiry', None)}
         elif self.verbosity == 1:
             tardata = head(cert_body['tardata'])
             cert_body['tardata'] = tardata

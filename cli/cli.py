@@ -34,7 +34,7 @@ VERSIONS = [
 SORTING = [
     'default',
     'timestamp',
-    'expiration',
+    'expiry',
 ]
 
 class VersionCheckFailedError(Exception):

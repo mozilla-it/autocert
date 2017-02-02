@@ -39,13 +39,14 @@ def expiryify(valid_till):
         return string2int(valid_till)
     return valid_till
 
-def certify(common_name, timestamp, order_id, expiry, csr=None, crt=None, cert=None):
+def certify(common_name, timestamp, expiry, order_id, csr=None, crt=None, cert=None):
     if cert == None:
         cert = {}
     cert_name = pki.create_cert_name(common_name, timestamp)
-    digicert = dict(
-        order_id=order_id,
-        expiry=expiry)
+#    digicert = dict(
+#        order_id=order_id,
+#        expiry=expiry)
+    digicert = dict(order_id=order_id)
     if csr:
         digicert['csr'] = csr
     if crt:
@@ -54,6 +55,7 @@ def certify(common_name, timestamp, order_id, expiry, csr=None, crt=None, cert=N
         cert_name: dict(
             common_name=common_name,
             timestamp=timestamp,
+            expiry=expiry,
             authority=dict(
                 digicert=digicert))})
 
@@ -70,7 +72,7 @@ class DigicertAuthority(AuthorityBase):
         crts = self._download_certificate(*certificate_ids, repeat_delta=repeat_delta)
         expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
         csrs = [call.recv.json.certificate.csr for call in calls]
-        return [certify(*args) for args in zip(common_names, timestamps, order_ids, expiries, csrs, crts, certs)]
+        return [certify(*args) for args in zip(common_names, timestamps, expiries, order_ids, csrs, crts, certs)]
 
     def create_certificate(self, common_name, timestamp, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
@@ -84,7 +86,7 @@ class DigicertAuthority(AuthorityBase):
         except DownloadCertificateError as dce:
             crt = None
             expiry = None
-        cert = certify(common_name, timestamp, order_id, expiry)
+        cert = certify(common_name, timestamp, expiry, order_id)
         if sans:
             cert['sans'] = list(sans)
         return crt, cert
