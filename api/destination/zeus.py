@@ -19,3 +19,13 @@ class ZeusDestination(DestinationBase):
 
     def remove_certificate(self, common_name, csr, *dests):
         raise NotImplementedError
+
+    def _get_installed_certificates_summary(self, *dests):
+        paths = ['ssl/server_keys']
+        calls = self.gets(paths=paths, dests=dests, verify_ssl=False)
+        summary = {}
+        for dest, call in zip(dests, calls):
+            summar[dest] = {}
+            for child in call.recv.json.children:
+                summary[dest][child.name] = child.href
+        return summary
