@@ -86,3 +86,6 @@ def body(d):
 def head_body(d):
     head_ = head(d)
     return head_, d[head_]
+
+def keys_ending(d, suffix):
+    return [k for k in d.keys() if k.endswith(suffix)]
