@@ -68,14 +68,14 @@ class DestinationBase(object):
     def deletes(self, paths=None, dests=None, **kw):
         return self.requests('DELETE', paths=paths, dests=dests, **kw)
 
-    def fetch_certificate(self, certs, *dests):
+    def fetch_certificates(self, certs, *dests):
         raise NotImplementedError
 
     def install_certificate(self, common_name, crt, csr, key, note, *dests):
         raise NotImplementedError
 
-    def update_certificate(self, certs, *dests):
+    def update_certificates(self, certs, *dests):
         raise NotImplementedError
 
-    def remove_certificate(self, certs, *dests):
+    def remove_certificates(self, certs, *dests):
         raise NotImplementedError
