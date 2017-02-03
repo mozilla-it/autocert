@@ -104,9 +104,10 @@ class EndpointBase(object):
         return cert
 
     def transform_call(self, call):
+        name = '{0} {1} {2}'.format(call.recv.status, call.send.method, call.send.url)
         if self.args.calls == 'simple':
-            return '{0} {1} {2}'.format(call.recv.status, call.send.method, call.send.url)
-        return dict(send=call.send, recv=call.recv)
+            return name
+        return {name: dict(send=call.send, recv=call.recv)}
 
     def sanitize(self, cert_name_pn, ext='.tar.gz'):
         if cert_name_pn.endswith(ext):
