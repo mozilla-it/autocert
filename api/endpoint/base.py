@@ -53,13 +53,13 @@ class EndpointBase(object):
         self.args = AttrDict(args)
         self.verbosity = self.args.verbosity
         authorities = self.cfg.authorities
-        self.authorities = {
+        self.authorities = AttrDict({
             a: create_authority(a, self.ar, authorities[a], self.verbosity) for a in authorities
-        }
+        })
         destinations = self.cfg.destinations
-        self.destinations = {
+        self.destinations = AttrDict({
             d: create_destination(d, self.ar, destinations[d], self.verbosity) for d in destinations
-        }
+        })
         self.tardata = Tardata(self.cfg.tar.dirpath, self.verbosity)
 
     @property
