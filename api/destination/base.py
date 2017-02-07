@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from pprint import pformat, pprint
+
 from itertools import product
 from attrdict import AttrDict
 
@@ -15,6 +17,13 @@ class DestinationDestError(Exception):
     def __init__(self, dest_or_dests):
         msg = fmt('error with DestinationBase param dest(s) = {dest_or_dests}')
         super(DestinationDestError, self).__init__(msg)
+
+class JsonsDontMatchPathsError(Exception):
+    def __init__(self, jsons, paths):
+        len_jsons = len(jsons) if isinstance(jsons, list) else None
+        len_paths = len(paths) if isinstance(paths, list) else None
+        msg = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
+        super(JsonsDontMatchPathsError, self).__init__(msg)
 
 class DestinationBase(object):
     def __init__(self, ar, cfg, verbosity):
@@ -48,30 +57,44 @@ class DestinationBase(object):
     def delete(self, path=None, dest=None, **kw):
         return self.request('DELETE', path=path, dest=dest, **kw)
 
-    def requests(self, method, paths=None, dests=None, **kw):
-        if not paths or not isinstance(paths, list):
-            raise DestinationPathsError(paths)
-        if not dests or not isinstance(paths, list):
-            raise DestinationDestsError(dests)
-        kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in product(paths, dests)]
+    def requests(self, method, paths=None, dests=None, jsons=None, **kw):
+        if not paths or not hasattr(paths, '__iter__'):
+            raise DestinationPathError(paths)
+        if not dests or not hasattr(dests, '__iter__'):
+            raise DestinationDestError(dests)
+        if jsons:
+            if len(jsons) != len(paths):
+                raise JsonsDontMatchPathsError(jsons, paths)
+            kws = [self.keywords(path=path, dest=dest, json=json, **kw) for (path, json), dest in product(zip(paths, jsons), dests)]
+        else:
+            kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in product(paths, dests)]
         return self.ar.requests(method, *kws)
 
-    def gets(self, paths=None, dests=None, **kw):
-        return self.requests('GET', paths=paths, dests=dests, **kw)
+    def gets(self, paths=None, dests=None, jsons=None, **kw):
+        return self.requests('GET', paths=paths, dests=dests, jsons=jsons, **kw)
 
-    def puts(self, paths=None, dests=None, **kw):
-        return self.requests('PUT', paths=paths, dests=dests, **kw)
+    def puts(self, paths=None, dests=None, jsons=None, **kw):
+        return self.requests('PUT', paths=paths, dests=dests, jsons=jsons, **kw)
 
-    def posts(self, paths=None, dests=None, **kw):
-        return self.requests('POST', paths=paths, dests=dests, **kw)
+    def posts(self, paths=None, dests=None, jsons=None, **kw):
+        return self.requests('POST', paths=paths, dests=dests, jsons=jsons, **kw)
 
-    def deletes(self, paths=None, dests=None, **kw):
-        return self.requests('DELETE', paths=paths, dests=dests, **kw)
+    def deletes(self, paths=None, dests=None, jsons=None, **kw):
+        return self.requests('DELETE', paths=paths, dests=dests, jsons=jsons, **kw)
+
+    def add_destinations(self, cert, *dests, **items):
+        '''
+        does this belong here?
+        '''
+        cert['destinations'] = cert.get('destinations', {})
+        for dest in dests:
+            cert['destinations'][dest] = items
+        return cert
 
     def fetch_certificates(self, certs, *dests):
         raise NotImplementedError
 
-    def install_certificate(self, common_name, crt, csr, key, note, *dests):
+    def install_certificates(self, certs, *dests):
         raise NotImplementedError
 
     def update_certificates(self, certs, *dests):
