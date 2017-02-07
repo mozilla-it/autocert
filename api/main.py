@@ -74,7 +74,7 @@ def initialize():
         app.logger.info('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
 
 def log_request(user, hostname, ip, method, path, json):
-    app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with "{json}"'))
+    app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with json=\n"{json}"'))
 
 @app.route('/auto-cert/version', methods=['GET'])
 def version():
