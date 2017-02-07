@@ -7,19 +7,13 @@ autocert.update
 from pprint import pformat
 from attrdict import AttrDict
 
-from utils import tar
-
-#from autocert import show
-
-from utils import pki
+from utils.format import fmt, pfmt
 
 from app import app
 
-from config import CFG
-
 class MissingUpdateArgumentsError(Exception):
     def __init__(self, args):
-        msg = 'missing arguments to update; args = {0}'.format(args)
+        msg = fmt('missing arguments to update; args = {args}')
         super(MissingUpdateArgumentsError, self).__init__(msg)
 
 class DeployError(Exception):
@@ -34,10 +28,29 @@ class UpdateEndpoint(EndpointBase):
         super(UpdateEndpoint, self).__init__(cfg, verbosity)
 
     def execute(self, **kwargs):
-        raise NotImplementedError
+        status = 201
+        cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
+        certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
+        if self.args.get('authority', None):
+            certs = self.renew(certs, **kwargs)
+        elif self.args.get('destinations', None):
+            certs = self.deploy(certs, **kwargs)
+        else:
+            raise MissingUpdateArgumentsError(self.args)
+        json = self.transform(certs)
+        return json, status
 
     def respond(self, **kwargs):
         raise NotImplementedError
+
+    def renew(self, certs, **kwargs):
+        raise NotImplementedError
+
+    def deploy(self, certs, **kwargs):
+        installed_certs = []
+        for name, dests in self.args.destinations.items():
+            installed_certs += self.destinations[name].install_certificates(certs, *dests)
+        return installed_certs
 
 #def renew(cert_name, authority, **kwargs):
 #    app.logger.info('update.renew:\n{0}'.format(pformat(locals())))
