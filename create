@@ -11,4 +11,4 @@ TWO="${TWO%\'*}"
 #lowercase and add tercotua domain
 COMMON_NAME="${ONE,,}-${TWO,,}.tercotua.org"
 
-./auto-cert create $COMMON_NAME "$@"
+./autocert create $COMMON_NAME "$@"
