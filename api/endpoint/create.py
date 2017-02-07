@@ -39,6 +39,8 @@ class CreateEndpoint(EndpointBase):
         cert_name = pki.create_cert_name(self.args.common_name, self.timestamp)
         tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, cert)
         cert = self.tardata.create_certdata(cert_name, key, csr, crt, cert)
+        if self.args.destinations:
+            for name, dests in self.args.destinations.items():
+                cert = self.destinations[name].install_certificate(self.args.common_name, crt, csr, key, cert_name, *dests)
         json = self.transform([cert])
         return json, status
-
