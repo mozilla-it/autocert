@@ -89,3 +89,12 @@ def head_body(d):
 
 def keys_ending(d, suffix):
     return [k for k in d.keys() if k.endswith(suffix)]
+
+def dictify(items, sep=':'):
+    result = {}
+    if items:
+        for item in items:
+            key, value = item.split(sep)
+            result[key] = result.get(key, []) + [value]
+    return result
+
