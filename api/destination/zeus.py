@@ -4,8 +4,30 @@
 from destination.base import DestinationBase
 from config import CFG
 
-from utils.dictionary import merge, head, body
+from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
+
+from app import app
+from utils.output import yaml_format
+
+def decompose_cert(cert):
+    cert_name, cert_body = head_body(cert)
+    common_name = cert_body['common_name']
+    tardata_body = body(cert_body['tardata'])
+    crt_filename = keys_ending(tardata_body, 'crt')[0]
+    csr_filename = keys_ending(tardata_body, 'csr')[0]
+    key_filename = keys_ending(tardata_body, 'key')[0]
+    crt = tardata_body[crt_filename]
+    csr = tardata_body[csr_filename]
+    key = tardata_body[key_filename]
+    return cert_name, common_name, crt, csr, key
+
+def compose_json(crt, csr, key, note):
+    return dict(properties=dict(basic=dict(
+        crt=crt,
+        csr=csr,
+        key=key,
+        note=note)))
 
 class ZeusDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity):
@@ -15,34 +37,23 @@ class ZeusDestination(DestinationBase):
         details = self._get_installed_certificates_details(certs, *dests)
         if details:
             for cert in certs:
-                cert_body = body(cert)
-                common_name = cert_body['common_name']
-                tardata_body = body(cert_body['tardata'])
-                crt_filename = keys_ending(tardata_body, 'crt')[0]
-                csr_filename = keys_ending(tardata_body, 'csr')[0]
-                key_filename = keys_ending(tardata_body, 'key')[0]
-                crt = tardata_body[crt_filename]
-                csr = tardata_body[csr_filename]
-                key = tardata_body[key_filename]
-                for dest, note in details.get((common_name, crt, csr), []):
-                    cert['destinations'] = cert.get('destinations', {})
-                    cert['destinations'][dest] = dict(
-                        crt=crt,
-                        csr=csr,
-                        key=key,
-                        note=note)
+                cert_name, common_name, crt, csr, key = decompose_cert(cert)
+                destinations = details.get((common_name, crt[:40]), None)
+                if destinations:
+                    cert[cert_name]['destinations'] = cert[cert_name].get('destinations', {})
+                    cert[cert_name]['destinations'].update(destinations)
         return certs
 
-    def install_certificate(self, common_name, crt, csr, key, note, *dests):
-        paths = ['ssl/server_keys/' + common_name]
-        calls = self.puts(paths=paths, dests=dests, json=dict(
-            properties=dict(
-                basic=dict(
-                    public=crt,
-                    request=csr,
-                    private=key,
-                    note=note))))
-        return calls
+    def install_certificates(self, certs, *dests):
+        paths, jsons = zip(*[('ssl/server_keys/' + common_name, compose_json(crt, csr, key, cert_name)) for cert_name, common_name, crt, csr, key in [decompose_cert(cert) for cert in certs]])
+
+        print('paths =', paths)
+        print('jsons =', yaml_format(jsons))
+        calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
+        #FIXME: seems like there could be a better way...
+        print('calls =', yaml_format(calls))
+        certs = self.fetch_certificates(certs, *dests)
+        return certs
 
     def update_certificates(self, certs, *dests):
         raise NotImplementedError
@@ -66,12 +77,17 @@ class ZeusDestination(DestinationBase):
         details = {}
         if summary:
             common_names, paths, dests = zip(*summary)
-            calls = self.gets(paths=paths, dests=dests)
+            calls = self.gets(paths=paths, dests=dests, verify_ssl=False)
             for common_name, path, dest, call in zip(common_names, paths, dests, calls):
                 crt = windows2unix(call.recv.json.properties.basic.public)
                 csr = windows2unix(call.recv.json.properties.basic.request)
                 key = windows2unix(call.recv.json.properties.basic.private)
                 note = call.recv.json.properties.basic.note
-                details[(common_name, crt, csr)] = details.get((common_name, crt, csr), []) + [(dest, note)]
+                details[(common_name, crt[:40])] = details.get((common_name, crt[:40]), {})
+                details[(common_name, crt[:40])][dest] = dict(
+                    crt=crt,
+                    csr=csr,
+                    key=key,
+                    note=note)
         return details
 
