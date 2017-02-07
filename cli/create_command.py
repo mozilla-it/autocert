@@ -11,6 +11,8 @@ from cli.utils.output import output
 from cli.namespace import jsonify
 from cli.arguments import add_argument
 
+from utils.dictionary import dictify
+
 def add_parser(subparsers):
     parser = subparsers.add_parser('create')
     add_argument(parser, '-a', '--authority')
@@ -23,7 +25,7 @@ def add_parser(subparsers):
     parser.set_defaults(func=do_create)
 
 def do_create(ns):
-    response = requests.post(ns.api_url / 'auto-cert', json=jsonify(ns))
+    response = requests.post(ns.api_url / 'auto-cert', json=jsonify(ns, destinations=dictify(ns.destinations)))
     if response.status_code == 201:
         json = response.json()
         output(json)

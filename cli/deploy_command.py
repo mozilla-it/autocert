@@ -10,6 +10,8 @@ from cli.utils.output import output
 from cli.namespace import jsonify
 from cli.arguments import add_argument
 
+from utils.dictionary import dictify
+
 def add_parser(subparsers):
     parser = subparsers.add_parser('deploy')
     add_argument(parser, '-d', '--destinations')
@@ -17,13 +19,6 @@ def add_parser(subparsers):
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'cert_name_pns')
     parser.set_defaults(func=do_deploy)
-
-def dictify(destinations, sep=':'):
-    result = {}
-    for destination in destinations:
-        key, value = destination.split(sep)
-        result[key] = result.get(key, []) + [value]
-    return result
 
 def do_deploy(ns):
     response = requests.put(ns.api_url / 'auto-cert', json=jsonify(ns, destinations=dictify(ns.destinations)))
