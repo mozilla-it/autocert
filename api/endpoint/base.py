@@ -19,8 +19,6 @@ from destination.factory import create_destination
 from utils.asyncrequests import AsyncRequests
 from utils import timestamp
 
-from autocert import digicert
-from autocert import zeus
 from utils import tar
 from utils.format import fmt, pfmt
 from utils.dictionary import merge, head, head_body
