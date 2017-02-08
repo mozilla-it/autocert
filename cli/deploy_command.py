@@ -21,7 +21,7 @@ def add_parser(subparsers):
     parser.set_defaults(func=do_deploy)
 
 def do_deploy(ns):
-    response = requests.put(ns.api_url / 'auto-cert', json=jsonify(ns, destinations=dictify(ns.destinations)))
+    response = requests.put(ns.api_url / 'autocert', json=jsonify(ns, destinations=dictify(ns.destinations)))
     if response.status_code == 200:
         certs = response.json().get('certs', [])
         output(certs)

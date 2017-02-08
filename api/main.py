@@ -76,7 +76,7 @@ def initialize():
 def log_request(user, hostname, ip, method, path, json):
     app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with json=\n"{json}"'))
 
-@app.route('/auto-cert/version', methods=['GET'])
+@app.route('/autocert/version', methods=['GET'])
 def version():
     args = request.json
     args = args if args else {}
@@ -92,7 +92,7 @@ def version():
     version = api_version()
     return jsonify({'version': api_version()})
 
-@app.route('/auto-cert', methods=['GET', 'PUT', 'POST', 'DELETE'])
+@app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():
     args = request.json
     cfg = args.get('cfg', None)

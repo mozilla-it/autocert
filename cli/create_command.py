@@ -25,7 +25,7 @@ def add_parser(subparsers):
     parser.set_defaults(func=do_create)
 
 def do_create(ns):
-    response = requests.post(ns.api_url / 'auto-cert', json=jsonify(ns, destinations=dictify(ns.destinations)))
+    response = requests.post(ns.api_url / 'autocert', json=jsonify(ns, destinations=dictify(ns.destinations)))
     if response.status_code == 201:
         json = response.json()
         output(json)

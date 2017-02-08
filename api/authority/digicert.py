@@ -120,7 +120,7 @@ class DigicertAuthority(AuthorityBase):
         path = fmt('request/{request_id}/status')
         json = dict(
             status='approved',
-            processor_comment='auto-cert')
+            processor_comment='autocert')
         app.logger.debug(fmt('calling digicert api with path={path} and json={json}'))
         call = self.put(path=path, json=json)
         if call.recv.status == 204:

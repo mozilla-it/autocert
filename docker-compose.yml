@@ -6,7 +6,7 @@ services:
         expose:
           - "8000"
         volumes:
-          - /data/auto-cert:/data/auto-cert
+          - /data/autocert:/data/autocert
         command: python3 -u /usr/local/bin/gunicorn -t 120 -w 2 -b :8000 main:app
 
     nginx:

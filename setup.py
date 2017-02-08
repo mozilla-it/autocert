@@ -17,17 +17,17 @@ def version():
 __version__ = version()
 
 setup(
-    name = 'auto-cert-cli',
+    name = 'autocert-cli',
     packages = ['cli'],
     entry_points = {
-        'console_scripts': ['auto-cert = cli.cli:main']
+        'console_scripts': ['autocert = cli.cli:main']
     },
     version = __version__,
-    description = 'auto-cert cli tool',
+    description = 'autocert cli tool',
     long_description = open('README.md').read().strip(),
     license = open('LICENSE').read().strip(),
     install_requires=open('requirements.txt').readlines(),
     author = 'Scott Idler',
     author_email = 'scott.a.idler@gmail.com',
-    url = 'https://github.com/auto-cert',
+    url = 'https://github.com/mozilla-it/autocert',
 )

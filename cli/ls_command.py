@@ -23,7 +23,7 @@ def add_parser(subparsers):
 
 def do_ls(ns):
     json = jsonify(ns)
-    response = requests.get(ns.api_url / 'auto-cert', json=json)
+    response = requests.get(ns.api_url / 'autocert', json=json)
     if response.status_code == 200:
         json = response.json()
         output(json)
