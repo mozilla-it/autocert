@@ -108,31 +108,6 @@ def route():
     json, status = endpoint.execute()
     return make_response(jsonify(json), status)
 
-#def endpoint():
-#    app.logger.info('{0}'.format(request.json))
-#    func = REQUEST_METHODS[request.method]
-#    args = request.json
-#    common_name, suffix, authority_code, order_id = pki.decompose_cert_name(args.get('cert_name', args.get('common_name', None)))
-#    if common_name:
-#        args.update(dict(
-#            common_name=common_name,
-#            suffix=suffix,
-#            authority_code=authority_code,
-#            order_id=order_id))
-#    app.logger.info('args = {0}'.format(pformat(args)))
-#    json, status_code = func(**args)
-#    return make_response(jsonify(json), status_code)
-
-#def log_and_jsonify_error(status, error, request):
-#    message = STATUS_CODES[status]
-#    request_path = request.path
-#    app.logger.error('{message}: {request_path}'.format(**locals()))
-#    return jsonify({
-#        'errors': [
-#            '{status}: {message}, {request_path}'.format(**locals()),
-#        ],
-#    })
-
 @app.errorhandler(400)
 def bad_request(error):
     return log_and_jsonify_error(400, error, request)
