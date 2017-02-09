@@ -9,7 +9,7 @@ from attrdict import AttrDict
 
 from cli.utils.output import output
 from cli.namespace import jsonify
-from cli.arguments import add_argument, DESTINATIONS
+from cli.arguments import add_argument
 
 from utils.dictionary import dictify
 from cli.config import CFG
