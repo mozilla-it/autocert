@@ -26,8 +26,14 @@ class DisplayEndpoint(EndpointBase):
         status = 200
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
         certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
+        certs2 = []
         if self.verbosity > 0:
-            certs = self.authorities.digicert.display_certificates(certs)
-            certs = self.destinations.zeus.fetch_certificates(certs, 'test2')
-        json = self.transform(certs)
+            #FIXME: this should be driven by the yml in the cert tarball
+            certs1 = self.authorities.digicert.display_certificates(certs)
+            for name, dests in self.args.destinations.items():
+                pfmt('name={name} dests={dests}')
+                certs2.extend(self.destinations[name].fetch_certificates(certs1, *dests))
+        else:
+            certs2 = certs
+        json = self.transform(certs2)
         return json, status
