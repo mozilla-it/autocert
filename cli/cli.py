@@ -117,7 +117,7 @@ def main():
         version_check(ns)
 
     if ns.config:
-        output(dict(CFG=CFG))
+        output(dict(CFG=dict(CFG)))
         sys.exit(0)
 
     parser = ArgumentParser(

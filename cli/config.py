@@ -6,6 +6,7 @@ cli.config: provides CFG for cli code
 
 import os
 from ruamel import yaml
+from attrdict import AttrDict
 from cli.utils.dictionary import merge
 
 CFG_FILES = [
@@ -21,6 +22,6 @@ def _load_config(cfgs):
                 yml = yaml.safe_load(f)
                 if yml:
                     config = merge(config, yml)
-    return config
+    return AttrDict(config)
 
 CFG = _load_config(CFG_FILES)
