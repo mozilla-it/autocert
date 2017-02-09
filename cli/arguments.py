@@ -4,20 +4,8 @@
 cli.arguments: default arguments with the ability to override them
 '''
 
-AUTHORITIES = [
-    'digicert',
-    'letsencrypt',
-]
-
-DESTINATIONS = [
-
-    'zeus:scl3-ext',
-    'zeus:scl3-int',
-    'zeus:phx1-ext',
-    'zeus:phx1-int',
-    'zeus:test1',
-    'zeus:test2',
-]
+from utils.dictionary import merge
+from config import CFG
 
 CALLS_STYLE = [
     'simple',
@@ -26,24 +14,24 @@ CALLS_STYLE = [
 
 # these are the default values for these arguments
 
-DEFAULTS = {
+ARGS = {
     ('-a', '--authority'): dict(
         metavar='AUTH',
-        default=AUTHORITIES[0],
-        choices=AUTHORITIES,
+        default=CFG.AUTHORITIES[0],
+        choices=CFG.AUTHORITIES,
         help='default="%(default)s"; choose authority; "%(choices)s"',
     ),
     ('-a', '--authorities'): dict(
         metavar='AUTH',
         required=True,
-        choices=AUTHORITIES,
+        choices=CFG.AUTHORITIES,
         nargs='+',
         help='default="%(default)s"; choose authorities; "%(choices)s"',
     ),
     ('-d', '--destinations'): dict(
         metavar='DEST',
         required=True,
-        choices=DESTINATIONS,
+        choices=CFG.DESTINATIONS,
         nargs='+',
         help='default="%(default)s"; choose destinations; "%(choices)s"',
     ),
@@ -55,7 +43,7 @@ DEFAULTS = {
     ),
     ('-s', '--sans'): dict(
         nargs='+',
-        help='add additional [s]ubject [a]lternative [n]ame'
+        help='add additional [s]ubject [a]lternative [n]ame(s)'
     ),
     ('--repeat-delta',): dict(
         dest='repeat_delta',
@@ -100,5 +88,5 @@ DEFAULTS = {
 def add_argument(parser, *sig, **overrides):
     parser.add_argument(
         *sig,
-        **{k:overrides.get(k, v) for k,v in DEFAULTS[sig].items()})
+        **merge(ARGS[sig], overrides))
 
