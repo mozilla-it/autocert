@@ -10,17 +10,7 @@ from utils.newline import windows2unix
 from app import app
 from utils.output import yaml_format
 
-def decompose_cert(cert):
-    cert_name, cert_body = head_body(cert)
-    common_name = cert_body['common_name']
-    tardata_body = body(cert_body['tardata'])
-    crt_filename = keys_ending(tardata_body, 'crt')[0]
-    csr_filename = keys_ending(tardata_body, 'csr')[0]
-    key_filename = keys_ending(tardata_body, 'key')[0]
-    crt = tardata_body[crt_filename]
-    csr = tardata_body[csr_filename]
-    key = tardata_body[key_filename]
-    return cert_name, common_name, crt, csr, key
+from cert import decompose_cert
 
 def compose_json(crt, csr, key, note):
     return dict(properties=dict(basic=dict(

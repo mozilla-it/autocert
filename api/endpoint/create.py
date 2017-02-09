@@ -9,6 +9,7 @@ from datetime import timedelta
 
 from utils.format import fmt
 from utils import tar, pki
+from cert import create_cert_name
 
 from app import app
 
@@ -36,7 +37,7 @@ class CreateEndpoint(EndpointBase):
             csr,
             self.args.sans,
             self.args.repeat_delta)
-        cert_name = pki.create_cert_name(self.args.common_name, self.timestamp)
+        cert_name = create_cert_name(self.args.common_name, self.timestamp)
         tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, cert)
         cert = self.tardata.create_certdata(cert_name, key, csr, crt, cert)
         if self.args.destinations:

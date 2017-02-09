@@ -11,7 +11,7 @@ from datetime import timedelta #FIXME: do we import this here?
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
 from utils.format import fmt, pfmt
-from utils import pki
+from cert import create_cert_name
 
 from app import app
 
@@ -42,7 +42,7 @@ def expiryify(valid_till):
 def certify(common_name, timestamp, expiry, order_id, csr=None, crt=None, cert=None):
     if cert == None:
         cert = {}
-    cert_name = pki.create_cert_name(common_name, timestamp)
+    cert_name = create_cert_name(common_name, timestamp)
 #    digicert = dict(
 #        order_id=order_id,
 #        expiry=expiry)
