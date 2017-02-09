@@ -57,7 +57,6 @@ class UpdateEndpoint(EndpointBase):
 #    return {'certs': []}
 #
 #def deploy(cert_name, destinations, verbosity, **kwargs):
-#    common_name, suffix, authority_code, order_id = pki.decompose_cert_name(cert_name)
 #    key, csr, crt = tar.untar_cert_files(cert_name)
 #    if not crt:
 #        if authority_code == 'dc':
