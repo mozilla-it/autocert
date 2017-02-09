@@ -85,7 +85,6 @@ class EndpointBase(object):
     def transform_cert(self, cert):
         cert_name, cert_body = head_body(cert)
         if self.verbosity == 0:
-            auth_name, auth_body = head_body(cert_body['authority'])
             return {cert_name: cert_body.get('expiry', None)}
         elif self.verbosity == 1:
             tardata = head(cert_body['tardata'])
