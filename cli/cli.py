@@ -23,8 +23,10 @@ except ImportError as ie:
 from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
 from cli.utils.output import output
+from cli.utils.format import fmt, pfmt
 from cli import requests
 
+from cli.config import CFG
 
 VERSIONS = [
     'cli',
@@ -83,6 +85,10 @@ def main():
     parser = ArgumentParser(
         add_help=False)
     parser.add_argument(
+        '-C', '--config',
+        action='store_true',
+        help='show loaded CFG values')
+    parser.add_argument(
         '-D', '--debug',
         action='store_true',
         help='turn on debug mode')
@@ -95,8 +101,8 @@ def main():
     parser.add_argument(
         '-U', '--api-url',
         metavar='URL',
+        default='http://0.0.0.0',
         type=URL,
-        default=r'http://0.0.0.0',
         help='default=%(default)s; set the api url to use')
     parser.add_argument(
         '-S', '--sort',
@@ -110,15 +116,17 @@ def main():
     if not any([h in rem for h in ('-h', '--help')]):
         version_check(ns)
 
-    config = {}
+    if ns.config:
+        output(dict(CFG=CFG))
+        sys.exit(0)
 
     parser = ArgumentParser(
         parents=[parser],
         description=__doc__,
-        formatter_class=RawDescriptionHelpFormatter,
-        argument_default=config)
+        formatter_class=RawDescriptionHelpFormatter)
 
     add_subparsers(parser)
+    parser.set_defaults(**CFG)
 
     ns = parser.parse_args()
     if ns.debug:
