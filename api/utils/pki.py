@@ -54,12 +54,6 @@ ENCODING = dict(
     PEM = serialization.Encoding.PEM,
 )
 
-def create_cert_name(common_name, timestamp, sep='@'):
-    return fmt('{common_name}{sep}{timestamp}')
-
-def decompose_cert_name(cert_name, sep='@'):
-    return cert_name.split(sep)
-
 def _create_key(common_name, **kwargs):
     app.logger.info('called create_key:\n{0}'.format(pformat(locals())))
     key = rsa.generate_private_key(
