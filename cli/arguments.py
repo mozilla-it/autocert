@@ -5,7 +5,7 @@ cli.arguments: default arguments with the ability to override them
 '''
 
 from utils.dictionary import merge
-from config import CFG
+from cli.config import CFG
 
 CALLS_STYLE = [
     'simple',
@@ -13,7 +13,6 @@ CALLS_STYLE = [
 ]
 
 # these are the default values for these arguments
-
 ARGS = {
     ('-a', '--authority'): dict(
         metavar='AUTH',
