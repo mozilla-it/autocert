@@ -27,7 +27,7 @@ class DisplayEndpoint(EndpointBase):
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
         certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
         certs2 = []
-        if self.verbosity > 0:
+        if self.verbosity > 1:
             #FIXME: this should be driven by the yml in the cert tarball
             certs1 = self.authorities.digicert.display_certificates(certs)
             for name, dests in self.args.destinations.items():
