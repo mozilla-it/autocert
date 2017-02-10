@@ -7,7 +7,11 @@ AUTHORITIES:
 
 # list of destinations active
 DESTINATIONS:
-- zeus:test2
+- zeus:scl3-ext
+- zeus:scl3-int
+- zeus:phx1-ext
+- zeus:phx1-int
+
 
 # url where the autocert api flask app is deployed
 api_url: http://0.0.0.0
