@@ -3,6 +3,11 @@
 from utils.format import fmt, pfmt
 from utils.isinstance import *
 
+class VisitError(Exception):
+    def __init__(self, obj):
+        msg = fmt('unknown type obj = {obj}')
+        super(VisitError, self).__init__(msg)
+
 def create_cert_name(common_name, timestamp, sep='@'):
     return fmt('{common_name}{sep}{timestamp}')
 
@@ -25,16 +30,43 @@ def printit(obj):
     print(obj)
     return obj
 
+def simple(obj):
+    if istuple(obj):
+        key, value = obj
+        if key[-3:] in ('crt', 'csr', 'key'):
+            value = key[-3:].upper()
+        return key, value
+    return obj
+
+def abbrev(obj):
+    if istuple(obj):
+        key, value = obj
+        if key[-3:] in ('crt', 'csr', 'key'):
+            lines = value.split('\n')
+            lines = lines[:2] + ['...'] + lines[-3:]
+            from pprint import pprint
+            pprint(dict(lines=lines))
+            value = '\n'.join(lines)
+        return key, value
+    return obj
+
 def visit(obj, func=printit):
     obj1 = None
     if isdict(obj):
         obj1 = {}
         for key, value in obj.items():
-            obj1[key] = visit(value, func=func)
-    elif isiter(obj):
+            if isscalar(value):
+                key1, value1 = visit((key, value), func=func)
+            else:
+                key1 = key
+                value1 = visit(value, func=func)
+            obj1[key1] = value1
+    elif islist(obj):
         obj1 = []
         for item in obj:
             obj1.append(visit(item, func=func))
-    elif isscalar(obj):
+    elif isscalar(obj) or istuple(obj) and len(obj) == 2:
         obj1 = func(obj)
+    else:
+        raise VisitError(obj)
     return obj1
