@@ -14,9 +14,9 @@ from cert import decompose_cert
 
 def compose_json(crt, csr, key, note):
     return dict(properties=dict(basic=dict(
-        crt=crt,
-        csr=csr,
-        key=key,
+        public=crt,
+        request=csr,
+        private=key,
         note=note)))
 
 class ZeusDestination(DestinationBase):
@@ -37,11 +37,7 @@ class ZeusDestination(DestinationBase):
     def install_certificates(self, certs, *dests):
         paths, jsons = zip(*[('ssl/server_keys/' + common_name, compose_json(crt, csr, key, cert_name)) for cert_name, common_name, crt, csr, key in [decompose_cert(cert) for cert in certs]])
 
-        print('paths =', paths)
-        print('jsons =', yaml_format(jsons))
         calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
-        #FIXME: seems like there could be a better way...
-        print('calls =', yaml_format(calls))
         certs = self.fetch_certificates(certs, *dests)
         return certs
 
