@@ -23,6 +23,8 @@ from utils import tar
 from utils.format import fmt, pfmt
 from utils.dictionary import merge, head, head_body
 
+from cert import visit, simple, abbrev
+
 from app import app
 from config import CFG
 
@@ -91,13 +93,9 @@ class EndpointBase(object):
             cert_body['tardata'] = tardata
             return {cert_name: cert_body}
         elif self.verbosity == 2:
-            tardata, filenames = head_body(cert_body['tardata'])
-            cert_body['tardata'] = {tardata: {filename: filename[-3:].upper() for filename in filenames}}
-            return {cert_name: cert_body}
+            cert = visit(cert, func=simple)
         elif self.verbosity == 3:
-            tardata, filenames = head_body(cert_body['tardata'])
-            cert_body['tardata'] = {tardata: {filename: content[:60] for filename, content in filenames.items()}}
-            return {cert_name: cert_body}
+            cert = visit(cert, func=abbrev)
         return cert
 
     def transform_call(self, call):
