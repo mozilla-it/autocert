@@ -10,23 +10,11 @@ def isstr(obj):
     '''
     return isinstance(obj, str)
 
-def isunicode(obj):
-    '''
-    isunicode
-    '''
-    return isinstance(obj, unicode)
-
 def isint(obj):
     '''
     isint
     '''
     return isinstance(obj, int)
-
-def islong(obj):
-    '''
-    islong
-    '''
-    return isinstance(obj, long)
 
 def isfloat(obj):
     '''
@@ -58,9 +46,7 @@ def isscalar(obj):
     '''
     return  obj is None or \
             isstr(obj) or \
-            isunicode(obj) or \
             isint(obj) or \
-            islong(obj) or \
             isfloat(obj)
 
 def islist(obj):
@@ -68,6 +54,12 @@ def islist(obj):
     islist
     '''
     return isinstance(obj, list)
+
+def istuple(obj):
+    '''
+    istuple
+    '''
+    return isinstance(obj, tuple)
 
 def isdict(obj):
     '''
