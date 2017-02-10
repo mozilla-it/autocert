@@ -8,6 +8,8 @@ from attrdict import AttrDict
 
 from utils.format import fmt
 
+from app import app
+
 class DestinationPathError(Exception):
     def __init__(self, path_or_paths):
         msg = fmt('error with DestinationBase param path(s) = {path_or_paths}')
@@ -68,6 +70,8 @@ class DestinationBase(object):
             kws = [self.keywords(path=path, dest=dest, json=json, **kw) for (path, json), dest in product(zip(paths, jsons), dests)]
         else:
             kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in product(paths, dests)]
+        app.logger.debug('requests kws =')
+        app.logger.debug(pformat(kws))
         return self.ar.requests(method, *kws)
 
     def gets(self, paths=None, dests=None, jsons=None, **kw):
