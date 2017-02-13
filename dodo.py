@@ -194,6 +194,16 @@ def task_rmvolumes():
         ],
     }
 
+def task_logs():
+    '''
+    simple wrapper that calls 'docker-compose logs'
+    '''
+    return {
+        'actions': [
+            'docker-compose logs',
+        ],
+    }
+
 def task_config():
     '''
     write config.yml -> .config.yml
