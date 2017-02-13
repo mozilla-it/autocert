@@ -10,8 +10,8 @@ from attrdict import AttrDict
 from cli.utils.dictionary import merge
 
 CFG_FILES = [
-    '~/.config/autocert/autocert.yml',
     '{0}/autocert.yml'.format(os.path.dirname(__file__)),
+    '~/.config/autocert/autocert.yml',
 ]
 
 def _load_config(cfgs):
