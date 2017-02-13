@@ -10,6 +10,8 @@ from utils.newline import windows2unix
 from app import app
 from utils.output import yaml_format
 
+from utils.format import fmt, pfmt
+
 from cert import decompose_cert
 
 def compose_json(crt, csr, key, note):
@@ -53,6 +55,7 @@ class ZeusDestination(DestinationBase):
         calls = self.gets(paths=paths, dests=dests, verify_ssl=False)
         summary = []
         for dest, call in zip(dests, calls):
+            app.logger.debug(fmt('dest={dest} call=\n{call}'))
             for child in call.recv.json.children:
                 if child.name in common_names:
                     summary += [(child.name, 'ssl/server_keys/' + child.name, dest)]
