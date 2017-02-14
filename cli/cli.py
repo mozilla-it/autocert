@@ -112,6 +112,7 @@ def main():
         choices=SORTING,
         help='default="%(default)s"; set the sorting method; choices=[%(choices)s]')
 
+    parser.set_defaults(**CFG)
     ns, rem = parser.parse_known_args()
     if not any([h in rem for h in ('-h', '--help')]):
         version_check(ns)
