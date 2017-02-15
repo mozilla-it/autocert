@@ -80,8 +80,7 @@ class EndpointBase(object):
         )
         if self.args.calls:
             calls = [self.transform_call(call) for call in self.ar.calls]
-            if calls:
-                json['calls'] = calls
+            json['calls'] = calls
         return json
 
     def transform_cert(self, cert):
