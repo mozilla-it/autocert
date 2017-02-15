@@ -70,6 +70,10 @@ ARGS = {
         action='store_true',
         help='force verification with authority'
     ),
+    ('--expired',): dict(
+        action='store_true',
+        help='show expired certs'
+    ),
     ('common_name',): dict(
         metavar='common-name',
         help='the commmon-name to be used for the certificate',

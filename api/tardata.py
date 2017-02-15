@@ -6,7 +6,7 @@ import glob
 
 from utils import tar
 from utils import sift
-from utils.dictionary import merge
+from utils.dictionary import merge, body
 
 from utils.format import fmt, pfmt
 
@@ -67,8 +67,10 @@ class Tardata(object):
         key, csr, crt, cert = tar.unbundle(self.tarpath, cert_name)
         return self.create_certdata(cert_name, key, csr, crt, cert)
 
-    def get_certdata_from_tarfiles(self, *cert_name_pns):
-        certdata = []
+    def get_certdata_from_tarfiles(self, timestamp, *cert_name_pns):
+        certs = []
         for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
-            certdata += [self.get_certdata_from_tarfile(cert_name)]
-        return certdata
+            cert = self.get_certdata_from_tarfile(cert_name)
+            if timestamp == None or body(cert)['expiry'] > timestamp:
+                certs += [cert]
+        return certs

@@ -19,6 +19,7 @@ def add_parser(subparsers):
     add_argument(parser, '-a', '--authorities', required=False, default=[]) #FIXME: should be similar to DESTINATIONS
     add_argument(parser, '-d', '--destinations', required=False, default=CFG.DESTINATIONS)
     add_argument(parser, '--verify')
+    add_argument(parser, '--expired')
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'cert_name_pns')

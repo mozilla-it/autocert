@@ -30,7 +30,7 @@ class UpdateEndpoint(EndpointBase):
     def execute(self, **kwargs):
         status = 201
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
-        certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
+        certs = self.tardata.get_certdata_from_tarfiles(self.timestamp, *cert_name_pns)
         if self.args.get('authority', None):
             certs = self.renew(certs, **kwargs)
         elif self.args.get('destinations', None):

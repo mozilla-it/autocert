@@ -25,7 +25,7 @@ class DisplayEndpoint(EndpointBase):
     def execute(self, **kwargs):
         status = 200
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
-        certs = self.tardata.get_certdata_from_tarfiles(*cert_name_pns)
+        certs = self.tardata.get_certdata_from_tarfiles(None if self.args.expired else self.timestamp, *cert_name_pns)
         certs2 = []
         if self.verbosity > 1:
             #FIXME: this should be driven by the yml in the cert tarball
