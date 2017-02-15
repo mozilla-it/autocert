@@ -4,21 +4,18 @@ services:
         restart: always
         build: ./api
         ports:
-          - "80:8000"
+          - "8000:8000"
         volumes:
           - /data/autocert:/data/autocert
         command: python3 -u /usr/local/bin/gunicorn -t 120 -w 2 -b :8000 main:app
-
     nginx:
         restart: always
         build: ./nginx
         ports:
-          - "8000:8000"
+          - "80:80"
         volumes:
           - /www/static
         volumes_from:
           - api
-        #links:
-        #  - api:app
-        depends_on:
-          - api
+        links:
+          - api:app
