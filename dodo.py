@@ -30,9 +30,9 @@ class UnknownPkgmgrError(Exception):
         super(UnknownPkgmgrError, self).__init__('unknown pkgmgr!')
 
 def check_hash(program):
-    from subprocess import check_call, CalledProcessError
+    from subprocess import check_call, CalledProcessError, PIPE
     try:
-        check_call('hash {program}'.format(**locals()), shell=True)
+        check_call('hash {program}'.format(**locals()), shell=True, stdout=PIPE, stderr=PIPE)
         return True
     except CalledProcessError:
         return False
