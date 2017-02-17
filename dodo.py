@@ -81,6 +81,9 @@ def task_checkreqs():
         },
         'rpm': {
             'actions': ['rpm -q ' + rpm for rpm in RPMS],
+        },
+        'brew': {
+            'actions': ['true'],
         }
     }[get_pkgmgr()]
 
