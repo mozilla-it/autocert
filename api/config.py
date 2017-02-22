@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 
 from copy import deepcopy
 from glob import glob
@@ -9,6 +10,7 @@ from ruamel import yaml
 from attrdict import AttrDict
 from urlpath import URL
 from pathlib2 import Path
+from dns import resolver
 
 try:
     from utils.dictionary import merge
@@ -18,6 +20,8 @@ except ImportError:
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
 DOT_CONFIG_YML = '{0}/.config.yml'.format(CONFIG_DIR)
+
+IP_PATTERN = '[0-9]{1,3}(.[0-9]{1,3}){3}'
 
 class ConfigLoadError(Exception):
     def __init__(config, errors=None):
@@ -49,7 +53,10 @@ def _fixup(obj):
         for k,v in obj.items():
             if isinstance(v, str):
                 if 'url' in k:
-                    d[k] = URL(v)
+                    url = URL(v)
+                    if not re.search(IP_PATTERN, url.hostname):
+                        resolver.query(url.hostname) #will throw NXDOMAIN if not resolving
+                    d[k] = url
                 elif 'path' in k:
                     d[k] = Path(v)
             elif isinstance(v, dict):
