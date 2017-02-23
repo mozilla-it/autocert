@@ -6,3 +6,4 @@ ruamel.yaml==0.12.15
 packaging==16.8
 virtualenv==15.1.0
 docker-compose==1.11.1
+dnspython3==1.15.0
