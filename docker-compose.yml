@@ -1,6 +1,7 @@
 version: '2'
 services:
     api:
+        network_mode: host
         restart: always
         build: ./api
         expose:
@@ -9,11 +10,12 @@ services:
           - /data/autocert:/data/autocert
         command: python3 -u /usr/local/bin/gunicorn -t 120 -w 2 -b :8000 main:app
     nginx:
+        network_mode: host
         restart: always
         build: ./nginx
         ports:
           - "80:80"
         volumes_from:
           - api
-        links:
-          - api:app
+        depends_on:
+          - api
