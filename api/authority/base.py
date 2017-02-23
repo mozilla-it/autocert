@@ -49,7 +49,7 @@ class AuthorityBase(object):
 
     def requests(self, method, paths=None, **kw):
         if not paths or not isinstance(paths, list):
-            raise AuthorityPathsError(paths)
+            raise AuthorityPathError(paths)
         kws = [self.keywords(path=path, **kw) for path in paths]
         return self.ar.requests(method, *kws)
 
