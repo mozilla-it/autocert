@@ -3,8 +3,8 @@ services:
     api:
         restart: always
         build: ./api
-        ports:
-          - "8000:8000"
+        expose:
+          - "8000"
         volumes:
           - /data/autocert:/data/autocert
         command: python3 -u /usr/local/bin/gunicorn -t 120 -w 2 -b :8000 main:app
@@ -13,8 +13,6 @@ services:
         build: ./nginx
         ports:
           - "80:80"
-        volumes:
-          - /www/static
         volumes_from:
           - api
         links:
