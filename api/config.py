@@ -10,7 +10,6 @@ from ruamel import yaml
 from attrdict import AttrDict
 from urlpath import URL
 from pathlib2 import Path
-from dns import resolver
 
 try:
     from utils.dictionary import merge
@@ -53,10 +52,7 @@ def _fixup(obj):
         for k,v in obj.items():
             if isinstance(v, str):
                 if 'url' in k:
-                    url = URL(v)
-                    if not re.search(IP_PATTERN, url.hostname):
-                        resolver.query(url.hostname) #will throw NXDOMAIN if not resolving
-                    d[k] = url
+                    d[k] = URL(v)
                 elif 'path' in k:
                     d[k] = Path(v)
             elif isinstance(v, dict):
