@@ -69,9 +69,6 @@ class EndpointBase(object):
     def execute(self, **kwargs):
         raise NotImplementedError
 
-    def respond(self, json, status):
-        return make_response(jsonify(json), status)
-
     def transform(self, certs):
         sorting_func = SORTING_FUNCS[self.args.sorting]
         certs = sorted(certs, key=sorting_func)

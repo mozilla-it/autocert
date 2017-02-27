@@ -11,7 +11,3 @@ class RevokeEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         raise NotImplementedError
-
-    def respond(self, **kwargs):
-        raise NotImplementedError
-
