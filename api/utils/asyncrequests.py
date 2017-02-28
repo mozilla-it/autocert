@@ -86,7 +86,7 @@ class AsyncRequests(Singleton):
                     delta = datetime.now() - start
                     if repeat_delta and delta < repeat_delta:
                         repeat += 1
-                        print(fmt('{delta} < {repeat_delta}; repeat {repeat}'))
+                        pfmt('{delta} < {repeat_delta}; repeat {repeat}')
                         await asyncio.sleep(repeat_wait)
                         continue
                 if raise_if and raise_if(call):
