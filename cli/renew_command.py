@@ -27,8 +27,6 @@ def do_renew(ns):
     response = requests.put(ns.api_url / 'autocert', json=json)
     if response.status_code == 201:
         certs = response.json()['certs']
-        if not ns.verbose:
-            pass
         output(certs)
         return
     else:
