@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+'''
+destination.base
+'''
 
-from pprint import pformat, pprint
-
+from pprint import pformat
 from itertools import product
 from attrdict import AttrDict
 
-from utils.format import fmt
+from utils.format import fmt, pfmt
 
 from app import app
 
