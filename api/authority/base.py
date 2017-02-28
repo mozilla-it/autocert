@@ -3,10 +3,13 @@
 '''
 authority.base
 '''
+
+from itertools import product
 from attrdict import AttrDict
-from pprint import pprint
 
 from utils.format import fmt
+
+from app import app
 
 class AuthorityFactoryError(Exception):
     def __init__(self, authority):
@@ -17,6 +20,13 @@ class AuthorityPathError(Exception):
     def __init__(self, path_or_paths):
         msg = fmt('error with AuthorityBase param path(s) = {path_or_paths}')
         super(AuthorityPathError, self).__init__(msg)
+
+class JsonsDontMatchPathsError(Exception):
+    def __init__(self, jsons, paths):
+        len_jsons = len(jsons) if isinstance(jsons, list) else None
+        len_paths = len(paths) if isinstance(paths, list) else None
+        msg = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
+        super(JsonsDontMatchPathsError, self).__init__(msg)
 
 class AuthorityBase(object):
     def __init__(self, ar, cfg, verbosity):
@@ -47,23 +57,28 @@ class AuthorityBase(object):
     def delete(self, path=None, **kw):
         return self.request('DELETE', path=path, **kw)
 
-    def requests(self, method, paths=None, **kw):
-        if not paths or not isinstance(paths, list):
+    def requests(self, method, paths=None, jsons=None, **kw):
+        if not paths or not hasattr(paths, '__iter__'):
             raise AuthorityPathError(paths)
-        kws = [self.keywords(path=path, **kw) for path in paths]
+        if jsons:
+            if len(jsons) != len(paths):
+                raise JsonsDontMatchPathsError(jsons, paths)
+            kws = [self.keywords(path=path, json=json, **kw) for (path, json) in product(paths, jsons)]
+        else:
+            kws = [self.keywords(path=path, **kw) for path in paths]
         return self.ar.requests(method, *kws)
 
-    def gets(self, paths=None, **kw):
-        return self.requests('GET', paths=paths, **kw)
+    def gets(self, paths=None, jsons=None, **kw):
+        return self.requests('GET', paths=paths, jsons=jsons, **kw)
 
-    def puts(self, paths=None, **kw):
-        return self.requests('PUT', paths=paths, **kw)
+    def puts(self, paths=None, jsons=None, **kw):
+        return self.requests('PUT', paths=paths, jsons=jsons, **kw)
 
-    def posts(self, paths=None, **kw):
-        return self.requests('POST', paths=paths, **kw)
+    def posts(self, paths=None, jsons=None, **kw):
+        return self.requests('POST', paths=paths, jsons=jsons, **kw)
 
-    def deletes(self, paths=None, **kw):
-        return self.requests('DELETE', paths=paths, **kw)
+    def deletes(self, paths=None, jsons=None, **kw):
+        return self.requests('DELETE', paths=paths, jsons=jsons, **kw)
 
     def display_certificates(self, certs):
         raise NotImplementedError
