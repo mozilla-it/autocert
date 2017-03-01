@@ -73,6 +73,27 @@ class DigicertAuthority(AuthorityBase):
 
     def create_certificate(self, common_name, timestamp, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
+        path, json = self._prepare_path_json(common_name, csr, sans=sans)
+        crts, expiries, order_ids = self._create_certificates([path], [json], repeat_delta)
+        cert = certify(common_name, timestamp, expiries[0], order_ids[0])
+        if sans:
+            cert['sans'] = list(sans)
+        return crts[0], cert
+
+    def renew_certificates(self, certs):
+        paths = []
+        jsons = []
+        for cert in certs:
+            path, json = self._cert_to_path_json(cert)
+            paths += path
+            jsons += json
+        crts, expiries, order_ids = self._create_certificates(paths, jsons, repeat_delta)
+        raise NotImplementedError
+
+    def revoke_certificates(self, certs):
+        raise NotImplementedError
+
+    def _prepare_path_json(self, common_name, csr, sans=None):
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
             certificate=dict(
@@ -83,30 +104,34 @@ class DigicertAuthority(AuthorityBase):
             json = merge(json, dict(
                 certificate=dict(
                     dns_names=sans)))
-        order_ids, request_ids = self._order_certificates([path], [json])
-        pfmt('order_ids={order_ids}')
-        result = self._approve_certificates(request_ids)
-        pfmt('result={result}')
+        return path, json
+
+    def _cert_to_path_json(self, cert):
+        cert_body = body(cert)
+        timestamp = cert_body['timestamp']
+        common_name = cert_body['common_name']
+        sans = cert_body.get('sans', None)
+        order_id = cert_body['autority']['digicert']['order_id']
+        tar_body = body(cert_body['tardata'])
+        csr = tar_body[fmt('{common_name}@{timestamp}.csr')]
+        path, json = self._prepare_path_json(common_name, csr, sans=sans)
+        json['renewal_of_order_id'] = order_id
+        return path, json
+
+    def _create_certificates(self, paths, jsons, repeat_delta):
+        order_ids, request_ids = self._order_certificates(paths, jsons)
+        self._approve_certificates(request_ids)
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
-        pfmt('certificate_ids={certificate_ids}')
         try:
-            crt = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)[0]
-            call = self._get_certificate_order_detail(order_ids)[0]
-            expiry = expiryify(call.recv.json.certificate.valid_till)
+            crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
+            calls = self._get_certificate_order_detail(order_ids)
+            expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
         except DownloadCertificateError as dce:
+            app.logger.warning(str(dce))
             crt = None
             expiry = None
-        cert = certify(common_name, timestamp, expiry, order_ids[0])
-        if sans:
-            cert['sans'] = list(sans)
-        return crt, cert
-
-    def renew_certificates(self, certs):
-        pass
-
-    def revoke_certificates(self, certs):
-        raise NotImplementedError
+        return crts, expiries, order_ids
 
     def _order_certificates(self, paths, jsons):
         app.logger.info(fmt('_order_certificates:\n{locals}'))
@@ -114,10 +139,7 @@ class DigicertAuthority(AuthorityBase):
         for call in calls:
             if call.recv.status != 201:
                 raise OrderCertificateError(call)
-        result = zip(*[(call.recv.json.id, call.recv.json.requests[0].id) for call in calls])
-        result = list(result)
-        pfmt('result={result}')
-        return result
+        return zip(*[(call.recv.json.id, call.recv.json.requests[0].id) for call in calls])
 
     def _approve_certificates(self, request_ids):
         app.logger.info(fmt('_approve_certificates:\n{locals}'))
