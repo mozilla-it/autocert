@@ -149,7 +149,8 @@ class DigicertAuthority(AuthorityBase):
         calls = self.puts(paths=paths, jsons=jsons)
         for call in calls:
             if call.recv.status != 204:
-                raise ApproveCertificateError(call)
+                if call.recv.json.errors[0].code != 'request_already_processed':
+                    raise ApproveCertificateError(call)
         return True
 
     def _get_certificate_order_detail(self, order_ids):
