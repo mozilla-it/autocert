@@ -8,6 +8,7 @@ from pprint import pformat
 from attrdict import AttrDict
 
 from utils.format import fmt, pfmt
+from utils.output import yaml_format
 
 from app import app
 
@@ -41,7 +42,10 @@ class UpdateEndpoint(EndpointBase):
         return json, status
 
     def renew(self, certs, **kwargs):
-        app.logger.info(fmt('renew: certs={certs} kwargs={kwargs}'))
+        count = len(certs) if certs else 0
+        certs_str = yaml_format(certs)
+        kwargs_str = yaml_format(kwargs)
+        app.logger.info(fmt('renew: {count} certs={certs_str} kwargs={kwargs_str}'))
         return []
 
     def deploy(self, certs, **kwargs):
