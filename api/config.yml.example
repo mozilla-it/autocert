@@ -11,10 +11,10 @@ csr:
         org_state: CA
         org_zip: 94041
         org_country: US
-        org_contact_firstname: Scott
-        org_contact_lastname: Idler
-        org_contact_email: sidler@mozilla.com
-        org_contact_telephone: 503.862.3533
+        org_contact_firstname: Some
+        org_contact_lastname: One
+        org_contact_email: someone@mozilla.com
+        org_contact_telephone: 800.867.5309
 
 key:
     # location where .key files are stored
