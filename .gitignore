@@ -103,3 +103,5 @@ api/.config.yml
 
 # skip .bak files
 *.bak
+
+digitool.py
