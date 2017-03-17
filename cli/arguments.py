@@ -12,27 +12,46 @@ CALLS_STYLE = [
     'detail',
 ]
 
+ORGANIZATIONS = [
+    'f', 'Mozilla Foundation',
+    'c', 'Mozilla Corporation',
+]
+
+def organization_type(string):
+    if string == 'f':
+        return 'Mozilla Foundation'
+    elif string == 'c':
+        return 'Mozilla Corporation'
+    return string
+
 # these are the default values for these arguments
 ARGS = {
+    ('-o', '--organization-name'): dict(
+        metavar='ORG',
+        required=True,
+        choices=ORGANIZATIONS,
+        type=organization_type,
+        help='which organization to take action under; choices=[%(choices)s]'
+    ),
     ('-a', '--authority'): dict(
         metavar='AUTH',
         default=CFG.AUTHORITIES[0],
         choices=CFG.AUTHORITIES,
-        help='default="%(default)s"; choose authority; "%(choices)s"',
+        help='default="%(default)s"; choose authority; choices=[%(choices)s]'
     ),
     ('-a', '--authorities'): dict(
         metavar='AUTH',
         required=True,
         choices=CFG.AUTHORITIES,
         nargs='+',
-        help='default="%(default)s"; choose authorities; "%(choices)s"',
+        help='default="%(default)s"; choose authorities; choices=[%(choices)s]'
     ),
     ('-d', '--destinations'): dict(
         metavar='DEST',
         required=True,
         choices=CFG.DESTINATIONS,
         nargs='+',
-        help='default="%(default)s"; choose destinations; "%(choices)s"',
+        help='default="%(default)s"; choose destinations; choices=[%(choices)s]'
     ),
     ('-w', '--within'): dict(
         metavar='DAYS',
@@ -55,7 +74,7 @@ ARGS = {
         const=CALLS_STYLE[0],
         choices=CALLS_STYLE,
         nargs='?',
-        help='const="%(const)s"; toggle and choose the call output format'
+        help='const="%(const)s"; toggle and choose the call output format; choices=[%(choices)s]'
     ),
     ('-v', '--verbose'): dict(
         metavar='LEVEL',
@@ -64,7 +83,7 @@ ARGS = {
         const=1,
         type=int,
         nargs='?',
-        help='set verbosity level',
+        help='set verbosity level'
     ),
     ('--verify',): dict(
         action='store_true',
@@ -76,14 +95,14 @@ ARGS = {
     ),
     ('common_name',): dict(
         metavar='common-name',
-        help='the commmon-name to be used for the certificate',
+        help='the commmon-name to be used for the certificate'
     ),
     ('cert_name_pns',): dict(
         metavar='cert-name',
         default='*',
         nargs='*',
         help='default="%(default)s"; <common-name>@<timestamp>; glob expressions '
-            'also accepted; if only a common-name is given, "*" will be appended',
+            'also accepted; if only a common-name is given, "*" will be appended'
     ),
 }
 

@@ -32,6 +32,7 @@ class CreateEndpoint(EndpointBase):
         status = 201
         key, csr = pki.create_key_and_csr(self.args.common_name, self.args.sans)
         crt, cert = self.authority.create_certificate(
+            self.args.organization_name,
             self.args.common_name,
             self.timestamp,
             csr,

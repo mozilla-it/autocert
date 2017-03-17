@@ -132,4 +132,5 @@ def main():
     ns = parser.parse_args()
     if ns.debug:
         print('ns =', ns)
+        sys.exit(0)
     ns.func(ns)

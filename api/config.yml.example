@@ -46,8 +46,6 @@ authorities:
                 server_platform:
                     id: 2 #Apache
                 signature_hash: sha256
-            organization:
-                id: 147486
             payment_method: balance
             validity_years: 1
 

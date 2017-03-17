@@ -15,6 +15,7 @@ from utils.dictionary import dictify
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('create')
+    add_argument(parser, '-o', '--organization-name')
     add_argument(parser, '-a', '--authority')
     add_argument(parser, '-d', '--destinations', required=False)
     add_argument(parser, '-s', '--sans')

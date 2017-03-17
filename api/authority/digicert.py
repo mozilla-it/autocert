@@ -33,6 +33,16 @@ class DownloadCertificateError(Exception):
         msg = fmt('download certificate error call={0}', call)
         super(DownloadCertificateError, self).__init__(msg)
 
+class OrganizationNameNotFoundError(Exception):
+    def __init__(self, organization_name):
+        msg = fmt('organization name {organization_name} not found')
+        super(OrganizationNameNotFoundError, self).__init__(msg)
+
+class NotValidatedDomainError(Exception):
+    def __init__(self, common_name):
+        msg = fmt('domain not validated for {common_name}')
+        super(NotValidatedDomainError, self).__init__(msg)
+
 def expiryify(valid_till):
     from utils.timestamp import string2int
     if valid_till and valid_till != 'null':
@@ -71,9 +81,12 @@ class DigicertAuthority(AuthorityBase):
         csrs = [call.recv.json.certificate.csr for call in calls]
         return [certify(*args) for args in zip(common_names, timestamps, expiries, order_ids, csrs, crts, certs)]
 
-    def create_certificate(self, common_name, timestamp, csr, sans=None, repeat_delta=None):
+    def create_certificate(self, organization_name, common_name, timestamp, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
-        path, json = self._prepare_path_json(common_name, csr, sans=sans)
+        organization_id, container_id = self._get_organization_container_ids(organization_name)
+        if not self._is_validated_domain(common_name, organization_id, container_id):
+            raise NotValidatedDomainError(common_name)
+        path, json = self._prepare_path_json(organization_id, common_name, csr, sans=sans)
         crts, expiries, order_ids = self._create_certificates([path], [json], repeat_delta)
         cert = certify(common_name, timestamp, expiries[0], order_ids[0])
         if sans:
@@ -93,12 +106,40 @@ class DigicertAuthority(AuthorityBase):
     def revoke_certificates(self, certs):
         raise NotImplementedError
 
-    def _prepare_path_json(self, common_name, csr, sans=None):
+    def _get_organization_container_ids(self, organization_name):
+        path = 'organization'
+        call = self.get(path)
+        for organization in call.recv.json.organizations:
+            if organization.name == organization_name:
+                return organization.id, organization.container.id
+        raise OrganizationNameNotFoundError(organization_name)
+
+    def _get_domains(self, organization_id, container_id):
+        call = self.get(fmt('domain?container_id={container_id}'))
+        return [domain for domain in call.recv.json.domains if domain.organization.id == organization_id]
+
+    def _is_validated_domain(self, common_name, organization_id, container_id):
+        app.logger.info(fmt('_is_validated_domain:\n{locals}'))
+        domains = self._get_domains(organization_id, container_id)
+        matched_domains = [domain for domain in domains if common_name == domain.name]
+        if matched_domains:
+            domain = matched_domains[0]
+        else:
+            matched_subdomains = [domain for domain in domains if common_name.endswith('.'+domain.name)]
+            if matched_subdomains:
+                domain = matched_subdomains[0]
+            else:
+                return False
+        return domain.is_active
+
+    def _prepare_path_json(self, organization_id, common_name, csr, sans=None):
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
             certificate=dict(
                 common_name=common_name,
-                csr=csr)))
+                csr=csr),
+            organization=dict(
+                id=organization_id)))
         if sans:
             path = 'order/certificate/ssl_multi_domain'
             json = merge(json, dict(
