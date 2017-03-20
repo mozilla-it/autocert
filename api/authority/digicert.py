@@ -200,7 +200,7 @@ class DigicertAuthority(AuthorityBase):
         calls = self.gets(paths=paths)
         return calls
 
-    def _download_certificates(self, certificate_ids, format_type='pem_all', repeat_delta=None):
+    def _download_certificates(self, certificate_ids, format_type='pem_noroot', repeat_delta=None):
         app.logger.info(fmt('_download_certificates:\n{locals}'))
         if repeat_delta is not None and isinstance(repeat_delta, int):
             repeat_delta = timedelta(seconds=repeat_delta)
