@@ -14,13 +14,17 @@ def fmt_dict(obj):
         return pformat(obj)
     return str(obj)
 
+def _format(string, *args, **kwargs):
+    return string.format(*args, **kwargs)
+
 def _fmt(string, args, kwargs, do_print=False):
     '''
     here there be baby dragons!
     '''
     try:
         if args or kwargs:
-            return string.format(
+            return _format(
+                string,
                 *[fmt_dict(arg) for arg in args],
                 **{k:fmt_dict(v) for k,v in kwargs.items()})
         frame = inspect.currentframe().f_back.f_back
@@ -30,7 +34,7 @@ def _fmt(string, args, kwargs, do_print=False):
         if frame.f_code.co_name == '<listcomp>':
             frame = frame.f_back
             gl.update(frame.f_locals)
-        s = string.format(**{k:fmt_dict(v) for k,v in gl.items()})
+        s = _format(string, **{k:fmt_dict(v) for k,v in gl.items()})
     except KeyError as ke:
         print('keyerror not found in following keys of gl dict:')
         pprint(list(gl.keys()))
