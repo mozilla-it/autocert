@@ -8,7 +8,6 @@ from attrdict import AttrDict
 from fnmatch import fnmatch
 from ruamel import yaml
 
-from utils import tar
 from utils.dictionary import merge, head, head_body
 from utils.format import fmt, pfmt
 from app import app

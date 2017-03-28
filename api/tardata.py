@@ -47,7 +47,7 @@ class Tardata(object):
         _, cert_name, _ = self.decompose_tarfile(tarfile)
         return cert_name
 
-    def create_certdata(self, cert_name, key, csr, crt, cert):
+    def create_certdata(self, cert_name, key=None, csr=None, crt=None, cert=None):
         if not cert:
             cert = {cert_name: {}}
 

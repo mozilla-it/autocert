@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+'''
+api.cert
+'''
+
 from utils.format import fmt, pfmt
 from utils.isinstance import *
 
@@ -72,3 +76,4 @@ def visit(obj, func=printit):
     else:
         raise VisitError(obj)
     return obj1
+
