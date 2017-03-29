@@ -32,6 +32,9 @@ def test_ctor(cert):
 def test_cert_name(cert):
     assert cert.cert_name == '{0}@{1}'.format(cert.common_name, cert.timestamp)
 
+def test_tarfile(cert):
+    assert cert.tarfile == cert.cert_name + '.tar.gz'
+
 def test_files(cert):
     assert cert.files == {
         cert.cert_name + '.key': KEY,
@@ -39,20 +42,14 @@ def test_files(cert):
         cert.cert_name + '.crt': CRT,
     }
 
-def test_to_disk(cert, tmpdir):
+def test_disk_roundtrip(cert, tmpdir, capsys):
     tarpath = tmpdir.mkdir('tarpath')
-    tarfile = cert.to_disk(tarpath)
-    output = check_output('tar -tvf ' + tarfile, shell=True).decode('utf-8')
-    assert cert.cert_name + '.key' in output
+    tarfile = cert.save(tarpath)
+    cert2 = Cert.load(tarpath, cert.cert_name)
+    assert cert == cert2
 
-def test_roundtrip(cert, tmpdir, capsys):
-    tarpath = tmpdir.mkdir('tarpath')
-    tarfile = cert.to_disk(tarpath)
-    cert2 = Cert.from_disk(tarpath, cert.cert_name)
-    assert cert.common_name == cert2.common_name
-    assert cert.timestamp == cert2.timestamp
-    assert cert.key == cert2.key
-    assert cert.csr == cert2.csr
-    assert cert.crt == cert2.crt
-    assert cert.expiry == cert2.expiry
-    assert cert.authority == cert2.authority
+def test_json_roundtrip(cert):
+    json = cert.to_json()
+    print('json =', json)
+    cert2 = Cert.from_json(json)
+    assert cert == cert2
