@@ -6,8 +6,6 @@ utils.cert
 
 import copy
 
-from pprint import pprint
-
 from utils import tar
 from utils.format import fmt, pfmt
 from utils.isinstance import *
@@ -15,6 +13,12 @@ from utils.isinstance import *
 from utils.output import yaml_format, output
 from utils.dictionary import head, body, head_body, keys_ending
 
+
+class CertFromJsonError(Exception):
+    def __init__(self, ex):
+        msg = 'cert.from_json error'
+        super(CertFromJsonError, self).__init__(msg)
+        self.errors = [ex]
 
 class Cert(object):
 
@@ -38,12 +42,11 @@ class Cert(object):
             self.key == cert.key and
             self.csr == cert.csr and
             self.crt == cert.crt and
-            self.expiry == cert.epiry and
-            self.authority == cert.authority) #and
-            #self.destinations == cert.destinations)
+            self.expiry == cert.expiry and
+            self.authority == cert.authority)
 
     @staticmethod
-    def from_disk(tarpath, cert_name):
+    def load(tarpath, cert_name):
         key, csr, crt, yml = tar.unbundle(tarpath, cert_name)
         return Cert(
             yml.pop('common_name', None),
@@ -56,7 +59,28 @@ class Cert(object):
 
     @staticmethod
     def from_json(json):
-        pass
+        try:
+            cert_name, cert_body = head_body(json)
+            common_name = cert_body['common_name']
+            timestamp = cert_body['timestamp']
+            expiry = cert_body['expiry']
+            authority = cert_body['authority']
+            destinations = cert_body.get('destinations', None)
+            files = cert_body['tardata'][fmt('{cert_name}.tar.gz')]
+            key = files[fmt('{cert_name}.key')]
+            csr = files[fmt('{cert_name}.csr')]
+            crt = files[fmt('{cert_name}.crt')]
+        except KeyError as ke:
+            raise CertFromJsonError(ke)
+        return Cert(
+            common_name,
+            timestamp,
+            key,
+            csr,
+            crt,
+            expiry,
+            authority,
+            destinations)
 
     @property
     def cert_name(self):
@@ -75,11 +99,8 @@ class Cert(object):
                 files[self.cert_name + ext] = content
         return files
 
-    def to_disk(self, tarpath):
-        print('to_disk:')
+    def save(self, tarpath):
         yml = copy.deepcopy(self.authority)
-        print('yml')
-        pprint(yml)
         yml.pop('key', None)
         yml.pop('csr', None)
         yml.pop('crt', None)
