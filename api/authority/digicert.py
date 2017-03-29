@@ -49,22 +49,22 @@ def expiryify(valid_till):
         return string2int(valid_till)
     return valid_till
 
-def certify(common_name, timestamp, expiry, order_id, csr=None, crt=None, cert=None):
-    if cert == None:
-        cert = {}
-    cert_name = create_cert_name(common_name, timestamp)
-    digicert = dict(order_id=order_id)
-    if csr:
-        digicert['csr'] = csr
-    if crt:
-        digicert['crt'] = crt
-    return merge(cert, {
-        cert_name: dict(
-            common_name=common_name,
-            timestamp=timestamp,
-            expiry=expiry,
-            authority=dict(
-                digicert=digicert))})
+#def certify(common_name, timestamp, expiry, order_id, csr=None, crt=None, cert=None):
+#    if cert == None:
+#        cert = {}
+#    cert_name = create_cert_name(common_name, timestamp)
+#    digicert = dict(order_id=order_id)
+#    if csr:
+#        digicert['csr'] = csr
+#    if crt:
+#        digicert['crt'] = crt
+#    return merge(cert, {
+#        cert_name: dict(
+#            common_name=common_name,
+#            timestamp=timestamp,
+#            expiry=expiry,
+#            authority=dict(
+#                digicert=digicert))})
 
 class DigicertAuthority(AuthorityBase):
     def __init__(self, ar, cfg, verbosity):

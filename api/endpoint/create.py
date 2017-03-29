@@ -11,7 +11,8 @@ from attrdict import AttrDict
 from datetime import timedelta
 
 from utils.format import fmt
-from utils import tar, pki
+#from utils import tar
+from utils import pki
 from cert import create_cert_name
 
 from app import app
@@ -42,7 +43,7 @@ class CreateEndpoint(EndpointBase):
             self.args.sans,
             self.args.repeat_delta)
         cert_name = create_cert_name(self.args.common_name, self.timestamp)
-        tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, cert)
+        #tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, cert)
         cert = self.tardata.create_certdata(cert_name, key, csr, crt, cert)
         if self.args.destinations:
             for name, dests in self.args.destinations.items():
