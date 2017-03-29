@@ -46,32 +46,48 @@ class Cert(object):
             self.authority == cert.authority)
 
     @staticmethod
-    def load(tarpath, cert_name):
-        key, csr, crt, yml = tar.unbundle(tarpath, cert_name)
-        return Cert(
-            yml.pop('common_name', None),
-            yml.pop('timestamp', None),
-            key,
-            csr,
-            crt,
-            expiry=yml.pop('expiry', None),
-            authority=yml)
-
-    @staticmethod
-    def from_json(json):
+    def _decompose(cert, tardata=False):
         try:
-            cert_name, cert_body = head_body(json)
+            cert_name, cert_body = head_body(cert)
+            print('cert_name =', cert_name)
             common_name = cert_body['common_name']
+            print('common_name =', common_name)
             timestamp = cert_body['timestamp']
+            print('timestamp =', timestamp)
             expiry = cert_body['expiry']
             authority = cert_body['authority']
             destinations = cert_body.get('destinations', None)
-            files = cert_body['tardata'][fmt('{cert_name}.tar.gz')]
-            key = files[fmt('{cert_name}.key')]
-            csr = files[fmt('{cert_name}.csr')]
-            crt = files[fmt('{cert_name}.crt')]
+            if tardata:
+                files = cert_body['tardata'][fmt('{cert_name}.tar.gz')]
+                key = files[fmt('{cert_name}.key')]
+                csr = files[fmt('{cert_name}.csr')]
+                crt = files[fmt('{cert_name}.crt')]
+            else:
+                key, csr, crt = [None] * 3
         except KeyError as ke:
+            print(ke)
+            from pprint import pprint
+            pprint(cert)
             raise CertFromJsonError(ke)
+        return common_name, timestamp, key, csr, crt, expiry, authority, destinations
+
+    @staticmethod
+    def load(tarpath, cert_name):
+        key, csr, crt, yml = tar.unbundle(tarpath, cert_name)
+        common_name, timestamp, _, _, _, expiry, authority, destinations = Cert._decompose(yml)
+        return Cert(
+            common_name,
+            timestamp,
+            key,
+            csr,
+            crt,
+            expiry,
+            authority,
+            destinations)
+
+    @staticmethod
+    def from_json(json):
+        common_name, timestamp, key, csr, crt, expiry, authority, destinations = Cert._decompose(json, True)
         return Cert(
             common_name,
             timestamp,
@@ -100,14 +116,18 @@ class Cert(object):
         return files
 
     def save(self, tarpath):
-        yml = copy.deepcopy(self.authority)
-        yml.pop('key', None)
-        yml.pop('csr', None)
-        yml.pop('crt', None)
-        yml.update(dict(
-            common_name=self.common_name,
-            timestamp=self.timestamp,
-            expiry=self.expiry))
+        authority = copy.deepcopy(self.authority)
+        authority.pop('key', None)
+        authority.pop('csr', None)
+        authority.pop('crt', None)
+        yml = {
+            self.cert_name: {
+                'common_name': self.common_name,
+                'timestamp': self.timestamp,
+                'expiry': self.expiry,
+                'authority': self.authority,
+            }
+        }
         return tar.bundle(
             tarpath,
             self.cert_name,
@@ -122,8 +142,8 @@ class Cert(object):
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
                 'expiry': self.expiry,
-                'destinations': self.destinations,
                 'authority': self.authority,
+                'destinations': self.destinations,
                 'tardata': {
                     self.tarfile: self.files
                 },
