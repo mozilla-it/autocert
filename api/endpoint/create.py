@@ -44,7 +44,6 @@ class CreateEndpoint(EndpointBase):
             self.args.repeat_delta)
         cert = self.tardata.create_cert(
             self.args.common_name,
-            self.timestamp,
             key,
             csr,
             crt,
