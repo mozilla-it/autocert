@@ -35,18 +35,24 @@ class CreateEndpoint(EndpointBase):
     def execute(self):
         status = 201
         key, csr = pki.create_key_and_csr(self.args.common_name, self.args.sans)
-        crt, cert = self.authority.create_certificate(
+        crt, expiry, authority = self.authority.create_certificate(
             self.args.organization_name,
             self.args.common_name,
             self.timestamp,
             csr,
             self.args.sans,
             self.args.repeat_delta)
-        cert_name = create_cert_name(self.args.common_name, self.timestamp)
-        #tarfile = tar.bundle(self.cfg.tar.dirpath, cert_name, key, csr, crt, cert)
-        cert = self.tardata.create_certdata(cert_name, key, csr, crt, cert)
+        cert = self.tardata.create_cert(
+            self.args.common_name,
+            self.timestamp,
+            key,
+            csr,
+            crt,
+            self.args.sans,
+            expiry,
+            authority)
         if self.args.destinations:
             for name, dests in self.args.destinations.items():
-                cert = self.destinations[name].install_certificate(self.args.common_name, crt, csr, key, cert_name, *dests)
+                cert = self.destinations[name].install_certificates([cert], *dests)[0]
         json = self.transform([cert])
         return json, status
