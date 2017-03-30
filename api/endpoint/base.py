@@ -40,12 +40,12 @@ def expiry_sorting(cert):
     head, body = head_body(cert)
     return body.get('expiry', 0)
 
-SORTING_FUNCS = dict(
-    default=default_sorting,
-    timestamp=timestamp_sorting,
-    expiry=expiry_sorting)
-
 class EndpointBase(object):
+    _sorting_funcs = dict(
+        default=default_sorting,
+        timestamp=timestamp_sorting,
+        expiry=expiry_sorting)
+
     def __init__(self, cfg, args):
         self.timestamp = timestamp.utcnow()
         self.ar = AsyncRequests()
@@ -66,13 +66,17 @@ class EndpointBase(object):
     def calls(self):
         return self.ar.calls
 
+    @property
+    def sorting_func(self):
+        return EndpointBase._sorting_funcs[self.args.sorting]
+
     def execute(self, **kwargs):
         raise NotImplementedError
 
     def transform(self, certs):
         certs = [cert.to_json() for cert in certs]
-        sorting_func = SORTING_FUNCS[self.args.sorting]
-        certs = sorted(certs, key=sorting_func)
+        #sorting_func = SORTING_FUNCS[self.args.sorting]
+        certs = sorted(certs, key=self.sorting_func)
         json = dict(
             certs=[self.transform_cert(cert) for cert in certs],
         )
@@ -82,8 +86,6 @@ class EndpointBase(object):
         return json
 
     def transform_cert(self, cert):
-        print('Endpoint.transform_cert:')
-        print(cert)
         cert_name, cert_body = head_body(cert)
         if self.verbosity == 0:
             return {cert_name: cert_body.get('expiry', None)}
