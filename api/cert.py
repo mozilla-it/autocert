@@ -39,7 +39,7 @@ def printit(obj):
 def simple(obj):
     if istuple(obj):
         key, value = obj
-        if key[-3:] in ('crt', 'csr', 'key'):
+        if isinstance(value, str) and key[-3:] in ('crt', 'csr', 'key'):
             value = key[-3:].upper()
         return key, value
     return obj
@@ -47,7 +47,7 @@ def simple(obj):
 def abbrev(obj):
     if istuple(obj):
         key, value = obj
-        if key[-3:] in ('crt', 'csr', 'key'):
+        if isinstance(value, str) and key[-3:] in ('crt', 'csr', 'key'):
             lines = value.split('\n')
             lines = lines[:2] + ['...'] + lines[-3:]
             from pprint import pprint
