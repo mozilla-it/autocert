@@ -30,7 +30,7 @@ class Cert(object):
         self.crt            = crt
         self.expiry         = expiry
         self.authority      = authority
-        self.destinations   = destinations if destinations else []
+        self.destinations   = destinations if destinations else {}
 
     def __repr__(self):
         return yaml_format(self.to_json())
