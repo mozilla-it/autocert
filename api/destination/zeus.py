@@ -29,11 +29,9 @@ class ZeusDestination(DestinationBase):
         details = self._get_installed_certificates_details(certs, *dests)
         if details:
             for cert in certs:
-                cert_name, common_name, crt, csr, key = decompose_cert(cert)
-                destinations = details.get((common_name, crt[:40]), None)
+                destinations = details.get((cert.common_name, cert.crt[:40]), None)
                 if destinations:
-                    cert[cert_name]['destinations'] = cert[cert_name].get('destinations', {})
-                    cert[cert_name]['destinations'].update(destinations)
+                    cert.destinations += ['zeus:'+destination for destination in destinations]
         return certs
 
     def install_certificates(self, certs, *dests):
