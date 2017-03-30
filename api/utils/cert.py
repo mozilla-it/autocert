@@ -22,12 +22,13 @@ class CertFromJsonError(Exception):
 
 class Cert(object):
 
-    def __init__(self, common_name, timestamp, key, csr, crt, expiry=None, authority=None, destinations=None): #FIXME: from CFG?
+    def __init__(self, common_name, timestamp, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
         self.common_name    = common_name
         self.timestamp      = timestamp
         self.key            = key
         self.csr            = csr
         self.crt            = crt
+        self.sans           = sans
         self.expiry         = expiry
         self.authority      = authority
         self.destinations   = destinations if destinations else {}
@@ -42,6 +43,7 @@ class Cert(object):
             self.key == cert.key and
             self.csr == cert.csr and
             self.crt == cert.crt and
+            self.sans == cert.sans and
             self.expiry == cert.expiry and
             self.authority == cert.authority)
 
@@ -53,6 +55,7 @@ class Cert(object):
             timestamp = cert_body['timestamp']
             expiry = cert_body['expiry']
             authority = cert_body['authority']
+            sans = cert_body.get('sans', None)
             destinations = cert_body.get('destinations', None)
             if tardata:
                 files = cert_body['tardata'][fmt('{cert_name}.tar.gz')]
@@ -66,31 +69,33 @@ class Cert(object):
             from pprint import pprint
             pprint(cert)
             raise CertFromJsonError(ke)
-        return common_name, timestamp, key, csr, crt, expiry, authority, destinations
+        return common_name, timestamp, key, csr, crt, sans, expiry, authority, destinations
 
     @staticmethod
     def load(tarpath, cert_name):
         key, csr, crt, yml = tar.unbundle(tarpath, cert_name)
-        common_name, timestamp, _, _, _, expiry, authority, destinations = Cert._decompose(yml)
+        common_name, timestamp, _, _, _, sans, expiry, authority, destinations = Cert._decompose(yml)
         return Cert(
             common_name,
             timestamp,
             key,
             csr,
             crt,
+            sans,
             expiry,
             authority,
             destinations)
 
     @staticmethod
     def from_json(json):
-        common_name, timestamp, key, csr, crt, expiry, authority, destinations = Cert._decompose(json, True)
+        common_name, timestamp, key, csr, crt, sans, expiry, authority, destinations = Cert._decompose(json, True)
         return Cert(
             common_name,
             timestamp,
             key,
             csr,
             crt,
+            sans,
             expiry,
             authority,
             destinations)
@@ -121,6 +126,7 @@ class Cert(object):
             self.cert_name: {
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
+                'sans': self.sans,
                 'expiry': self.expiry,
                 'authority': self.authority,
             }
@@ -138,6 +144,7 @@ class Cert(object):
             self.cert_name: {
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
+                'sans': self.sans,
                 'expiry': self.expiry,
                 'authority': self.authority,
                 'destinations': self.destinations,
