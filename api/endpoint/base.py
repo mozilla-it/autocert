@@ -70,6 +70,7 @@ class EndpointBase(object):
         raise NotImplementedError
 
     def transform(self, certs):
+        certs = [cert.to_json() for cert in certs]
         sorting_func = SORTING_FUNCS[self.args.sorting]
         certs = sorted(certs, key=sorting_func)
         json = dict(
@@ -81,6 +82,8 @@ class EndpointBase(object):
         return json
 
     def transform_cert(self, cert):
+        print('Endpoint.transform_cert:')
+        print(cert)
         cert_name, cert_body = head_body(cert)
         if self.verbosity == 0:
             return {cert_name: cert_body.get('expiry', None)}
