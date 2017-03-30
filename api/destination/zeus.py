@@ -44,7 +44,7 @@ class ZeusDestination(DestinationBase):
         return certs
 
     def install_certificates(self, certs, *dests):
-        paths, jsons = zip(*[(ZEUS_PATH+common_name, compose_json(cert.key, crt.csr, crt.crt, crt.cert_name)) for cert in certs])
+        paths, jsons = zip(*[(ZEUS_PATH+cert.common_name, compose_json(cert.key, cert.csr, cert.crt, cert.cert_name)) for cert in certs])
         calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
         certs = self.fetch_certificates(certs, *dests)
         return certs
