@@ -30,7 +30,7 @@ class Cert(object):
         self.crt            = crt
         self.expiry         = expiry
         self.authority      = authority
-        self.destinations   = destinations
+        self.destinations   = destinations if destinations else []
 
     def __repr__(self):
         return yaml_format(self.to_json())
@@ -49,11 +49,8 @@ class Cert(object):
     def _decompose(cert, tardata=False):
         try:
             cert_name, cert_body = head_body(cert)
-            print('cert_name =', cert_name)
             common_name = cert_body['common_name']
-            print('common_name =', common_name)
             timestamp = cert_body['timestamp']
-            print('timestamp =', timestamp)
             expiry = cert_body['expiry']
             authority = cert_body['authority']
             destinations = cert_body.get('destinations', None)
