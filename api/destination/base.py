@@ -3,9 +3,8 @@
 '''
 destination.base
 '''
-
+import itertools
 from pprint import pformat
-from itertools import product
 from attrdict import AttrDict
 
 from utils.format import fmt, pfmt
@@ -28,6 +27,13 @@ class JsonsDontMatchPathsError(Exception):
         len_paths = len(paths) if isinstance(paths, list) else None
         msg = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
         super(JsonsDontMatchPathsError, self).__init__(msg)
+
+class DestsDontMatchPathsError(Exception):
+    def __init__(self, dests, paths):
+        len_dests = len(dests) if isinstance(dests, list) else None
+        len_paths = len(paths) if isinstance(paths, list) else None
+        msg = fmt('len(dests) -> {len_dests} != len(paths) -> {len_paths}; dests={dests}, paths={paths}')
+        super(DestsDontMatchPathsError, self).__init__(msg)
 
 class DestinationBase(object):
     def __init__(self, ar, cfg, verbosity):
@@ -61,7 +67,7 @@ class DestinationBase(object):
     def delete(self, path=None, dest=None, **kw):
         return self.request('DELETE', path=path, dest=dest, **kw)
 
-    def requests(self, method, paths=None, dests=None, jsons=None, **kw):
+    def requests(self, method, paths=None, dests=None, jsons=None, product=True, **kw):
         if not paths or not hasattr(paths, '__iter__'):
             raise DestinationPathError(paths)
         if not dests or not hasattr(dests, '__iter__'):
@@ -69,9 +75,19 @@ class DestinationBase(object):
         if jsons:
             if len(jsons) != len(paths):
                 raise JsonsDontMatchPathsError(jsons, paths)
-            kws = [self.keywords(path=path, dest=dest, json=json, **kw) for (path, json), dest in product(zip(paths, jsons), dests)]
+            if product:
+                kws = [self.keywords(path=path, dest=dest, json=json, **kw) for (path, json), dest in itertools.product(zip(paths, jsons), dests)]
+            else:
+                if len(dests) != len(paths):
+                    raise DestsDontMatchPathsError(dests, paths)
+                kws = [self.keywords(path=path, dest=dest, json=json, **kw) for (path, json), dest in zip(zip(paths, jsons), dests)]
         else:
-            kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in product(paths, dests)]
+            if product:
+                kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in itertools.product(paths, dests)]
+            else:
+                if len(dests) != len(paths):
+                    raise DestsDontMatchPathsError(dests, paths)
+                kws = [self.keywords(path=path, dest=dest, **kw) for path, dest in zip(paths, dests)]
         app.logger.debug('requests kws =')
         app.logger.debug(pformat(kws))
         return self.ar.requests(method, *kws)
