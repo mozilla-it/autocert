@@ -23,6 +23,8 @@ class CertFromJsonError(Exception):
 class Cert(object):
 
     def __init__(self, common_name, timestamp, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
+        if authority:
+            assert isinstance(authority, dict)
         self.common_name    = common_name
         self.timestamp      = timestamp
         self.key            = key

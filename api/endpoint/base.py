@@ -47,7 +47,6 @@ class EndpointBase(object):
         expiry=expiry_sorting)
 
     def __init__(self, cfg, args):
-        self.timestamp = timestamp.utcnow()
         self.ar = AsyncRequests()
         self.cfg = AttrDict(cfg)
         self.args = AttrDict(args)
@@ -61,6 +60,10 @@ class EndpointBase(object):
             d: create_destination(d, self.ar, destinations[d], self.verbosity) for d in destinations
         })
         self.tardata = Tardata(self.cfg.tar.dirpath, self.verbosity)
+
+    @property
+    def timestamp(self):
+        return self.tardata.timestamp
 
     @property
     def calls(self):

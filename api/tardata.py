@@ -6,11 +6,10 @@ import glob
 
 #from utils import tar
 from utils import sift
-from utils.dictionary import merge, body
-
-from utils.format import fmt, pfmt
-
+from utils import timestamp
 from utils.cert import Cert
+from utils.format import fmt, pfmt
+from utils.dictionary import merge, body
 
 class DecomposeTarpathError(Exception):
     def __init__(self, tarpath):
@@ -20,8 +19,13 @@ class DecomposeTarpathError(Exception):
 class Tardata(object):
 
     def __init__(self, tarpath, verbosity):
+        self._timestamp = timestamp.utcnow()
         self._tarpath = str(tarpath)
         self.verbosity = verbosity
+
+    @property
+    def timestamp(self):
+        return self._timestamp
 
     @property
     def tarpath(self):
@@ -49,10 +53,10 @@ class Tardata(object):
         _, cert_name, _ = self.decompose_tarfile(tarfile)
         return cert_name
 
-    def create_cert(self, common_name, timestamp, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
+    def create_cert(self, common_name, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
         cert = Cert(
             common_name,
-            timestamp,
+            self.timestamp,
             key,
             csr,
             crt,
@@ -63,14 +67,20 @@ class Tardata(object):
         cert.save(self.tarpath)
         return cert
 
+    def update_cert(self, cert):
+        pass
+
+    def update_certs(self, certs):
+        pass
+
     def load_cert(self, cert_name):
         cert = Cert.load(self.tarpath, cert_name)
         return cert
 
-    def load_certs(self, timestamp, *cert_name_pns):
+    def load_certs(self, *cert_name_pns, expired=False):
         certs = []
         for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
             cert = self.load_cert(cert_name)
-            if timestamp == None or cert.expiry > timestamp:
+            if expired or cert.expiry > self.timestamp:
                 certs += [cert]
         return certs
