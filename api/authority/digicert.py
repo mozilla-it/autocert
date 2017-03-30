@@ -63,10 +63,8 @@ class DigicertAuthority(AuthorityBase):
         expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
         csrs = [windows2unix(call.recv.json.certificate.csr) for call in calls]
         for expiry, csr, crt, cert in zip(expiries, csrs, crts, certs):
-            cert.authority['digicert']['matched'] = {
-                'csr': csr.strip() == cert.csr.strip(),
-                'crt': crt.strip() == cert.crt.strip(),
-            }
+            matched = csr.strip() == cert.csr.strip() and crt.strip() == cert.crt.strip()
+            cert.authority['digicert']['matched'] = matched
         return certs
 
     def create_certificate(self, organization_name, common_name, timestamp, csr, sans=None, repeat_delta=None):
@@ -76,10 +74,8 @@ class DigicertAuthority(AuthorityBase):
             raise NotValidatedDomainError(common_name)
         path, json = self._prepare_path_json(organization_id, common_name, csr, sans=sans)
         crts, expiries, order_ids = self._create_certificates([path], [json], repeat_delta)
-        cert = certify(common_name, timestamp, expiries[0], order_ids[0])
-        if sans:
-            cert['sans'] = list(sans)
-        return crts[0], cert
+        authority = dict(digicert=dict(order_id=order_ids[0]))
+        return crts[0], expiries[0], authority
 
     def renew_certificates(self, certs):
         paths = []
