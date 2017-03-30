@@ -63,7 +63,7 @@ class DigicertAuthority(AuthorityBase):
         expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
         csrs = [windows2unix(call.recv.json.certificate.csr) for call in calls]
         for expiry, csr, crt, cert in zip(expiries, csrs, crts, certs):
-            cert.authority['matched'] = {
+            cert.authority['digicert']['matched'] = {
                 'csr': csr.strip() == cert.csr.strip(),
                 'crt': crt.strip() == cert.crt.strip(),
             }
