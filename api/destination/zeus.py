@@ -50,7 +50,7 @@ class ZeusDestination(DestinationBase):
         raise NotImplementedError
 
     def _get_installed_summary(self, certs, *dests):
-        common_names = [body(cert)['common_name'] for cert in certs]
+        common_names = [cert.common_name for cert in certs]
         paths = ['ssl/server_keys']
         calls = self.gets(paths=paths, dests=dests, verify_ssl=False)
         summary = []
