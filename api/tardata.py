@@ -49,39 +49,14 @@ class Tardata(object):
         _, cert_name, _ = self.decompose_tarfile(tarfile)
         return cert_name
 
-#    def create_certdata(self, cert_name, key=None, csr=None, crt=None, cert=None):
-#        if not cert:
-#            cert = {cert_name: {}}
-#
-#        files = {}
-#        for content in (key, csr, crt):
-#            if content:
-#                ext = tar.get_file_ext(content)
-#                files[fmt('{cert_name}{ext}')] = content
-#        tarfile = self.cert_name_to_tarfile(cert_name)
-#        cert[cert_name]['tardata'] = {
-#            tarfile: files
-#        }
-#
-#        return cert
-
     def load_cert(self, cert_name):
-        #key, csr, crt, cert = tar.unbundle(self.tarpath, cert_name)
-        #return self.create_certdata(cert_name, key, csr, crt, cert)
-        print('Cert.load_cert:')
-        print('self.tarpath =', self.tarpath)
-        print('cert_name =', cert_name)
         cert = Cert.load(self.tarpath, cert_name)
         return cert
 
     def load_certs(self, timestamp, *cert_name_pns):
         certs = []
         for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
-            #cert = self.get_certdata_from_tarfile(cert_name)
             cert = self.load_cert(cert_name)
-            #if timestamp == None or body(cert)['expiry'] > timestamp:
-            print('cert.common_name =', cert.common_name)
-            print('cert.expiry =', cert.expiry)
             if timestamp == None or cert.expiry > timestamp:
                 certs += [cert]
         return certs
