@@ -11,7 +11,9 @@ from datetime import timedelta #FIXME: do we import this here?
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
 from utils.format import fmt, pfmt
+from utils.newline import windows2unix
 from cert import create_cert_name
+
 
 from app import app
 
@@ -49,37 +51,23 @@ def expiryify(valid_till):
         return string2int(valid_till)
     return valid_till
 
-#def certify(common_name, timestamp, expiry, order_id, csr=None, crt=None, cert=None):
-#    if cert == None:
-#        cert = {}
-#    cert_name = create_cert_name(common_name, timestamp)
-#    digicert = dict(order_id=order_id)
-#    if csr:
-#        digicert['csr'] = csr
-#    if crt:
-#        digicert['crt'] = crt
-#    return merge(cert, {
-#        cert_name: dict(
-#            common_name=common_name,
-#            timestamp=timestamp,
-#            expiry=expiry,
-#            authority=dict(
-#                digicert=digicert))})
-
 class DigicertAuthority(AuthorityBase):
     def __init__(self, ar, cfg, verbosity):
         super(DigicertAuthority, self).__init__(ar, cfg, verbosity)
 
     def display_certificates(self, certs, repeat_delta=None):
-        common_names = [body(cert)['common_name'] for cert in certs]
-        timestamps = [body(cert)['timestamp'] for cert in certs]
-        order_ids = [body(cert)['authority']['digicert']['order_id'] for cert in certs]
+        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
         expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
-        csrs = [call.recv.json.certificate.csr for call in calls]
-        return [certify(*args) for args in zip(common_names, timestamps, expiries, order_ids, csrs, crts, certs)]
+        csrs = [windows2unix(call.recv.json.certificate.csr) for call in calls]
+        for expiry, csr, crt, cert in zip(expiries, csrs, crts, certs):
+            cert.authority['matched'] = {
+                'csr': csr.strip() == cert.csr.strip(),
+                'crt': crt.strip() == cert.crt.strip(),
+            }
+        return certs
 
     def create_certificate(self, organization_name, common_name, timestamp, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
