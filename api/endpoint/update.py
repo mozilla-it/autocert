@@ -12,6 +12,8 @@ from utils.output import yaml_format
 
 from app import app
 
+from endpoint.base import EndpointBase
+
 class MissingUpdateArgumentsError(Exception):
     def __init__(self, args):
         msg = fmt('missing arguments to update; args = {args}')
@@ -22,11 +24,9 @@ class DeployError(Exception):
         msg = 'deploy error; deployment didnt happen'
         super(DeployError, self).__init__(msg)
 
-from endpoint.base import EndpointBase
-
 class UpdateEndpoint(EndpointBase):
-    def __init__(self, cfg, verbosity):
-        super(UpdateEndpoint, self).__init__(cfg, verbosity)
+    def __init__(self, cfg, args):
+        super(UpdateEndpoint, self).__init__(cfg, args)
 
     def execute(self, **kwargs):
         status = 201
@@ -42,11 +42,15 @@ class UpdateEndpoint(EndpointBase):
         return json, status
 
     def renew(self, certs, **kwargs):
-        count = len(certs) if certs else 0
-        certs_str = yaml_format(certs)
-        kwargs_str = yaml_format(kwargs)
-        app.logger.info(fmt('renew: {count} certs={certs_str} kwargs={kwargs_str}'))
-        return []
+        crts, expiries, authorities = self.authority.renew_certificates(
+            certs,
+            self.args.repeat_delta)
+        for cert, crt, expiry, authority in zip(certs, crts, expiries, authorities):
+            cert.crt = crt
+            cert.expiry = expiry
+            cert.authority = authority
+            self.tardata.update_cert(cert)
+        return certs
 
     def deploy(self, certs, **kwargs):
         installed_certs = []
