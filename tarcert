@@ -6,6 +6,9 @@ COMMON_NAME="$1"
 CERT_DIR=${2:-.}
 CERT_NAME="$COMMON_NAME@$TIMESTAMP"
 
+declare -A EXTS
+EXTS=( ["x509"]="crt" ["req"]="csr" ["rsa"]="key" )
+
 if [ -z "$COMMON_NAME" ] || [[ "$@" == *"-h"* ]] || [[ "$@" == *"--help"* ]]; then
     cat <<EOF
 usage: $SCRIPT [-h] common-name [cert-dir]
@@ -22,5 +25,9 @@ fi
 
 true | openssl s_client -connect $COMMON_NAME:443 2>/dev/null | openssl x509 -in /dev/stdin > "$CERT_NAME.crt"
 MODULUS_HASH=`openssl x509 -in "$CERT_NAME.crt" -modulus -noout | openssl md5 | awk '{print $2}'`
-MODULUS_DATA=`./modcert "$CERT_DIR"`
-echo "$MODULUS_DATA" | grep $MODULUS_HASH
+MODULUS_DATA=`./modcert "$CERT_DIR" | grep $MODULUS_HASH`
+
+echo "$MODULUS_DATA" | while read modulus ssltype filename; do
+    ext=${EXTS[$ssltype]}
+    cp "$filename" "$CERT_NAME.$ext"
+done
