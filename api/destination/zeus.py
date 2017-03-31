@@ -68,14 +68,10 @@ class ZeusDestination(DestinationBase):
             common_names, paths, dests = zip(*summary)
             calls = self.gets(paths=paths, dests=dests, verify_ssl=False)
             for common_name, path, dest, call in zip(common_names, paths, dests, calls):
-                try:
-                    crt = windows2unix(call.recv.json.properties.basic.public)
-                    csr = windows2unix(call.recv.json.properties.basic.request)
-                    key = windows2unix(call.recv.json.properties.basic.private)
-                    note = call.recv.json.properties.basic.note
-                except Exception as ex:
-                    app.logger.debug(dict(call.recv.json))
-                    raise ex
+                crt = windows2unix(call.recv.json.properties.basic.get('public', 'missing'))
+                csr = windows2unix(call.recv.json.properties.basic.get('request', 'missing'))
+                key = windows2unix(call.recv.json.properties.basic.get('private', 'missing'))
+                note = call.recv.json.properties.basic.get('note', '')
                 details[(common_name, crt[:40])] = details.get((common_name, crt[:40]), {})
                 details[(common_name, crt[:40])][dest] = dict(
                     crt=crt,
