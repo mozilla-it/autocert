@@ -68,7 +68,8 @@ class Tardata(object):
         return cert
 
     def update_cert(self, cert):
-        pass
+        cert.save(self.tarpath)
+        return cert
 
     def update_certs(self, certs):
         pass
