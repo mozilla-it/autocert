@@ -1,0 +1,31 @@
+#!/bin/bash
+
+VERBOSE=${VERBOSE:-false}
+SCRIPT="$0"
+TARGETS=( "$@" )
+ACTIONS=( x509 req rsa )
+
+for TARGET in "${TARGETS[@]}"; do
+    ACTION="NULL"
+    MODULUS_HASH="00000000000000000000000000000000"
+    if [ -d "$TARGET" ]; then
+        NEW_TARGETS=`find $TARGET -maxdepth 1 -mindepth 1 -print0 | xargs -0 echo`
+        $SCRIPT $NEW_TARGETS
+        continue
+    elif [ -f "$TARGET" ]; then
+        for action in "${ACTIONS[@]}"; do
+            MODULUS=`openssl $action -in $TARGET -modulus -noout 2>/dev/null`
+            if [[ $MODULUS == "Modulus="* ]]; then
+                ACTION="$action"
+                break
+            fi
+        done
+
+        if [ -n "$MODULUS" ]; then
+            MODULUS_HASH=`echo $MODULUS | openssl md5 | awk '{print $2}'`
+        fi
+    fi
+    printf "%s %-4s %s\n" $MODULUS_HASH $ACTION $TARGET
+done
+
+
