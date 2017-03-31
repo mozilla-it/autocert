@@ -1,0 +1,26 @@
+#!/bin/bash
+
+SCRIPT="$0"
+TIMESTAMP=`date "+%Y%m%d%H%M%S"`
+COMMON_NAME="$1"
+CERT_DIR=${2:-.}
+CERT_NAME="$COMMON_NAME@$TIMESTAMP"
+
+if [ -z "$COMMON_NAME" ] || [[ "$@" == *"-h"* ]] || [[ "$@" == *"--help"* ]]; then
+    cat <<EOF
+usage: $SCRIPT [-h] common-name [cert-dir]
+
+positional args:
+    common-name     required: name of domain
+    cert-dir        optional: dir to search; default=.
+
+optional args:
+    -h|--help       print this help message
+EOF
+    exit 1
+fi
+
+true | openssl s_client -connect $COMMON_NAME:443 2>/dev/null | openssl x509 -in /dev/stdin > "$CERT_NAME.crt"
+MODULUS_HASH=`openssl x509 -in "$CERT_NAME.crt" -modulus -noout | openssl md5 | awk '{print $2}'`
+MODULUS_DATA=`./modcert "$CERT_DIR"`
+echo "$MODULUS_DATA" | grep $MODULUS_HASH
