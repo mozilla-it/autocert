@@ -18,8 +18,8 @@ from destination.factory import create_destination
 from utils.output import yaml_format
 
 class DisplayEndpoint(EndpointBase):
-    def __init__(self, cfg, verbosity):
-        super(DisplayEndpoint, self).__init__(cfg, verbosity)
+    def __init__(self, cfg, args):
+        super(DisplayEndpoint, self).__init__(cfg, args)
 
     def execute(self, **kwargs):
         status = 200

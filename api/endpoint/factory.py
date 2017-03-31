@@ -18,12 +18,12 @@ method2endpoint = dict(
     POST=CreateEndpoint,
     DELETE=RevokeEndpoint)
 
-def create_endpoint(method, cfg, verbosity):
+def create_endpoint(method, cfg, args):
     if cfg is None:
         cfg = CFG
     endpoint = method2endpoint[method]
-    app.logger.debug(fmt('create_endpoint: verbosity={0} endpoint={1}', verbosity, endpoint))
-    return endpoint(cfg, verbosity)
+    app.logger.debug(fmt('create_endpoint: endpoint={0} args={1}', endpoint, args))
+    return endpoint(cfg, args)
 
 
 

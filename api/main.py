@@ -81,7 +81,6 @@ def version():
     args = request.json
     args = args if args else {}
     cfg = args.get('cfg', None)
-    verbosity = args.get('verbosity', 0)
     log_request(
         args.get('user', 'unknown'),
         args.get('hostname', 'unknown'),
@@ -95,8 +94,8 @@ def version():
 @app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():
     args = request.json
+    args = args if args else {}
     cfg = args.get('cfg', None)
-    verbosity = args.get('verbosity', 0)
     log_request(
         args.get('user', 'unknown'),
         args.get('hostname', 'unknown'),
