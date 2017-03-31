@@ -28,10 +28,6 @@ class CreateEndpoint(EndpointBase):
     def __init__(self, cfg, args):
         super(CreateEndpoint, self).__init__(cfg, args)
 
-    @property
-    def authority(self):
-        return self.authorities[self.args.authority]
-
     def execute(self):
         status = 201
         key, csr = pki.create_key_and_csr(self.args.common_name, self.args.sans)
