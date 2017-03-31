@@ -62,6 +62,10 @@ class EndpointBase(object):
         self.tardata = Tardata(self.cfg.tar.dirpath, self.verbosity)
 
     @property
+    def authority(self):
+        return self.authorities[self.args.authority]
+
+    @property
     def timestamp(self):
         return self.tardata.timestamp
 
