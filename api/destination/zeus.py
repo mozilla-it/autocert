@@ -74,6 +74,7 @@ class ZeusDestination(DestinationBase):
                     key = windows2unix(call.recv.json.properties.basic.get('private', 'missing'))
                     note = call.recv.json.properties.basic.get('note', '')
                 except Exception as ex:
+                    app.logger.debug(fmt('call.send.url={0}', call.send.url))
                     app.logger.debug(fmt('call.recv.json=\n{0}', call.recv.json))
                 details[(common_name, crt[:40])] = details.get((common_name, crt[:40]), {})
                 details[(common_name, crt[:40])][dest] = dict(
