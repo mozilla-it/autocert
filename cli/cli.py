@@ -22,8 +22,10 @@ except ImportError as ie:
 
 from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
+from utils.dictionary import dictify
 from cli.utils.output import output
 from cli.utils.format import fmt, pfmt
+from cli.namespace import jsonify
 from cli import requests
 
 from cli.config import CFG
@@ -38,6 +40,14 @@ SORTING = [
     'timestamp',
     'expiry',
 ]
+
+METHODS = {
+    'ls': 'GET',
+    'create': 'POST',
+    'renew': 'PUT',
+    'deploy': 'PUT',
+    'revoke': 'DELETE',
+}
 
 class VersionCheckFailedError(Exception):
     def __init__(self, version, required):
@@ -80,6 +90,14 @@ def add_subparsers(parser):
     [mod.add_parser(subparsers) for mod in import_modules(dirpath, endswith)]
     subparsers.required = True
     return subparsers
+
+def do_request(ns):
+    method = METHODS[ns.command]
+    json = jsonify(ns, destinations=dictify(ns.destinations))
+    response = requests.request(method, ns.api_url / 'autocert', json=json)
+    json = response.json()
+    output(json)
+    return response.status_code
 
 def main():
     parser = ArgumentParser(
@@ -133,4 +151,8 @@ def main():
     if ns.debug:
         print('ns =', ns)
         sys.exit(0)
-    ns.func(ns)
+
+    status = do_request(ns)
+
+    if status not in (200, 201, 202, 203, 204, 205):
+        return status

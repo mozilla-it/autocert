@@ -18,16 +18,3 @@ def add_parser(subparsers):
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'cert_name_pns')
-    parser.set_defaults(func=do_deploy)
-
-def do_deploy(ns):
-    json = jsonify(ns, destinations=dictify(ns.destinations))
-    response = requests.put(ns.api_url / 'autocert', json=json)
-    if response.status_code in (200, 201):
-        certs = response.json().get('certs', [])
-        output(certs)
-    else:
-        print(response)
-        print(response.text)
-        raise Exception('wtf do_deploy')
-

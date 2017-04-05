@@ -13,7 +13,3 @@ def add_parser(subparsers):
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'cert_name_pns')
-    parser.set_defaults(func=do_revoke)
-
-def do_revoke(ns):
-    print('do_revoke')

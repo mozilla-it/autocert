@@ -13,9 +13,10 @@ from pprint import pformat
 
 from app import app
 
+from endpoint.factory import create_endpoint
 from utils.version import version as api_version
 from utils.format import fmt
-from endpoint.factory import create_endpoint
+from utils.exceptions import AutocertError
 
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
@@ -104,7 +105,13 @@ def route():
         request.path,
         args)
     endpoint = create_endpoint(request.method, cfg, args)
-    json, status = endpoint.execute()
+    try:
+        json, status = endpoint.execute()
+    except AutocertError as ae:
+        status = 500
+        json = dict(errors={
+            ae.name: ae.message
+        })
     return make_response(jsonify(json), status)
 
 @app.errorhandler(400)

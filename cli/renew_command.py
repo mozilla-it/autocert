@@ -22,17 +22,3 @@ def add_parser(subparsers):
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'cert_name_pns')
-    parser.set_defaults(func=do_renew)
-
-def do_renew(ns):
-    json = jsonify(ns, destinations=dictify(ns.destinations))
-    response = requests.put(ns.api_url / 'autocert', json=json)
-    if response.status_code == 201:
-        certs = response.json()['certs']
-        output(certs)
-        return
-    else:
-        print(response)
-        print(response.text)
-    raise Exception('wtf do_renew')
-

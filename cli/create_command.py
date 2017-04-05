@@ -23,17 +23,3 @@ def add_parser(subparsers):
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'common_name')
-    parser.set_defaults(func=do_create)
-
-def do_create(ns):
-    json = jsonify(ns, destinations=dictify(ns.destinations))
-    response = requests.post(ns.api_url / 'autocert', json=json)
-    if response.status_code == 201:
-        json = response.json()
-        output(json)
-        return
-    else:
-        print(response)
-        print(response.text)
-    raise Exception('wtf do_create')
-

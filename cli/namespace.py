@@ -10,7 +10,7 @@ import copy
 
 def jsonify(ns, **kwargs):
     json = copy.deepcopy(ns.__dict__)
-    json.pop('func')
+    json.pop('func', None)
     for k,v in kwargs.items():
         json[k] = v
     json['user'] = getpass.getuser()
