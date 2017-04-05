@@ -21,18 +21,18 @@ from config import CFG
 
 class KeyExistError(AutocertError):
     def __init__(self, keyfile):
-        msg = 'key file {keyfile} does not exist'.format(**locals())
-        super(KeyExistError, self).__init__(msg)
+        message = 'key file {keyfile} does not exist'.format(**locals())
+        super(KeyExistError, self).__init__(message)
 
 class CsrExistError(AutocertError):
     def __init__(self, csrfile):
-        msg = 'csr file {csrfile} does not exist'.format(**locals())
-        super(CsrExistError, self).__init__(msg)
+        message = 'csr file {csrfile} does not exist'.format(**locals())
+        super(CsrExistError, self).__init__(message)
 
 class CertNameDecomposeError(AutocertError):
     def __init__(self, pattern, cert_name):
-        msg = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
-        super(CertNameDecomposeError, self).__init__(msg)
+        message = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
+        super(CertNameDecomposeError, self).__init__(message)
 
 OIDS_MAP = dict(
     common_name =              NameOID.COMMON_NAME,

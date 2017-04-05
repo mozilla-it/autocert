@@ -21,8 +21,8 @@ from endpoint.base import EndpointBase
 
 class UnknownCertificateAuthorityError(AutocertError):
     def __init__(self, authority):
-        msg = fmt('unknown certificate authority: {authority}')
-        super(UnknownCertificateAuthorityError, self).__init__(msg)
+        message = fmt('unknown certificate authority: {authority}')
+        super(UnknownCertificateAuthorityError, self).__init__(message)
 
 class CreateEndpoint(EndpointBase):
     def __init__(self, cfg, args):

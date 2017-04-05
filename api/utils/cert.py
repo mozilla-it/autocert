@@ -17,8 +17,8 @@ from utils.exceptions import AutocertError
 
 class CertFromJsonError(AutocertError):
     def __init__(self, ex):
-        msg = 'cert.from_json error'
-        super(CertFromJsonError, self).__init__(msg)
+        message = 'cert.from_json error'
+        super(CertFromJsonError, self).__init__(message)
         self.errors = [ex]
 
 class Cert(object):

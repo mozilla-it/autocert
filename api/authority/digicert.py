@@ -23,28 +23,28 @@ def not_200(call):
 
 class OrderCertificateError(AutocertError):
     def __init__(self, call):
-        msg = fmt('order certificate error call={0}', call)
-        super(OrderCertificateError, self).__init__(msg)
+        message = fmt('order certificate error call={0}', call)
+        super(OrderCertificateError, self).__init__(message)
 
 class ApproveCertificateError(AutocertError):
     def __init__(self, call):
-        msg = fmt('approve certificate error call={0}', call)
-        super(ApproveCertificateError, self).__init__(msg)
+        message = fmt('approve certificate error call={0}', call)
+        super(ApproveCertificateError, self).__init__(message)
 
 class DownloadCertificateError(AutocertError):
     def __init__(self, call):
-        msg = fmt('download certificate error call={0}', call)
-        super(DownloadCertificateError, self).__init__(msg)
+        message = fmt('download certificate error call={0}', call)
+        super(DownloadCertificateError, self).__init__(message)
 
 class OrganizationNameNotFoundError(AutocertError):
     def __init__(self, organization_name):
-        msg = fmt('organization name {organization_name} not found')
-        super(OrganizationNameNotFoundError, self).__init__(msg)
+        message = fmt('organization name {organization_name} not found')
+        super(OrganizationNameNotFoundError, self).__init__(message)
 
 class NotValidatedDomainError(AutocertError):
     def __init__(self, common_name):
-        msg = fmt('domain not validated for {common_name}')
-        super(NotValidatedDomainError, self).__init__(msg)
+        message = fmt('domain not validated for {common_name}')
+        super(NotValidatedDomainError, self).__init__(message)
 
 def expiryify(valid_till):
     from utils.timestamp import string2int

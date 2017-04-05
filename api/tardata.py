@@ -14,8 +14,8 @@ from utils.exceptions import AutocertError
 
 class DecomposeTarpathError(AutocertError):
     def __init__(self, tarpath):
-        msg = fmt('error decomposing tarpath={tarpath}')
-        super(DecomposeTarpathError, self).__init__(msg)
+        message = fmt('error decomposing tarpath={tarpath}')
+        super(DecomposeTarpathError, self).__init__(message)
 
 class Tardata(object):
 

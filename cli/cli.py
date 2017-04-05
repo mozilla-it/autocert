@@ -41,8 +41,8 @@ SORTING = [
 
 class VersionCheckFailedError(Exception):
     def __init__(self, version, required):
-        msg = 'autocert/api {version} is not at least {required}'.format(**locals())
-        super(VersionCheckFailedError, self).__init__(msg)
+        message = 'autocert/api {version} is not at least {required}'.format(**locals())
+        super(VersionCheckFailedError, self).__init__(message)
 
 def api_version(ns):
     response = requests.get(ns.api_url / 'autocert/version')

@@ -12,8 +12,8 @@ from utils.exceptions import AutocertError
 
 class VisitError(AutocertError):
     def __init__(self, obj):
-        msg = fmt('unknown type obj = {obj}')
-        super(VisitError, self).__init__(msg)
+        message = fmt('unknown type obj = {obj}')
+        super(VisitError, self).__init__(message)
 
 def create_cert_name(common_name, timestamp, sep='@'):
     return fmt('{common_name}{sep}{timestamp}')

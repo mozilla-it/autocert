@@ -14,20 +14,20 @@ from app import app
 
 class AuthorityFactoryError(AutocertError):
     def __init__(self, authority):
-        msg = fmt('authority factory error {authority}')
-        super(AuthorityFactoryError, self).__init__(msg)
+        message = fmt('authority factory error {authority}')
+        super(AuthorityFactoryError, self).__init__(message)
 
 class AuthorityPathError(AutocertError):
     def __init__(self, path_or_paths):
-        msg = fmt('error with AuthorityBase param path(s) = {path_or_paths}')
-        super(AuthorityPathError, self).__init__(msg)
+        message = fmt('error with AuthorityBase param path(s) = {path_or_paths}')
+        super(AuthorityPathError, self).__init__(message)
 
 class JsonsDontMatchPathsError(AutocertError):
     def __init__(self, jsons, paths):
         len_jsons = len(jsons) if isinstance(jsons, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None
-        msg = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
-        super(JsonsDontMatchPathsError, self).__init__(msg)
+        message = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
+        super(JsonsDontMatchPathsError, self).__init__(message)
 
 class AuthorityBase(object):
     def __init__(self, ar, cfg, verbosity):

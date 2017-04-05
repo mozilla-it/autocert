@@ -18,8 +18,8 @@ from utils.exceptions import AutocertError
 
 class RaiseIfError(AutocertError):
     def __init__(self, call):
-        msg = fmt('raise if error with {call}')
-        super(RaiseIfError, self).__init__(msg)
+        message = fmt('raise if error with {call}')
+        super(RaiseIfError, self).__init__(message)
 
 class AsyncRequests(Singleton):
     def __init__(self):

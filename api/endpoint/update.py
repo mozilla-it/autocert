@@ -17,13 +17,13 @@ from endpoint.base import EndpointBase
 
 class MissingUpdateArgumentsError(AutocertError):
     def __init__(self, args):
-        msg = fmt('missing arguments to update; args = {args}')
-        super(MissingUpdateArgumentsError, self).__init__(msg)
+        message = fmt('missing arguments to update; args = {args}')
+        super(MissingUpdateArgumentsError, self).__init__(message)
 
 class DeployError(AutocertError):
     def __init__(self):
-        msg = 'deploy error; deployment didnt happen'
-        super(DeployError, self).__init__(msg)
+        message = 'deploy error; deployment didnt happen'
+        super(DeployError, self).__init__(message)
 
 class UpdateEndpoint(EndpointBase):
     def __init__(self, cfg, args):

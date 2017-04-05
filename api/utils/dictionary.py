@@ -11,8 +11,8 @@ class MergeError(AutocertError):
 class DictDoesntHaveHeadError(AutocertError):
     def __init__(self, d):
         keys = list(d.keys())
-        msg = 'dictionary.keys(): {keys} does not have a single key to be considered a head'.format(**locals())
-        super(DictDoesntHaveHeadError, self).__init__(msg)
+        message = 'dictionary.keys(): {keys} does not have a single key to be considered a head'.format(**locals())
+        super(DictDoesntHaveHeadError, self).__init__(message)
 
 def dict_to_attrs(obj, d):
     for k, v in d.items():

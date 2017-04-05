@@ -21,8 +21,8 @@ FILETYPE = {
 
 class UnknownFileExtError(AutocertError):
     def __init__(self, content):
-        msg = fmt('unknown filetype for this content: {content}')
-        super(UnknownFileExtError, self).__init__(msg)
+        message = fmt('unknown filetype for this content: {content}')
+        super(UnknownFileExtError, self).__init__(message)
 
 def get_file_ext(content):
     for head, ext in FILETYPE.items():
