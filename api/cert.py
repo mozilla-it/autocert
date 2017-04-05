@@ -8,8 +8,9 @@ from utils.format import fmt, pfmt
 from utils.isinstance import *
 
 from utils.dictionary import head, body, head_body, keys_ending
+from utils.exceptions import AutocertError
 
-class VisitError(Exception):
+class VisitError(AutocertError):
     def __init__(self, obj):
         msg = fmt('unknown type obj = {obj}')
         super(VisitError, self).__init__(msg)

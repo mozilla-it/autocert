@@ -11,6 +11,7 @@ from ruamel import yaml
 from utils.format import fmt
 from utils.output import yaml_format
 from utils.dictionary import merge
+from utils.exceptions import AutocertError
 
 FILETYPE = {
     '-----BEGIN RSA PRIVATE KEY-----':      '.key',
@@ -18,7 +19,7 @@ FILETYPE = {
     '-----BEGIN CERTIFICATE-----':          '.crt',
 }
 
-class UnknownFileExtError(Exception):
+class UnknownFileExtError(AutocertError):
     def __init__(self, content):
         msg = fmt('unknown filetype for this content: {content}')
         super(UnknownFileExtError, self).__init__(msg)

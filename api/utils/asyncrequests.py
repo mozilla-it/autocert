@@ -14,8 +14,9 @@ from utils.format import fmt, pfmt
 from utils.newline import windows2unix
 from utils.dictionary import merge
 from utils.singleton import Singleton
+from utils.exceptions import AutocertError
 
-class RaiseIfError(Exception):
+class RaiseIfError(AutocertError):
     def __init__(self, call):
         msg = fmt('raise if error with {call}')
         super(RaiseIfError, self).__init__(msg)

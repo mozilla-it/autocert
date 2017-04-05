@@ -9,17 +9,18 @@ from attrdict import AttrDict
 
 from utils.format import fmt, pfmt
 from utils.output import yaml_format
+from utils.exceptions import AutocertError
 
 from app import app
 
 from endpoint.base import EndpointBase
 
-class MissingUpdateArgumentsError(Exception):
+class MissingUpdateArgumentsError(AutocertError):
     def __init__(self, args):
         msg = fmt('missing arguments to update; args = {args}')
         super(MissingUpdateArgumentsError, self).__init__(msg)
 
-class DeployError(Exception):
+class DeployError(AutocertError):
     def __init__(self):
         msg = 'deploy error; deployment didnt happen'
         super(DeployError, self).__init__(msg)

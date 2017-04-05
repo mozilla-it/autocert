@@ -8,20 +8,21 @@ from itertools import product
 from attrdict import AttrDict
 
 from utils.format import fmt
+from utils.exceptions import AutocertError
 
 from app import app
 
-class AuthorityFactoryError(Exception):
+class AuthorityFactoryError(AutocertError):
     def __init__(self, authority):
         msg = fmt('authority factory error {authority}')
         super(AuthorityFactoryError, self).__init__(msg)
 
-class AuthorityPathError(Exception):
+class AuthorityPathError(AutocertError):
     def __init__(self, path_or_paths):
         msg = fmt('error with AuthorityBase param path(s) = {path_or_paths}')
         super(AuthorityPathError, self).__init__(msg)
 
-class JsonsDontMatchPathsError(Exception):
+class JsonsDontMatchPathsError(AutocertError):
     def __init__(self, jsons, paths):
         len_jsons = len(jsons) if isinstance(jsons, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None

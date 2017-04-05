@@ -8,27 +8,28 @@ from pprint import pformat
 from attrdict import AttrDict
 
 from utils.format import fmt, pfmt
+from utils.exceptions import AutocertError
 
 from app import app
 
-class DestinationPathError(Exception):
+class DestinationPathError(AutocertError):
     def __init__(self, path_or_paths):
         msg = fmt('error with DestinationBase param path(s) = {path_or_paths}')
         super(DestinationPathError, self).__init__(msg)
 
-class DestinationDestError(Exception):
+class DestinationDestError(AutocertError):
     def __init__(self, dest_or_dests):
         msg = fmt('error with DestinationBase param dest(s) = {dest_or_dests}')
         super(DestinationDestError, self).__init__(msg)
 
-class JsonsDontMatchPathsError(Exception):
+class JsonsDontMatchPathsError(AutocertError):
     def __init__(self, jsons, paths):
         len_jsons = len(jsons) if isinstance(jsons, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None
         msg = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
         super(JsonsDontMatchPathsError, self).__init__(msg)
 
-class DestsDontMatchPathsError(Exception):
+class DestsDontMatchPathsError(AutocertError):
     def __init__(self, dests, paths):
         len_dests = len(dests) if isinstance(dests, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None

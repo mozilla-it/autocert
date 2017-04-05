@@ -13,8 +13,10 @@ from pathlib2 import Path
 
 try:
     from utils.dictionary import merge
+    from utils.exceptions import AutocertError
 except ImportError:
     from dictionary import merge
+    from exceptions import AutocertError
 
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
@@ -22,25 +24,25 @@ DOT_CONFIG_YML = '{0}/.config.yml'.format(CONFIG_DIR)
 
 IP_PATTERN = '[0-9]{1,3}(.[0-9]{1,3}){3}'
 
-class ConfigLoadError(Exception):
+class ConfigLoadError(AutocertError):
     def __init__(config, errors=None):
         message = 'Error loading config file =%s'.format(config)
         super(ConfigLoadError, self).__init__(message)
         self.errors = errors
 
-class ConfigWriteError(Exception):
+class ConfigWriteError(AutocertError):
     def __init__(config, errors=None):
         message = 'Error loading config file =%s'.format(config)
         super(ConfigLoadError, self).__init__(message)
         self.errors = errors
 
-class AuthKeyNotAllowedError(Exception):
+class AuthKeyNotAllowedError(AutocertError):
     def __init__(d, errors=None):
         message = '"auth" key found on dict =%s'.format(d)
         super(AuthKeyNotAllowedError, self).__init__(message)
         self.errors = errors
 
-class ApikeyNotFoundError(Exception):
+class ApikeyNotFoundError(AutocertError):
     def __init__(d, errors=None):
         message = 'Could not find apikey in this dict %s' % d
         super(ApikeyNotFoundError, self).__init__(message)

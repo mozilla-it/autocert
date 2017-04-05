@@ -2,6 +2,17 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
+from utils.exceptions import AutocertError
+
+class MergeError(AutocertError):
+    def __init__(self, message):
+        super(MergeError, self).__init__(message)
+
+class DictDoesntHaveHeadError(AutocertError):
+    def __init__(self, d):
+        keys = list(d.keys())
+        msg = 'dictionary.keys(): {keys} does not have a single key to be considered a head'.format(**locals())
+        super(DictDoesntHaveHeadError, self).__init__(msg)
 
 def dict_to_attrs(obj, d):
     for k, v in d.items():
@@ -23,10 +34,6 @@ def isfloat(obj):
 
 def isscalar(obj):
     return (obj == None) or isstr(obj) or isint(obj) or isfloat(obj)
-
-class MergeError(Exception):
-    def __init__(self, msg):
-        self.msg = msg
 
 def _merge(obj1, obj2):
     """merges obj2 into obj1 and return merged result
@@ -66,12 +73,6 @@ def merge(*objs):
     for obj in objs[1:]:
         result = _merge(result, obj)
     return result
-
-class DictDoesntHaveHeadError(Exception):
-    def __init__(self, d):
-        keys = list(d.keys())
-        msg = 'dictionary.keys(): {keys} does not have a single key to be considered a head'.format(**locals())
-        super(DictDoesntHaveHeadError, self).__init__(msg)
 
 def head(d):
     assert isinstance(d, dict)

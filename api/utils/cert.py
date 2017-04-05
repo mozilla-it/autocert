@@ -12,9 +12,10 @@ from utils.isinstance import *
 
 from utils.output import yaml_format, output
 from utils.dictionary import head, body, head_body, keys_ending
+from utils.exceptions import AutocertError
 
 
-class CertFromJsonError(Exception):
+class CertFromJsonError(AutocertError):
     def __init__(self, ex):
         msg = 'cert.from_json error'
         super(CertFromJsonError, self).__init__(msg)

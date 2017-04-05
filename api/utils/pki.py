@@ -13,22 +13,23 @@ from cryptography.hazmat.primitives import hashes, serialization
 import tarfile
 
 from utils.format import fmt
+from utils.exceptions import AutocertError
 
 from app import app
 
 from config import CFG
 
-class KeyExistError(Exception):
+class KeyExistError(AutocertError):
     def __init__(self, keyfile):
         msg = 'key file {keyfile} does not exist'.format(**locals())
         super(KeyExistError, self).__init__(msg)
 
-class CsrExistError(Exception):
+class CsrExistError(AutocertError):
     def __init__(self, csrfile):
         msg = 'csr file {csrfile} does not exist'.format(**locals())
         super(CsrExistError, self).__init__(msg)
 
-class CertNameDecomposeError(Exception):
+class CertNameDecomposeError(AutocertError):
     def __init__(self, pattern, cert_name):
         msg = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
         super(CertNameDecomposeError, self).__init__(msg)

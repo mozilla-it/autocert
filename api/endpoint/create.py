@@ -10,16 +10,16 @@ from pprint import pformat
 from attrdict import AttrDict
 from datetime import timedelta
 
-from utils.format import fmt
-#from utils import tar
 from utils import pki
+from utils.format import fmt
+from utils.exceptions import AutocertError
 from cert import create_cert_name
 
 from app import app
 
 from endpoint.base import EndpointBase
 
-class UnknownCertificateAuthorityError(Exception):
+class UnknownCertificateAuthorityError(AutocertError):
     def __init__(self, authority):
         msg = fmt('unknown certificate authority: {authority}')
         super(UnknownCertificateAuthorityError, self).__init__(msg)

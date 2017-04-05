@@ -10,8 +10,9 @@ from utils import timestamp
 from utils.cert import Cert
 from utils.format import fmt, pfmt
 from utils.dictionary import merge, body
+from utils.exceptions import AutocertError
 
-class DecomposeTarpathError(Exception):
+class DecomposeTarpathError(AutocertError):
     def __init__(self, tarpath):
         msg = fmt('error decomposing tarpath={tarpath}')
         super(DecomposeTarpathError, self).__init__(msg)

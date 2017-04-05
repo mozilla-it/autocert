@@ -12,6 +12,7 @@ from authority.base import AuthorityBase
 from utils.dictionary import merge, body
 from utils.format import fmt, pfmt
 from utils.newline import windows2unix
+from utils.exceptions import AutocertError
 from cert import create_cert_name
 
 
@@ -20,27 +21,27 @@ from app import app
 def not_200(call):
     return call.recv.status != 200
 
-class OrderCertificateError(Exception):
+class OrderCertificateError(AutocertError):
     def __init__(self, call):
         msg = fmt('order certificate error call={0}', call)
         super(OrderCertificateError, self).__init__(msg)
 
-class ApproveCertificateError(Exception):
+class ApproveCertificateError(AutocertError):
     def __init__(self, call):
         msg = fmt('approve certificate error call={0}', call)
         super(ApproveCertificateError, self).__init__(msg)
 
-class DownloadCertificateError(Exception):
+class DownloadCertificateError(AutocertError):
     def __init__(self, call):
         msg = fmt('download certificate error call={0}', call)
         super(DownloadCertificateError, self).__init__(msg)
 
-class OrganizationNameNotFoundError(Exception):
+class OrganizationNameNotFoundError(AutocertError):
     def __init__(self, organization_name):
         msg = fmt('organization name {organization_name} not found')
         super(OrganizationNameNotFoundError, self).__init__(msg)
 
-class NotValidatedDomainError(Exception):
+class NotValidatedDomainError(AutocertError):
     def __init__(self, common_name):
         msg = fmt('domain not validated for {common_name}')
         super(NotValidatedDomainError, self).__init__(msg)
