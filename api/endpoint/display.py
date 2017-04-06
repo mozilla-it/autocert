@@ -36,3 +36,4 @@ class DisplayEndpoint(EndpointBase):
             certs2 = certs
         json = self.transform(certs2)
         return json, status
+
