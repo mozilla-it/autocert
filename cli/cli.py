@@ -8,6 +8,7 @@ import os
 import imp
 import sys
 import logging
+from json import JSONDecodeError
 from subprocess import check_output
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
@@ -95,9 +96,16 @@ def do_request(ns):
     method = METHODS[ns.command]
     json = jsonify(ns, destinations=dictify(ns.destinations))
     response = requests.request(method, ns.api_url / 'autocert', json=json)
-    json = response.json()
-    output(json)
-    return response.status_code
+    status = response.status_code
+    if ns.debug:
+        print('status =', status)
+    try:
+        json = response.json()
+        output(json)
+    except JSONDecodeError as jde:
+        print(jde)
+        return -1
+    return status
 
 def main():
     parser = ArgumentParser(
@@ -150,7 +158,6 @@ def main():
     ns = parser.parse_args()
     if ns.debug:
         print('ns =', ns)
-        sys.exit(0)
 
     status = do_request(ns)
 
