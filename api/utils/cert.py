@@ -23,11 +23,12 @@ class CertFromJsonError(AutocertError):
 
 class Cert(object):
 
-    def __init__(self, common_name, timestamp, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
+    def __init__(self, common_name, timestamp, modhash, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
         if authority:
             assert isinstance(authority, dict)
         self.common_name    = common_name
         self.timestamp      = timestamp
+        self.modhash        = modhash
         self.key            = key
         self.csr            = csr
         self.crt            = crt
@@ -43,6 +44,7 @@ class Cert(object):
         return (
             self.common_name == cert.common_name and
             self.timestamp == cert.timestamp and
+            self.modhash == cert.modhash and
             self.key == cert.key and
             self.csr == cert.csr and
             self.crt == cert.crt and
@@ -56,6 +58,7 @@ class Cert(object):
             cert_name, cert_body = head_body(cert)
             common_name = cert_body['common_name']
             timestamp = cert_body['timestamp']
+            modhash = cert_body['modhash']
             expiry = cert_body['expiry']
             authority = cert_body['authority']
             sans = cert_body.get('sans', None)
@@ -72,15 +75,16 @@ class Cert(object):
             from pprint import pprint
             pprint(cert)
             raise CertFromJsonError(ke)
-        return common_name, timestamp, key, csr, crt, sans, expiry, authority, destinations
+        return common_name, timestamp, modhash, key, csr, crt, sans, expiry, authority, destinations
 
     @staticmethod
     def load(tarpath, cert_name):
         key, csr, crt, yml = tar.unbundle(tarpath, cert_name)
-        common_name, timestamp, _, _, _, sans, expiry, authority, destinations = Cert._decompose(yml)
+        common_name, timestamp, modhash, _, _, _, sans, expiry, authority, destinations = Cert._decompose(yml)
         return Cert(
             common_name,
             timestamp,
+            modhash,
             key,
             csr,
             crt,
@@ -91,10 +95,11 @@ class Cert(object):
 
     @staticmethod
     def from_json(json):
-        common_name, timestamp, key, csr, crt, sans, expiry, authority, destinations = Cert._decompose(json, True)
+        common_name, timestamp, modhash, key, csr, crt, sans, expiry, authority, destinations = Cert._decompose(json, True)
         return Cert(
             common_name,
             timestamp,
+            modhash,
             key,
             csr,
             crt,
@@ -129,6 +134,7 @@ class Cert(object):
             self.cert_name: {
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
+                'modhash': self.modhash,
                 'sans': self.sans,
                 'expiry': self.expiry,
                 'authority': self.authority,
@@ -147,6 +153,7 @@ class Cert(object):
             self.cert_name: {
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
+                'modhash': self.modhash,
                 'sans': self.sans,
                 'expiry': self.expiry,
                 'authority': self.authority,

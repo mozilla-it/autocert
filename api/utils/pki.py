@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import re
+import hashlib
 from pprint import pformat
 from datetime import datetime
 from cryptography import x509
@@ -89,6 +90,26 @@ def _create_csr(common_name, key, oids=None, sans=None):
         _add_sans(subject, sans)
     csr = subject.sign(key, hashes.SHA256(), default_backend())
     return csr
+
+def _create_modhash(key):
+    modulus_int = key.private_numbers().public_numbers.n
+    modulus_hex = hex(modulus_int).rstrip('L').lstrip('0x').upper()
+    modulus_bytes = fmt('Modulus={modulus_hex}\n').encode('utf-8')
+    md5 = hashlib.md5()
+    md5.update(modulus_bytes)
+    return md5.hexdigest()
+
+def create_key_csr_and_modhash(common_name, oids=None, sans=None):
+    key = _create_key(common_name)
+    csr = _create_csr(common_name, key)
+    modhash = _create_modhash(key)
+    return (
+        key.private_bytes(
+            encoding=ENCODING[CFG.key.encoding],
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()).decode('utf-8'),
+        csr.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8'),
+        modhash)
 
 def create_key_and_csr(common_name, oids=None, sans=None):
     key = _create_key(common_name)

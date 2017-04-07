@@ -54,10 +54,11 @@ class Tardata(object):
         _, cert_name, _ = self.decompose_tarfile(tarfile)
         return cert_name
 
-    def create_cert(self, common_name, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
+    def create_cert(self, common_name, modhash, key, csr, crt, sans=None, expiry=None, authority=None, destinations=None):
         cert = Cert(
             common_name,
             self.timestamp,
+            modhash,
             key,
             csr,
             crt,

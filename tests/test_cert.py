@@ -19,7 +19,8 @@ CRT = open(DIR+'/crt').read()
 def cert():
     return Cert(
         'common.name',
-        20170209155541 ,
+        20170209155541,
+        'e8a7fcfbe48df21daede665d78984dec',
         KEY,
         CSR,
         CRT,
