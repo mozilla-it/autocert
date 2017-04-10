@@ -109,8 +109,12 @@ class Cert(object):
             destinations)
 
     @property
+    def modhash_abbrev(self):
+        return self.modhash[:8]
+
+    @property
     def cert_name(self):
-        return '{0}@{1}'.format(self.common_name, self.timestamp)
+        return '{0}@{1}'.format(self.common_name, self.modhash_abbrev)
 
     @property
     def tarfile(self):

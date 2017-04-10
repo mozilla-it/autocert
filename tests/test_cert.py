@@ -30,8 +30,11 @@ def cert():
 def test_ctor(cert):
     assert isinstance(cert, Cert)
 
+def test_modhash_abbrev(cert):
+    assert cert.modhash_abbrev == cert.modhash[:8]
+
 def test_cert_name(cert):
-    assert cert.cert_name == '{0}@{1}'.format(cert.common_name, cert.timestamp)
+    assert cert.cert_name == '{0}@{1}'.format(cert.common_name, cert.modhash_abbrev)
 
 def test_tarfile(cert):
     assert cert.tarfile == cert.cert_name + '.tar.gz'
