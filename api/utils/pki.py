@@ -99,25 +99,14 @@ def _create_modhash(key):
     md5.update(modulus_bytes)
     return md5.hexdigest()
 
-def create_key_csr_and_modhash(common_name, oids=None, sans=None):
+def create_modhash_key_and_csr(common_name, oids=None, sans=None):
     key = _create_key(common_name)
     csr = _create_csr(common_name, key)
     modhash = _create_modhash(key)
     return (
-        key.private_bytes(
-            encoding=ENCODING[CFG.key.encoding],
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()).decode('utf-8'),
-        csr.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8'),
-        modhash)
-
-def create_key_and_csr(common_name, oids=None, sans=None):
-    key = _create_key(common_name)
-    csr = _create_csr(common_name, key)
-    return (
+        modhash,
         key.private_bytes(
             encoding=ENCODING[CFG.key.encoding],
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption()).decode('utf-8'),
         csr.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8'))
-

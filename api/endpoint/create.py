@@ -30,7 +30,7 @@ class CreateEndpoint(EndpointBase):
 
     def execute(self):
         status = 201
-        key, csr, modhash = pki.create_key_csr_and_modhash(self.args.common_name, self.args.sans)
+        modhash, key, csr = pki.create_modhash_key_and_csr(self.args.common_name, self.args.sans)
         crt, expiry, authority = self.authority.create_certificate(
             self.args.organization_name,
             self.args.common_name,
