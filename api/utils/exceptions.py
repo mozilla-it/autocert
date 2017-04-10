@@ -4,7 +4,7 @@
 class AutocertError(Exception):
     def __init__(self, message):
         self._message = message
-        super(AutocertException, self).__init__(message)
+        super(AutocertError, self).__init__(message)
 
     @property
     def name(self):
