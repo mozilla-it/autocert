@@ -63,6 +63,11 @@ STATUS_CODES = {
     511: 'network authentication required',
 }
 
+class EmptyJsonError(AutocertError):
+    def __init__(self, json):
+        message = fmt('empty json error ={0}', json)
+        super(EmptyJsonError, self).__init__(message)
+
 @app.before_first_request
 def initialize():
     from logging.config import dictConfig
@@ -105,14 +110,23 @@ def route():
         request.path,
         args)
     endpoint = create_endpoint(request.method, cfg, args)
-    try:
-        json, status = endpoint.execute()
-    except AutocertError as ae:
-        status = 500
-        json = dict(errors={
-            ae.name: ae.message
-        })
+    json, status = endpoint.execute()
+    if not json:
+        raise EmptyJsonError(json)
     return make_response(jsonify(json), status)
+
+@app.errorhandler(AutocertError)
+def unhandled_error(ex):
+    import traceback
+    tb = traceback.format_exc()
+    app.logger.error(tb)
+    status = 500
+    json = dict(errors={ae.name: ae.message})
+    return make_reponse(jsonify(json), status)
+
+@app.errorhandler(Exception)
+def unhandled_exception(ex):
+    app.logger.error('unhandled exception', exc_info=True)
 
 @app.errorhandler(400)
 def bad_request(error):
@@ -142,9 +156,6 @@ def internal_server_error(error):
 def service_unavailable(error):
     return log_jsonify_error(503, error, request)
 
-@app.errorhandler(Exception)
-def unhandled_exception(ex):
-    app.logger.error('unhandled exception', exc_info=True)
 
 if __name__ == '__main__':
     app.run()
