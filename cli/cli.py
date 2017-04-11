@@ -103,7 +103,9 @@ def do_request(ns):
         json = response.json()
         output(json)
     except JSONDecodeError as jde:
-        print(jde)
+        print('status =', status)
+        print('JSONDecodeError =', jde)
+        print('text =', response.text)
         return -1
     return status
 
