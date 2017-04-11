@@ -36,19 +36,22 @@ def tarinfo(cert_name, content):
     info.size = len(content)
     return info
 
-def bundle(dirpath, cert_name, key, csr, crt, yml):
+def bundle(dirpath, cert_name, key, csr, crt, yml, readme):
     if not yml:
         yml = {}
     yml = yaml_format(yml)
     tarpath = fmt('{dirpath}/{cert_name}.tar.gz')
     with tarfile.open(tarpath, 'w:gz') as tar:
+        readme_info = tarfile.TarInfo('README')
+        readme_info.size = len(readme)
+        tar.addfile(readme_info, BytesIO(readme.encode('utf-8')))
         for content in (key, csr, crt, yml):
             if content:
                 tar.addfile(tarinfo(cert_name, content), BytesIO(content.encode('utf-8')))
     return tarpath
 
 def unbundle(dirpath, cert_name):
-    key, csr, crt, yml = [None] * 4
+    key, csr, crt, yml, readme = [None] * 5
     tarpath = fmt('{dirpath}/{cert_name}.tar.gz')
     with tarfile.open(tarpath, 'r:gz') as tar:
         for info in tar.getmembers():
@@ -61,4 +64,6 @@ def unbundle(dirpath, cert_name):
             elif info.name.endswith('.yml'):
                 yml = tar.extractfile(info.name).read().decode('utf-8')
                 yml = yaml.safe_load(yml)
-    return key, csr, crt, yml
+            elif info.name == 'README':
+                readme = tar.extractfile(info.name).read().decode('utf-8')
+    return key, csr, crt, yml, readme

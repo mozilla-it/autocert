@@ -4,6 +4,7 @@
 utils.cert
 '''
 
+import os
 import copy
 
 from utils import tar
@@ -14,6 +15,7 @@ from utils.output import yaml_format, output
 from utils.dictionary import head, body, head_body, keys_ending
 from utils.exceptions import AutocertError
 
+DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
 class CertFromJsonError(AutocertError):
     def __init__(self, ex):
@@ -36,6 +38,9 @@ class Cert(object):
         self.expiry         = expiry
         self.authority      = authority
         self.destinations   = destinations if destinations else {}
+
+        with open(DIRPATH + '/README.tarfile') as f:
+            self.readme = f.read()
 
     def __repr__(self):
         return yaml_format(self.to_json())
@@ -79,7 +84,7 @@ class Cert(object):
 
     @staticmethod
     def load(tarpath, cert_name):
-        key, csr, crt, yml = tar.unbundle(tarpath, cert_name)
+        key, csr, crt, yml, readme = tar.unbundle(tarpath, cert_name)
         common_name, timestamp, modhash, _, _, _, sans, expiry, authority, destinations = Cert._decompose(yml)
         return Cert(
             common_name,
@@ -150,7 +155,8 @@ class Cert(object):
             self.key,
             self.csr,
             self.crt,
-            yml)
+            yml,
+            self.readme)
 
     def to_json(self):
         return {
