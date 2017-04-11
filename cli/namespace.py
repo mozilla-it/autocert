@@ -16,5 +16,6 @@ def jsonify(ns, **kwargs):
     json['user'] = getpass.getuser()
     json['hostname'] = platform.node()
     json['api_url'] = str(json['api_url']) #FIXME: ugly wart to remove
+    json['sans'] = list(json.get('sans', []))
     return json
 

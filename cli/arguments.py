@@ -56,7 +56,6 @@ ARGS = {
     ('-w', '--within'): dict(
         metavar='DAYS',
         default=14,
-        type=int,
         help='default="%(default)s"; within number of days from expiring'
     ),
     ('-s', '--sans'): dict(
