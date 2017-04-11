@@ -61,6 +61,7 @@ ARGS = {
     ),
     ('-s', '--sans'): dict(
         nargs='+',
+        type=list,
         help='add additional [s]ubject [a]lternative [n]ame(s)'
     ),
     ('--repeat-delta',): dict(
