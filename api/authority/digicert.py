@@ -70,6 +70,8 @@ class DigicertAuthority(AuthorityBase):
 
     def create_certificate(self, organization_name, common_name, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
+        if not sans:
+            sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
         if not self._is_validated_domain(common_name, organization_id, container_id):
             raise NotValidatedDomainError(common_name)

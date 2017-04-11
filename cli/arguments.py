@@ -59,8 +59,8 @@ ARGS = {
         help='default="%(default)s"; within number of days from expiring'
     ),
     ('-s', '--sans'): dict(
+        default=[],
         nargs='+',
-        type=list,
         help='add additional [s]ubject [a]lternative [n]ame(s)'
     ),
     ('--repeat-delta',): dict(

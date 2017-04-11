@@ -61,7 +61,7 @@ class Cert(object):
             modhash = cert_body['modhash']
             expiry = cert_body['expiry']
             authority = cert_body['authority']
-            sans = cert_body.get('sans', None)
+            sans = cert_body.get('sans', [])
             destinations = cert_body.get('destinations', None)
             if tardata:
                 files = cert_body['tardata'][fmt('{cert_name}.tar.gz')]
