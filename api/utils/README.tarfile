@@ -25,7 +25,7 @@ stored as a key in the .yml file included in the tarfile.
 
 The modhash can be generated from any SSL file with one of the commands below:
 
-    openssl req -in name-of-file.csr -noout -modulus | md5sum
+    openssl rsa -in name-of-file.key -noout -modulus | md5sum
     openssl req -in name-of-file.csr -noout -modulus | md5sum
     openssl x509 -in name-of-file.crt -noout -modulus | md5sum
 
