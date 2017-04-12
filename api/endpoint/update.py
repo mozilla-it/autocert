@@ -33,12 +33,14 @@ class UpdateEndpoint(EndpointBase):
         status = 201
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
         certs = self.tardata.load_certs(*cert_name_pns)
+        authority = self.args.get('authority', None)
+        destinations = self.args.get('destinations', None)
+        if authority != None and destinations != None:
+            raise MissingUpdateArgumentsError(self.args)
         if self.args.get('authority', None):
             certs = self.renew(certs, **kwargs)
-        elif self.args.get('destinations', None):
+        if self.args.get('destinations', None):
             certs = self.deploy(certs, **kwargs)
-        else:
-            raise MissingUpdateArgumentsError(self.args)
         json = self.transform(certs)
         return json, status
 
