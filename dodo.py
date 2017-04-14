@@ -80,7 +80,7 @@ def task_checkreqs():
         'docker-engine',
     ]
     RPMS = [
-        'docker-engine',
+        'docker-ce',
     ]
     return {
         'deb': {
