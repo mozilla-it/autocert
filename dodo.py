@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 
 import os
+import pwd
 
 from doit import get_var
 from ruamel import yaml
 
 from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
+from utils.format import fmt
+
 DOIT_CONFIG = {
     'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
     'verbosity': 2,
 }
 
-USER = os.getenv('USER')
+UID = os.getuid()
+USER = pwd.getpwuid(UID).pw_name
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -32,7 +36,7 @@ class UnknownPkgmgrError(Exception):
 def check_hash(program):
     from subprocess import check_call, CalledProcessError, PIPE
     try:
-        check_call('hash {program}'.format(**locals()), shell=True, stdout=PIPE, stderr=PIPE)
+        check_call(fmt('hash {program}'), shell=True, stdout=PIPE, stderr=PIPE)
         return True
     except CalledProcessError:
         return False
@@ -58,7 +62,7 @@ def task_count():
     scandir = os.path.dirname(__file__)
     return {
         'actions': [
-            'cloc {excludes} {scandir}'.format(**locals()),
+            fmt('cloc {excludes} {scandir}'),
         ],
         'uptodate': [
             lambda: not check_hash('cloc'),
@@ -165,7 +169,7 @@ def task_deploy():
         ],
         'actions': [
             'docker-compose build',
-            'docker-compose up --remove-orphans -d',
+            fmt('env AC_USER={USER} AC_UID={UID} docker-compose up --remove-orphans -d'),
         ],
     }
 
@@ -176,10 +180,10 @@ def task_rmimages():
     query = '`docker images -q -f dangling=true`'
     return {
         'actions': [
-            'docker rmi {query}'.format(**locals()),
+            fmt('docker rmi {query}'),
         ],
         'uptodate': [
-            '[ -z "{query}" ] && exit 0 || exit 1'.format(**locals()),
+            fmt('[ -z "{query}" ] && exit 0 || exit 1'),
         ],
     }
 
@@ -190,10 +194,10 @@ def task_rmvolumes():
     query = '`docker volume ls -q -f dangling=true`'
     return {
         'actions': [
-            'docker volume rm {query}'.format(**locals()),
+            fmt('docker volume rm {query}'),
         ],
         'uptodate': [
-            '[ -z "{query}" ] && exit 0 || exit 1'.format(**locals()),
+            fmt('[ -z "{query}" ] && exit 0 || exit 1'),
         ],
     }
 
@@ -218,7 +222,7 @@ def task_config():
     log_level = get_var('LOG_LEVEL', log_level)
     if log_level not in LOG_LEVELS:
         raise UnknownLogLevelError(log_level)
-    punch = '''
+    punch = fmt('''
     logging:
         loggers:
             api:
@@ -226,12 +230,12 @@ def task_config():
         handlers:
             console:
                 level: {log_level}
-    '''.format(**locals())
+    ''')
     return {
         'actions': [
-            'echo "cp {CONFIG_YML}\n-> {DOT_CONFIG_YML}"'.format(**globals()),
-            'echo "setting LOG_LEVEL={log_level}"'.format(**locals()),
-            'cp {CONFIG_YML} {DOT_CONFIG_YML}'.format(**globals()),
+            fmt('echo "cp {CONFIG_YML}\n-> {DOT_CONFIG_YML}"'),
+            fmt('echo "setting LOG_LEVEL={log_level}"'),
+            fmt('cp {CONFIG_YML} {DOT_CONFIG_YML}'),
             lambda: _update_config(DOT_CONFIG_YML, yaml.safe_load(punch)),
         ]
     }
@@ -242,18 +246,18 @@ def task_example():
     cp|strip config.yml -> config.yml.example
     '''
     apikey = '82_CHAR_APIKEY'
-    punch = '''
+    punch = fmt('''
     authorities:
         digicert:
             apikey: {apikey}
     destinations:
         zeus:
             apikey: {apikey}
-    '''.format(**locals())
+    ''')
     return {
         'actions': [
-            'cp {CONFIG_YML}.example {CONFIG_YML}.bak'.format(**globals()),
-            'cp {CONFIG_YML} {CONFIG_YML}.example'.format(**globals()),
+            fmt('cp {CONFIG_YML}.example {CONFIG_YML}.bak'),
+            fmt('cp {CONFIG_YML} {CONFIG_YML}.example'),
             lambda: _update_config(CONFIG_YML+'.example', yaml.safe_load(punch)),
         ],
     }
