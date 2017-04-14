@@ -15,8 +15,10 @@ DOIT_CONFIG = {
     'verbosity': 2,
 }
 
+DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
 USER = pwd.getpwuid(UID).pw_name
+ENV=dict(AC_UID=UID, AC_USER=USER)
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -154,6 +156,18 @@ def task_version():
         ],
     }
 
+def task_dotenv():
+    '''
+    write environment variables to .env file in reporoot
+    '''
+    def write_dotenv():
+        with open(DIR+'/.env', 'w') as f:
+            for k,v in ENV.items():
+                f.write(fmt('{k}={v}\n'))
+    return {
+        'actions': [write_dotenv],
+    }
+
 def task_deploy():
     '''
     deloy flask app via docker-compose
@@ -165,6 +179,7 @@ def task_deploy():
             'version',
             'test',
             'config',
+            'dotenv',
             'dockercompose'
         ],
         'actions': [

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 AC_EP="$0"
-AC_USER=${1:-root}
-AC_UID=${2:-0}
+AC_USER=${AC_USER:-root}
+AC_UID=${AC_UID:-0}
 
 echo "AC_EP=$AC_EP AC_USER=$AC_USER AC_UID=$AC_UID"
 

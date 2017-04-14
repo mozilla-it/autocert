@@ -8,7 +8,10 @@ services:
           - "8000"
         volumes:
           - /data/autocert:/data/autocert
-        entrypoint: /usr/src/app/entrypoint.sh ${AC_USER} ${AC_UID}
+        environment:
+          - AC_USER=${AC_USER}
+          - AC_UID=${AC_UID}
+        entrypoint: /usr/src/app/entrypoint.sh
     nginx:
         network_mode: host
         restart: always
