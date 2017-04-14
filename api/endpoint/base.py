@@ -82,7 +82,6 @@ class EndpointBase(object):
 
     def transform(self, certs):
         certs = [cert.to_json() for cert in certs]
-        #sorting_func = SORTING_FUNCS[self.args.sorting]
         certs = sorted(certs, key=self.sorting_func)
         json = dict(
             certs=[self.transform_cert(cert) for cert in certs],

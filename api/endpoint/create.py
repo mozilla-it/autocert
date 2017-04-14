@@ -13,7 +13,6 @@ from datetime import timedelta
 from utils import pki
 from utils.format import fmt
 from utils.exceptions import AutocertError
-from cert import create_cert_name
 
 from app import app
 

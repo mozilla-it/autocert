@@ -12,7 +12,6 @@ from utils.output import yaml_format
 
 from utils.format import fmt, pfmt
 
-from cert import decompose_cert
 
 ZEUS_PATH = 'ssl/server_keys/'
 

@@ -13,8 +13,6 @@ from utils.dictionary import merge, body
 from utils.format import fmt, pfmt
 from utils.newline import windows2unix
 from utils.exceptions import AutocertError
-from cert import create_cert_name
-
 
 from app import app
 

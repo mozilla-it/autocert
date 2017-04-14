@@ -18,9 +18,6 @@ class VisitError(AutocertError):
 def create_cert_name(common_name, timestamp, sep='@'):
     return fmt('{common_name}{sep}{timestamp}')
 
-def decompose_cert_name(cert_name, sep='@'):
-    return cert_name.split(sep)
-
 def decompose_cert(cert):
     cert_name, cert_body = head_body(cert)
     common_name = cert_body['common_name']
