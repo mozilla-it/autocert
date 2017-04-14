@@ -11,6 +11,7 @@ if ! getent passwd $AC_USER 2>/dev/null; then
     groupadd --gid $AC_GID $AC_USER
     useradd --uid $AC_UID --gid $AC_GID --shell /bin/bash --no-create-home $AC_USER
     echo -e "\n$AC_USER   ALL=(ALL) NOPASSWD: ALL\n" > /etc/sudoers
+    chown -R $AC_USER:$AC_USER /usr/src/app/
 fi
 
 echo "executing \"$AC_CMD\" as $AC_USER"
