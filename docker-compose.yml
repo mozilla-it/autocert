@@ -9,8 +9,9 @@ services:
         volumes:
           - /data/autocert:/data/autocert
         environment:
-          - AC_USER=${AC_USER}
           - AC_UID=${AC_UID}
+          - AC_GID=${AC_GID}
+          - AC_USER=${AC_USER}
         entrypoint: /usr/src/app/entrypoint.sh
     nginx:
         network_mode: host

@@ -17,8 +17,9 @@ DOIT_CONFIG = {
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
+GID = pwd.getpwuid(UID).pw_gid
 USER = pwd.getpwuid(UID).pw_name
-ENV=dict(AC_UID=UID, AC_USER=USER)
+ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -184,7 +185,7 @@ def task_deploy():
         ],
         'actions': [
             'docker-compose build',
-            fmt('env AC_USER={USER} AC_UID={UID} docker-compose up --remove-orphans -d'),
+            fmt('env AC_UID={UID} AC_GID={GID} AC_USER={USER} docker-compose up --remove-orphans -d'),
         ],
     }
 
