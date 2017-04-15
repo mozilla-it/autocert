@@ -23,28 +23,14 @@ from utils import tar
 from utils.format import fmt, pfmt
 from utils.dictionary import merge, head, head_body
 
-from cert import visit, simple, abbrev
-
 from app import app
 from config import CFG
 
-def default_sorting(cert):
-    head, body = head_body(cert)
-    return body.get('common_name', '')
-
-def timestamp_sorting(cert):
-    head, body = head_body(cert)
-    return body.get('timestamp', 0)
-
-def expiry_sorting(cert):
-    head, body = head_body(cert)
-    return body.get('expiry', 0)
-
 class EndpointBase(object):
     _sorting_funcs = dict(
-        default=default_sorting,
-        timestamp=timestamp_sorting,
-        expiry=expiry_sorting)
+        default=lambda cert: cert.common_name,
+        timestamp=lambda cert: cert.timestamp,
+        expiry=lambda cert: cert.expiry)
 
     def __init__(self, cfg, args):
         self.ar = AsyncRequests()
@@ -81,29 +67,13 @@ class EndpointBase(object):
         raise NotImplementedError
 
     def transform(self, certs):
-        certs = [cert.to_json() for cert in certs]
-        certs = sorted(certs, key=self.sorting_func)
         json = dict(
-            certs=[self.transform_cert(cert) for cert in certs],
+            certs=[cert.transform(self.verbosity) for cert in sorted(certs, key=self.sorting_func)],
         )
         if self.args.calls:
             calls = [self.transform_call(call) for call in self.ar.calls]
             json['calls'] = calls
         return json
-
-    def transform_cert(self, cert):
-        cert_name, cert_body = head_body(cert)
-        if self.verbosity == 0:
-            return {cert_name: cert_body.get('expiry', None)}
-        elif self.verbosity == 1:
-            tardata = head(cert_body['tardata'])
-            cert_body['tardata'] = tardata
-            return {cert_name: cert_body}
-        elif self.verbosity == 2:
-            cert = visit(cert, func=simple)
-        elif self.verbosity == 3:
-            cert = visit(cert, func=abbrev)
-        return cert
 
     def transform_call(self, call):
         name = '{0} {1} {2}'.format(call.recv.status, call.send.method, call.send.url)

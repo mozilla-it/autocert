@@ -15,6 +15,8 @@ from utils.output import yaml_format, output
 from utils.dictionary import head, body, head_body, keys_ending
 from utils.exceptions import AutocertError
 
+from pprint import pprint
+
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
 class CertFromJsonError(AutocertError):
@@ -22,6 +24,54 @@ class CertFromJsonError(AutocertError):
         message = 'cert.from_json error'
         super(CertFromJsonError, self).__init__(message)
         self.errors = [ex]
+
+class VisitError(AutocertError):
+    def __init__(self, obj):
+        message = fmt('unknown type obj = {obj}')
+        super(VisitError, self).__init__(message)
+
+def printit(obj):
+    print(obj)
+    return obj
+
+def simple(obj):
+    if istuple(obj):
+        key, value = obj
+        if isinstance(value, str) and key[-3:] in ('crt', 'csr', 'key'):
+            value = key[-3:].upper()
+        return key, value
+    return obj
+
+def abbrev(obj):
+    if istuple(obj):
+        key, value = obj
+        if isinstance(value, str) and key[-3:] in ('crt', 'csr', 'key'):
+            lines = value.split('\n')
+            lines = lines[:2] + ['...'] + lines[-3:]
+            value = '\n'.join(lines)
+        return key, value
+    return obj
+
+def visit(obj, func=printit):
+    obj1 = None
+    if isdict(obj):
+        obj1 = {}
+        for key, value in obj.items():
+            if isscalar(value):
+                key1, value1 = visit((key, value), func=func)
+            else:
+                key1 = key
+                value1 = visit(value, func=func)
+            obj1[key1] = value1
+    elif islist(obj):
+        obj1 = []
+        for item in obj:
+            obj1.append(visit(item, func=func))
+    elif isscalar(obj) or istuple(obj) and len(obj) == 2:
+        obj1 = func(obj)
+    else:
+        raise VisitError(obj)
+    return obj1
 
 class Cert(object):
 
@@ -66,7 +116,7 @@ class Cert(object):
             modhash = cert_body['modhash']
             expiry = cert_body['expiry']
             authority = cert_body['authority']
-            sans = cert_body.get('sans', [])
+            sans = cert_body.get('sans', None)
             destinations = cert_body.get('destinations', None)
             if tardata:
                 files = cert_body['tardata'][fmt('{cert_name}.tar.gz')]
@@ -144,11 +194,12 @@ class Cert(object):
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
                 'modhash': self.modhash,
-                'sans': self.sans,
                 'expiry': self.expiry,
                 'authority': self.authority,
             }
         }
+        if self.sans:
+            yml[self.cert_name]['sans'] = self.sans
         return tar.bundle(
             tarpath,
             self.cert_name,
@@ -159,12 +210,11 @@ class Cert(object):
             self.readme)
 
     def to_json(self):
-        return {
+        json = {
             self.cert_name: {
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
                 'modhash': self.modhash,
-                'sans': self.sans,
                 'expiry': self.expiry,
                 'authority': self.authority,
                 'destinations': self.destinations,
@@ -173,3 +223,19 @@ class Cert(object):
                 },
             }
         }
+        if self.sans:
+            json[self.cert_name]['sans'] = self.sans
+        return json
+
+    def transform(self, verbosity):
+        json = self.to_json()
+        if verbosity == 0:
+            json = {self.cert_name: self.expiry}
+        elif verbosity == 1:
+            json[self.cert_name].pop('destinations', None)
+            json[self.cert_name]['tardata'] = self.tarfile
+        elif verbosity == 2:
+            json = visit(json, func=simple)
+        elif verbosity == 3:
+            json = visit(json, func=abbrev)
+        return json

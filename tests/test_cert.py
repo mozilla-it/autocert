@@ -54,6 +54,5 @@ def test_disk_roundtrip(cert, tmpdir, capsys):
 
 def test_json_roundtrip(cert):
     json = cert.to_json()
-    print('json =', json)
     cert2 = Cert.from_json(json)
     assert cert == cert2
