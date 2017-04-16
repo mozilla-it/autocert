@@ -33,6 +33,7 @@ class CreateEndpoint(EndpointBase):
         crt, expiry, authority = self.authority.create_certificate(
             self.args.organization_name,
             self.args.common_name,
+            self.args.validity_years,
             csr,
             list(self.args.sans),
             self.args.repeat_delta)

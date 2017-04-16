@@ -63,6 +63,12 @@ ARGS = {
         nargs='+',
         help='add additional [s]ubject [a]lternative [n]ame(s)'
     ),
+    ('-y', '--validity-years'): dict(
+        metavar='YEARS',
+        default=1,
+        type=int,
+        help='default="%(default)s"; choose number of years for certificate'
+    ),
     ('--repeat-delta',): dict(
         dest='repeat_delta',
         metavar='SECS',
@@ -101,7 +107,7 @@ ARGS = {
         metavar='cert-name',
         default='*',
         nargs='*',
-        help='default="%(default)s"; <common-name>@<timestamp>; glob expressions '
+        help='default="%(default)s"; <common-name>@<modhash>; glob expressions '
             'also accepted; if only a common-name is given, "*" will be appended'
     ),
 }

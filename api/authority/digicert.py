@@ -66,20 +66,20 @@ class DigicertAuthority(AuthorityBase):
             cert.authority['digicert']['matched'] = matched
         return certs
 
-    def create_certificate(self, organization_name, common_name, csr, sans=None, repeat_delta=None):
+    def create_certificate(self, organization_name, common_name, validity_years, csr, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
         if not self._is_validated_domain(common_name, organization_id, container_id):
             raise NotValidatedDomainError(common_name)
-        path, json = self._prepare_path_json(organization_id, common_name, csr, sans=sans)
+        path, json = self._prepare_path_json(organization_id, common_name, validity_years, csr, sans=sans)
         crts, expiries, order_ids = self._create_certificates([path], [json], repeat_delta)
         authority = dict(digicert=dict(order_id=order_ids[0]))
         return crts[0], expiries[0], authority
 
-    def renew_certificates(self, certs, repeat_delta=None):
-        paths, jsons = self._prepare_paths_jsons_for_renewals(certs)
+    def renew_certificates(self, certs, validity_years, repeat_delta=None):
+        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, validity_years)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
@@ -113,9 +113,10 @@ class DigicertAuthority(AuthorityBase):
                 return False
         return domain.is_active
 
-    def _prepare_path_json(self, organization_id, common_name, csr, sans=None, renewal_of_order_id=None):
+    def _prepare_path_json(self, organization_id, common_name, validity_years, csr, sans=None, renewal_of_order_id=None):
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
+            validity_years=validity_years,
             certificate=dict(
                 common_name=common_name,
                 csr=csr),
@@ -133,7 +134,7 @@ class DigicertAuthority(AuthorityBase):
                 renewal_of_order_id=renewal_of_order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs):
+    def _prepare_paths_jsons_for_renewals(self, certs, validity_years):
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
         paths = []
@@ -142,6 +143,7 @@ class DigicertAuthority(AuthorityBase):
             path, json = self._prepare_path_json(
                 call.recv.json.organization.id,
                 cert.common_name,
+                validity_years,
                 cert.csr,
                 sans=cert.sans,
                 renewal_of_order_id=cert.authority['digicert']['order_id'])

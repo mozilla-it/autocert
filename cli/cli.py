@@ -94,7 +94,8 @@ def add_subparsers(parser):
 
 def do_request(ns):
     method = METHODS[ns.command]
-    json = jsonify(ns, destinations=dictify(ns.destinations))
+    destinations = dictify(ns.destinations)
+    json = jsonify(ns, destinations=destinations if destinations else None)
     response = requests.request(method, ns.api_url / 'autocert', json=json)
     status = response.status_code
     if ns.debug:

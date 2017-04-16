@@ -19,6 +19,7 @@ def add_parser(subparsers):
     add_argument(parser, '-a', '--authority')
     add_argument(parser, '-d', '--destinations', required=False)
     add_argument(parser, '-s', '--sans')
+    add_argument(parser, '-y', '--validity-years')
     add_argument(parser, '--repeat-delta')
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')

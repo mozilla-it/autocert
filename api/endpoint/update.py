@@ -36,6 +36,10 @@ class UpdateEndpoint(EndpointBase):
         authority = self.args.get('authority', None)
         destinations = self.args.get('destinations', None)
         if authority != None and destinations != None:
+            print('*'*80)
+            print('authority =', authority)
+            print('destinations =', destinations)
+            print('*'*80)
             raise MissingUpdateArgumentsError(self.args)
         if self.args.get('authority', None):
             certs = self.renew(certs, **kwargs)
@@ -47,6 +51,7 @@ class UpdateEndpoint(EndpointBase):
     def renew(self, certs, **kwargs):
         crts, expiries, authorities = self.authority.renew_certificates(
             certs,
+            self.args.validity_years,
             self.args.repeat_delta)
         for cert, crt, expiry, authority in zip(certs, crts, expiries, authorities):
             cert.crt = crt
