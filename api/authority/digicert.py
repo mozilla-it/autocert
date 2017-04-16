@@ -121,7 +121,9 @@ class DigicertAuthority(AuthorityBase):
                 csr=csr),
             organization=dict(
                 id=organization_id)))
-        if sans:
+        if common_name.startswith('*.'):
+            path = 'order/certificate/ssl_wildcard'
+        elif sans:
             path = 'order/certificate/ssl_multi_domain'
             json = merge(json, dict(
                 certificate=dict(

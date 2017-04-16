@@ -169,7 +169,11 @@ class Cert(object):
 
     @property
     def cert_name(self):
-        return '{0}@{1}'.format(self.common_name, self.modhash_abbrev)
+        prefix = self.common_name
+        suffix = self.modhash_abbrev
+        if self.common_name.startswith('*.'):
+            prefix = 'wildcard' + self.common_name[1:]
+        return prefix + '@' + suffix
 
     @property
     def tarfile(self):

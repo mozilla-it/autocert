@@ -27,6 +27,18 @@ def cert():
         expiry=20170401000000,
         authority=dict(digicert=dict(order_id=1298368)))
 
+@pytest.fixture
+def wildcard_cert():
+    return Cert(
+        '*.common.name',
+        20170209155541,
+        'e8a7fcfbe48df21daede665d78984dec',
+        KEY,
+        CSR,
+        CRT,
+        expiry=20170401000000,
+        authority=dict(digicert=dict(order_id=1298368)))
+
 def test_ctor(cert):
     assert isinstance(cert, Cert)
 
@@ -35,6 +47,9 @@ def test_modhash_abbrev(cert):
 
 def test_cert_name(cert):
     assert cert.cert_name == '{0}@{1}'.format(cert.common_name, cert.modhash_abbrev)
+
+def test_wildcard_cert_name(wildcard_cert):
+    assert wildcard_cert.cert_name == 'wildcard.common.name@e8a7fcfb'
 
 def test_tarfile(cert):
     assert cert.tarfile == cert.cert_name + '.tar.gz'
