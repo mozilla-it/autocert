@@ -35,11 +35,7 @@ class UpdateEndpoint(EndpointBase):
         certs = self.tardata.load_certs(*cert_name_pns)
         authority = self.args.get('authority', None)
         destinations = self.args.get('destinations', None)
-        if authority != None and destinations != None:
-            print('*'*80)
-            print('authority =', authority)
-            print('destinations =', destinations)
-            print('*'*80)
+        if authority == None and destinations == None:
             raise MissingUpdateArgumentsError(self.args)
         if self.args.get('authority', None):
             certs = self.renew(certs, **kwargs)
