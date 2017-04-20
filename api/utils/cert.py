@@ -239,6 +239,10 @@ class Cert(object):
             json[self.cert_name].pop('destinations', None)
             json[self.cert_name]['tardata'] = self.tarfile
         elif verbosity == 2:
+            if self.cert_name == 'videos-origin.mozilla.org@9c061c81':
+                print('#'*80)
+                pprint(json)
+                print('#'*80)
             json = visit(json, func=simple)
         elif verbosity == 3:
             json = visit(json, func=abbrev)
