@@ -127,7 +127,6 @@ class Cert(object):
                 key, csr, crt = [None] * 3
         except KeyError as ke:
             print(ke)
-            from pprint import pprint
             pprint(cert)
             raise CertFromJsonError(ke)
         return common_name, timestamp, modhash, key, csr, crt, sans, expiry, authority, destinations
@@ -239,10 +238,6 @@ class Cert(object):
             json[self.cert_name].pop('destinations', None)
             json[self.cert_name]['tardata'] = self.tarfile
         elif verbosity == 2:
-            if self.cert_name == 'videos-origin.mozilla.org@9c061c81':
-                print('#'*80)
-                pprint(json)
-                print('#'*80)
             json = visit(json, func=simple)
         elif verbosity == 3:
             json = visit(json, func=abbrev)

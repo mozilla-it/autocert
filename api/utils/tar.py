@@ -14,9 +14,10 @@ from utils.dictionary import merge
 from utils.exceptions import AutocertError
 
 FILETYPE = {
-    '-----BEGIN RSA PRIVATE KEY-----':      '.key',
-    '-----BEGIN CERTIFICATE REQUEST-----':  '.csr',
-    '-----BEGIN CERTIFICATE-----':          '.crt',
+    '-----BEGIN RSA PRIVATE KEY-----':          '.key',
+    '-----BEGIN CERTIFICATE REQUEST-----':      '.csr',
+    '-----BEGIN NEW CERTIFICATE REQUEST-----':  '.csr',
+    '-----BEGIN CERTIFICATE-----':              '.crt',
 }
 
 class UnknownFileExtError(AutocertError):
