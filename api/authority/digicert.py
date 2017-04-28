@@ -55,6 +55,7 @@ class DigicertAuthority(AuthorityBase):
         super(DigicertAuthority, self).__init__(ar, cfg, verbosity)
 
     def display_certificates(self, certs, repeat_delta=None):
+        app.logger.info(fmt('display_certificates:\n{locals}'))
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
@@ -66,21 +67,28 @@ class DigicertAuthority(AuthorityBase):
             cert.authority['digicert']['matched'] = matched
         return certs
 
-    def create_certificate(self, organization_name, common_name, validity_years, csr, sans=None, repeat_delta=None):
+    def create_certificate(self, organization_name, common_name, validity_years, csr, bug, sans=None, repeat_delta=None):
         app.logger.info(fmt('create_certificate:\n{locals}'))
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
         if not self._is_validated_domain(common_name, organization_id, container_id):
             raise NotValidatedDomainError(common_name)
-        path, json = self._prepare_path_json(organization_id, common_name, validity_years, csr, sans=sans)
-        crts, expiries, order_ids = self._create_certificates([path], [json], repeat_delta)
+        path, json = self._prepare_path_json(
+            organization_id,
+            common_name,
+            validity_years,
+            csr,
+            bug,
+            sans=sans)
+        crts, expiries, order_ids = self._create_certificates([path], [json], bug, repeat_delta)
         authority = dict(digicert=dict(order_id=order_ids[0]))
         return crts[0], expiries[0], authority
 
-    def renew_certificates(self, certs, validity_years, repeat_delta=None):
-        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, validity_years)
-        crts, expiries, order_ids = self._create_certificates(paths, jsons, repeat_delta)
+    def renew_certificates(self, certs, bug, validity_years, repeat_delta=None):
+        app.logger.info(fmt('renew_certificates:\n{locals}'))
+        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, bug, validity_years)
+        crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
 
@@ -88,6 +96,7 @@ class DigicertAuthority(AuthorityBase):
         raise NotImplementedError
 
     def _get_organization_container_ids(self, organization_name):
+        app.logger.debug(fmt('_get_organization_container_ids:\n{locals}'))
         path = 'organization'
         call = self.get(path)
         for organization in call.recv.json.organizations:
@@ -96,11 +105,12 @@ class DigicertAuthority(AuthorityBase):
         raise OrganizationNameNotFoundError(organization_name)
 
     def _get_domains(self, organization_id, container_id):
+        app.logger.debug(fmt('_get_domains:\n{locals}'))
         call = self.get(fmt('domain?container_id={container_id}'))
         return [domain for domain in call.recv.json.domains if domain.organization.id == organization_id]
 
     def _is_validated_domain(self, common_name, organization_id, container_id):
-        app.logger.info(fmt('_is_validated_domain:\n{locals}'))
+        app.logger.debug(fmt('_is_validated_domain:\n{locals}'))
         domains = self._get_domains(organization_id, container_id)
         matched_domains = [domain for domain in domains if common_name == domain.name]
         if matched_domains:
@@ -113,7 +123,8 @@ class DigicertAuthority(AuthorityBase):
                 return False
         return domain.is_active
 
-    def _prepare_path_json(self, organization_id, common_name, validity_years, csr, sans=None, renewal_of_order_id=None):
+    def _prepare_path_json(self, organization_id, common_name, validity_years, csr, bug, sans=None, renewal_of_order_id=None):
+        app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
             validity_years=validity_years,
@@ -121,7 +132,8 @@ class DigicertAuthority(AuthorityBase):
                 common_name=common_name,
                 csr=csr),
             organization=dict(
-                id=organization_id)))
+                id=organization_id),
+            comments=bug))
         if common_name.startswith('*.'):
             path = 'order/certificate/ssl_wildcard'
         elif sans:
@@ -134,7 +146,8 @@ class DigicertAuthority(AuthorityBase):
                 renewal_of_order_id=renewal_of_order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs, validity_years):
+    def _prepare_paths_jsons_for_renewals(self, certs, bug, validity_years):
+        app.logger.debug(fmt('_prepare_paths_jsons_for_renewals:\n{locals}'))
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
         paths = []
@@ -145,21 +158,26 @@ class DigicertAuthority(AuthorityBase):
                 cert.common_name,
                 validity_years,
                 cert.csr,
+                bug,
                 sans=cert.sans,
                 renewal_of_order_id=cert.authority['digicert']['order_id'])
             paths += [path]
             jsons += [json]
         return paths, jsons
 
-    def _create_certificates(self, paths, jsons, repeat_delta):
+    def _create_certificates(self, paths, jsons, bug, repeat_delta):
+        app.logger.debug(fmt('_create_certificates:\n{locals}'))
         order_ids, request_ids = self._order_certificates(paths, jsons)
-        self._approve_certificates(request_ids)
+        self._approve_certificates(request_ids, bug)
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         try:
             crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
             calls = self._get_certificate_order_detail(order_ids)
             expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
+        except AttributeError as ae:
+            pprint(calls[0].recv.json)
+            raise ae
         except DownloadCertificateError as dce:
             app.logger.warning(str(dce))
             crt = None
@@ -167,17 +185,17 @@ class DigicertAuthority(AuthorityBase):
         return crts, expiries, order_ids
 
     def _order_certificates(self, paths, jsons):
-        app.logger.info(fmt('_order_certificates:\n{locals}'))
+        app.logger.debug(fmt('_order_certificates:\n{locals}'))
         calls = self.posts(paths=paths, jsons=jsons)
         for call in calls:
             if call.recv.status != 201:
                 raise OrderCertificateError(call)
         return zip(*[(call.recv.json.id, call.recv.json.requests[0].id) for call in calls])
 
-    def _approve_certificates(self, request_ids):
-        app.logger.info(fmt('_approve_certificates:\n{locals}'))
+    def _approve_certificates(self, request_ids, bug):
+        app.logger.debug(fmt('_approve_certificates:\n{locals}'))
         paths = [fmt('request/{request_id}/status') for request_id in request_ids]
-        jsons = [dict(status='approved', processor_common='autocert')]
+        jsons = [dict(status='approved', processor_comment=bug)]
         app.logger.debug(fmt('calling digicert api with paths={paths} and jsons={jsons}'))
         calls = self.puts(paths=paths, jsons=jsons)
         for call in calls:
@@ -187,13 +205,13 @@ class DigicertAuthority(AuthorityBase):
         return True
 
     def _get_certificate_order_detail(self, order_ids):
-        app.logger.info(fmt('_get_certificate_order_detail:\n{locals}'))
+        app.logger.debug(fmt('_get_certificate_order_detail:\n{locals}'))
         paths = [fmt('order/certificate/{order_id}') for order_id in order_ids]
         calls = self.gets(paths=paths)
         return calls
 
     def _download_certificates(self, certificate_ids, format_type='pem_noroot', repeat_delta=None):
-        app.logger.info(fmt('_download_certificates:\n{locals}'))
+        app.logger.debug(fmt('_download_certificates:\n{locals}'))
         if repeat_delta is not None and isinstance(repeat_delta, int):
             repeat_delta = timedelta(seconds=repeat_delta)
         paths = [fmt('certificate/{certificate_id}/download/format/{format_type}') for certificate_id in certificate_ids]

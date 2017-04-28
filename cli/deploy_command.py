@@ -14,6 +14,7 @@ from utils.dictionary import dictify
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('deploy')
+    add_argument(parser, '-b', '--bug')
     add_argument(parser, '-d', '--destinations')
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')

@@ -24,6 +24,7 @@ def cert():
         KEY,
         CSR,
         CRT,
+        '0000000',
         expiry=20170401000000,
         authority=dict(digicert=dict(order_id=1298368)))
 
@@ -36,6 +37,7 @@ def wildcard_cert():
         KEY,
         CSR,
         CRT,
+        '0000000',
         expiry=20170401000000,
         authority=dict(digicert=dict(order_id=1298368)))
 

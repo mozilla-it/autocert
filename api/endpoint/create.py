@@ -35,6 +35,7 @@ class CreateEndpoint(EndpointBase):
             self.args.common_name,
             self.args.validity_years,
             csr,
+            self.args.bug,
             list(self.args.sans),
             self.args.repeat_delta)
         cert = self.tardata.create_cert(
@@ -43,6 +44,7 @@ class CreateEndpoint(EndpointBase):
             key,
             csr,
             crt,
+            self.args.bug,
             list(self.args.sans),
             expiry,
             authority)

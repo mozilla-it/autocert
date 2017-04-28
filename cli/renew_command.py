@@ -14,6 +14,7 @@ from utils.dictionary import dictify
 
 def add_parser(subparsers):
     parser = subparsers.add_parser('renew')
+    add_argument(parser, '-b', '--bug')
     add_argument(parser, '-a', '--authority')
     add_argument(parser, '-d', '--destinations', required=False)
     add_argument(parser, '-s', '--sans')

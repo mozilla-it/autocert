@@ -84,10 +84,10 @@ class AuthorityBase(object):
     def display_certificates(self, certs):
         raise NotImplementedError
 
-    def create_certificate(self, organization_name, common_name, validity_years, csr, sans=None, repeat_delta=None):
+    def create_certificate(self, organization_name, common_name, validity_years, csr, bug, sans=None, repeat_delta=None):
         raise NotImplementedError
 
-    def renew_certificates(self, certs, validity_years, repeat_delta=None):
+    def renew_certificates(self, certs, bug, validity_years, repeat_delta=None):
         raise NotImplementedError
 
     def revoke_certificates(self, certs):

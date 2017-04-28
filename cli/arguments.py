@@ -3,7 +3,9 @@
 '''
 cli.arguments: default arguments with the ability to override them
 '''
+import re
 
+from utils.format import fmt
 from utils.dictionary import merge
 from cli.config import CFG
 
@@ -16,6 +18,19 @@ ORGANIZATIONS = [
     'f', 'Mozilla Foundation',
     'c', 'Mozilla Corporation',
 ]
+
+class WrongBugFormatError(Exception):
+    def __init__(self, bug):
+        msg = fmt('WrongBugFormatError: string = {bug}')
+        super(WrongBugFormatError, self).__init__(msg)
+
+def bug_type(bug):
+    pattern = '\d{7,8}'
+    print(locals())
+    regex = re.compile(pattern)
+    if regex.match(bug):
+        return bug
+    raise WrongBugFormatError(bug)
 
 def organization_type(string):
     if string == 'f':
@@ -52,6 +67,11 @@ ARGS = {
         choices=CFG.DESTINATIONS,
         nargs='+',
         help='default="%(default)s"; choose destinations; choices=[%(choices)s]'
+    ),
+    ('-b', '--bug'): dict(
+        required=True,
+        type=bug_type,
+        help='the bug number assocated with this ssl|tls certificate'
     ),
     ('-w', '--within'): dict(
         metavar='DAYS',

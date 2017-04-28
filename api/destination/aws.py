@@ -8,14 +8,14 @@ class AwsDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity=0):
         super(AwsDestination, self).__init__(ar, cfg, verbosity)
 
-    def fetch_certificate(self, common_name, *dests, csr=None):
+    def fetch_certificate(self, certs, *dests):
         raise NotImplementedError
 
-    def install_certificate(self, common_name, crt, csr, key, note, *dests):
+    def install_certificate(self, certs, *dests):
         raise NotImplementedError
 
-    def update_certificate(self, common_name, crt, note, *dests):
+    def update_certificate(self, certs, *dests):
         raise NotImplementedError
 
-    def remove_certificate(self, common_name, csr, *dests):
+    def remove_certificate(self, certs, *dests):
         raise NotImplementedError
