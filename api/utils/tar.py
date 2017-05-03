@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import os
 import glob
@@ -38,6 +36,7 @@ def tarinfo(cert_name, content):
     return info
 
 def bundle(dirpath, cert_name, key, csr, crt, yml, readme):
+    os.makedirs(str(dirpath), exist_ok=True)
     if not yml:
         yml = {}
     yml = yaml_format(yml)
