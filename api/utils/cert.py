@@ -118,7 +118,7 @@ class Cert(object):
             modhash = cert_body['modhash']
             expiry = cert_body['expiry']
             authority = cert_body['authority']
-            bug = cert_body['bug']
+            bug = cert_body.get('bug', None)
             sans = cert_body.get('sans', None)
             destinations = cert_body.get('destinations', None)
             if tardata:
