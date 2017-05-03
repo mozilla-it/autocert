@@ -77,7 +77,7 @@ def task_checkreqs():
     check for required software
     '''
     DEBS = [
-        'docker-engine',
+        'docker-ce',
     ]
     RPMS = [
         'docker-ce',
