@@ -26,7 +26,6 @@ class WrongBugFormatError(Exception):
 
 def bug_type(bug):
     pattern = '\d{7,8}'
-    print(locals())
     regex = re.compile(pattern)
     if regex.match(bug):
         return bug
