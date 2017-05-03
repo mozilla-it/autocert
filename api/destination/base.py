@@ -117,7 +117,7 @@ class DestinationBase(object):
     def fetch_certificates(self, certs, *dests):
         raise NotImplementedError
 
-    def install_certificates(self, certs, *dests):
+    def install_certificates(self, note, certs, *dests):
         raise NotImplementedError
 
     def update_certificates(self, certs, *dests):

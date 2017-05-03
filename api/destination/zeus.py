@@ -33,7 +33,7 @@ class ZeusDestination(DestinationBase):
                 detail_key = (cert.common_name, cert.crt[:40])
                 destinations = details.get(detail_key, {})
                 if destinations:
-                    for dest, (note, key, csr, crt) in destinations.items():
+                    for dest, (key, csr, crt, note) in destinations.items():
                         zeus_detail = cert.destinations.get('zeus', {})
                         matched = csr == cert.csr and crt == cert.crt
                         zeus_detail[dest] = dict(
@@ -42,8 +42,8 @@ class ZeusDestination(DestinationBase):
                         cert.destinations['zeus'] = zeus_detail
         return certs
 
-    def install_certificates(self, certs, *dests):
-        paths, jsons = zip(*[(ZEUS_PATH+cert.common_name, compose_json(cert.key, cert.csr, cert.crt, cert.cert_name)) for cert in certs])
+    def install_certificates(self, note, certs, *dests):
+        paths, jsons = zip(*[(ZEUS_PATH+cert.common_name, compose_json(cert.key, cert.csr, cert.crt, note)) for cert in certs])
         calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
         certs = self.fetch_certificates(certs, *dests)
         return certs
@@ -82,10 +82,10 @@ class ZeusDestination(DestinationBase):
                     app.logger.debug(fmt('call.send.url={0}', call.send.url))
                     app.logger.debug(fmt('call.recv.json=\n{0}', call.recv.json))
                 details[(common_name, crt[:40])] = details.get((common_name, crt[:40]), {})
-                details[(common_name, crt[:40])][dest] = dict(
-                    crt=crt,
-                    csr=csr,
-                    key=key,
-                    note=note)
+                details[(common_name, crt[:40])][dest] = (
+                    key,
+                    csr,
+                    crt,
+                    note)
         return details
 
