@@ -59,6 +59,7 @@ class UpdateEndpoint(EndpointBase):
 
     def deploy(self, certs, **kwargs):
         installed_certs = []
+        note = 'bug {bug}'.format(**self.args)
         for name, dests in self.args.destinations.items():
-            installed_certs += self.destinations[name].install_certificates(certs, *dests)
+            installed_certs += self.destinations[name].install_certificates(note, certs, *dests)
         return installed_certs
