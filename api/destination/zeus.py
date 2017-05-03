@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from destination.base import DestinationBase
+from destination.base import DestinationBase, DestinationConnectivityError
 from config import CFG
 
 from utils.dictionary import merge, head, body, head_body, keys_ending
@@ -25,6 +25,13 @@ def compose_json(key, csr, crt, note):
 class ZeusDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity):
         super(ZeusDestination, self).__init__(ar, cfg, verbosity)
+
+    def has_connectivity(self, *dests):
+        calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=5)
+        for call in calls:
+            if call.recv.status != 200:
+                raise DestinationConnectivityError(call)
+        return True
 
     def fetch_certificates(self, certs, *dests):
         details = self._get_installed_certificates_details(certs, *dests)
@@ -56,7 +63,7 @@ class ZeusDestination(DestinationBase):
 
     def _get_installed_summary(self, certs, *dests):
         common_names = [cert.common_name for cert in certs]
-        calls = self.gets(paths=[ZEUS_PATH], dests=dests, verify_ssl=False)
+        calls = self.gets(paths=[ZEUS_PATH], dests=dests, timeout=10, verify_ssl=False)
         assert len(dests) == len(calls)
         summary = []
         for dest, call in zip(dests, calls):

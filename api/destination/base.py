@@ -12,6 +12,11 @@ from utils.exceptions import AutocertError
 
 from app import app
 
+class DestinationConnectivityError(AutocertError):
+    def __init__(self, call):
+        msg = fmt('destination connectivity error {call}')
+        super(ConnectivityError, self).__init__(msg)
+
 class DestinationPathError(AutocertError):
     def __init__(self, path_or_paths):
         message = fmt('error with DestinationBase param path(s) = {path_or_paths}')
@@ -43,7 +48,7 @@ class DestinationBase(object):
         self.verbosity = verbosity
 
     def keywords(self, path=None, dest=None, **kw):
-        if not path:
+        if path is None:
             raise DestinationPathError(path)
         if not dest:
             raise DestinationDestError(dest)
@@ -104,6 +109,9 @@ class DestinationBase(object):
 
     def deletes(self, paths=None, dests=None, jsons=None, **kw):
         return self.requests('DELETE', paths=paths, dests=dests, jsons=jsons, **kw)
+
+    def has_conectivity(self, *dests):
+        raise NotImplementedError
 
     def add_destinations(self, cert, *dests, **items):
         '''

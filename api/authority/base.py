@@ -12,6 +12,11 @@ from utils.exceptions import AutocertError
 
 from app import app
 
+class AuthorityConnectivityError(AutocertError):
+    def __init__(self, call):
+        msg = fmt('authority connectivity error {call}')
+        super(ConnectivityError, self).__init__(msg)
+
 class AuthorityFactoryError(AutocertError):
     def __init__(self, authority):
         message = fmt('authority factory error {authority}')
@@ -80,6 +85,9 @@ class AuthorityBase(object):
 
     def deletes(self, paths=None, jsons=None, **kw):
         return self.requests('DELETE', paths=paths, jsons=jsons, **kw)
+
+    def has_connectivity(self):
+        raise NotImplementedError
 
     def display_certificates(self, certs):
         raise NotImplementedError

@@ -24,6 +24,7 @@ except ImportError as ie:
 from cli.utils.importer import import_modules
 from cli.utils.version import version as cli_version
 from utils.dictionary import dictify
+from utils.url import validate
 from cli.utils.output import output
 from cli.utils.format import fmt, pfmt
 from cli.namespace import jsonify
@@ -96,6 +97,7 @@ def do_request(ns):
     method = METHODS[ns.command]
     destinations = dictify(ns.destinations)
     json = jsonify(ns, destinations=destinations if destinations else None)
+    validate(ns.api_url, throw=True)
     response = requests.request(method, ns.api_url / 'autocert', json=json)
     status = response.status_code
     if ns.debug:

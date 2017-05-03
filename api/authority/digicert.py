@@ -54,6 +54,12 @@ class DigicertAuthority(AuthorityBase):
     def __init__(self, ar, cfg, verbosity):
         super(DigicertAuthority, self).__init__(ar, cfg, verbosity)
 
+    def has_connectivity(self):
+        call = self.get('user/me')
+        if call.recv.status != 200:
+            raise AuthorityConnectivityError(call)
+        return True
+
     def display_certificates(self, certs, repeat_delta=None):
         app.logger.info(fmt('display_certificates:\n{locals}'))
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
