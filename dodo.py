@@ -10,11 +10,6 @@ from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 from utils.format import fmt
 
-DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
-    'verbosity': 2,
-}
-
 DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
 GID = pwd.getpwuid(UID).pw_gid
@@ -31,6 +26,14 @@ LOG_LEVELS = [
     'CRITICAL',
 ]
 
+DOIT_CONFIG = {
+    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
+    'verbosity': 2,
+}
+
+ENVS = ' '.join([
+    'PYTHONPATH=.:api:$PYTHONPATH',
+])
 
 class UnknownPkgmgrError(Exception):
     def __init__(self):
@@ -143,7 +146,8 @@ def task_test():
             'venv/bin/pip3 install --upgrade pip',
             'venv/bin/pip install -r api/requirements.txt',
             'venv/bin/pip install -r tests/requirements.txt',
-            'venv/bin/pytest -v tests/',
+            fmt('{ENVS} venv/bin/pytest -s -vv tests/'),
+            #'venv/bin/pytest -v tests/',
         ],
     }
 

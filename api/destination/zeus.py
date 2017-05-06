@@ -7,11 +7,12 @@ from config import CFG
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
 
-from app import app
 from utils.output import yaml_format
 
 from utils.format import fmt, pfmt
+from asyncio import TimeoutError
 
+from app import app
 
 ZEUS_PATH = 'ssl/server_keys/'
 
@@ -27,10 +28,10 @@ class ZeusDestination(DestinationBase):
         super(ZeusDestination, self).__init__(ar, cfg, verbosity)
 
     def has_connectivity(self, *dests):
-        calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=5)
-        for call in calls:
-            if call.recv.status != 200:
-                raise DestinationConnectivityError(call)
+        try:
+            calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=3)
+        except TimeoutError as te:
+            raise DestinationConnectivityError(te)
         return True
 
     def fetch_certificates(self, certs, *dests):

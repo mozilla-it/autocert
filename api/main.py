@@ -8,17 +8,14 @@ import sys
 
 from flask import Flask, request, jsonify, make_response
 from pdb import set_trace as breakpoint
-
 from pprint import pformat
-
-from app import app
 
 from endpoint.factory import create_endpoint
 from utils.version import version as api_version
 from utils.format import fmt
 from utils.exceptions import AutocertError
 
-app.config['PROPAGATE_EXCEPTIONS'] = True
+from app import app
 
 STATUS_CODES = {
     400: 'bad request',
@@ -77,7 +74,7 @@ def initialize():
         PID = os.getpid()
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
-        app.logger.info('starting api with pid={PID}, ppid={PPID} by user={USER}'.format(**locals()))
+        app.logger.info(fmt('starting api with pid={PID}, ppid={PPID} by user={USER}'))
 
 def log_request(user, hostname, ip, method, path, json):
     app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with json=\n"{json}"'))
@@ -110,13 +107,22 @@ def route():
         request.path,
         args)
     endpoint = create_endpoint(request.method, cfg, args)
-    json, status = endpoint.execute()
+    try:
+        json, status = endpoint.execute()
+    except AutocertError as ae:
+        print('try except AutocertError')
+        print(80*'*')
+        status = 500
+        json = dict(errors={ae.name: ae.message})
+        return make_response(jsonify(json), status)
     if not json:
         raise EmptyJsonError(json)
     return make_response(jsonify(json), status)
 
 @app.errorhandler(AutocertError)
 def unhandled_error(ex):
+    print('unhandled_error: AutocertError')
+    print(80*'*')
     import traceback
     tb = traceback.format_exc()
     app.logger.error(tb)

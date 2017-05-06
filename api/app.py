@@ -3,4 +3,5 @@
 
 from flask import Flask
 app = Flask('api')
+app.config['PROPAGATE_EXCEPTIONS'] = True
 app.logger

@@ -10,9 +10,10 @@ from subprocess import check_output
 
 from utils.docstr import docstr
 from utils.json import jsonify
-from main import app
 
 from utils.version import version
+
+from main import app
 
 def test_version():
     '''
