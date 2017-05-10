@@ -105,3 +105,6 @@ api/.config.yml
 *.bak
 
 digitool.py
+
+#prevent checking in old logs that are generated on each deploy
+oldlogs/

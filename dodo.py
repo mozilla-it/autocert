@@ -16,7 +16,7 @@ UID = os.getuid()
 GID = pwd.getpwuid(UID).pw_gid
 USER = pwd.getpwuid(UID).pw_name
 ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
-LOGDIR='../logs'
+LOGDIR='oldlogs'
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
