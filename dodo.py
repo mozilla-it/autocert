@@ -9,12 +9,14 @@ from ruamel import yaml
 from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 from utils.format import fmt
+from utils.timestamp import utcnow
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
 GID = pwd.getpwuid(UID).pw_gid
 USER = pwd.getpwuid(UID).pw_name
 ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
+LOGDIR='../logs'
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -173,6 +175,22 @@ def task_dotenv():
         'actions': [write_dotenv],
     }
 
+def task_savelogs():
+    '''
+    save the logs to a timestamped file
+    '''
+    timestamp = utcnow()
+    return {
+        'task_dep': [
+            'checkreqs',
+            'dockercompose'
+        ],
+        'actions': [
+            fmt('mkdir -p {LOGDIR}'),
+            fmt('docker-compose logs > {LOGDIR}/{timestamp}.log'),
+        ]
+    }
+
 def task_deploy():
     '''
     deloy flask app via docker-compose
@@ -185,7 +203,8 @@ def task_deploy():
             'test',
             'config',
             'dotenv',
-            'dockercompose'
+            'dockercompose',
+            'savelogs',
         ],
         'actions': [
             'docker-compose build',
