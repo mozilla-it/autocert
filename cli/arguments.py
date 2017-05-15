@@ -21,7 +21,7 @@ ORGANIZATIONS = [
 
 class WrongBugFormatError(Exception):
     def __init__(self, bug):
-        msg = fmt('WrongBugFormatError: string = {bug}')
+        msg = fmt('WrongBugFormatError: bug should be 7-8 digits long but was, {bug}')
         super(WrongBugFormatError, self).__init__(msg)
 
 def bug_type(bug):
