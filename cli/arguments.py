@@ -124,8 +124,7 @@ ARGS = {
     ),
     ('cert_name_pns',): dict(
         metavar='cert-name',
-        default='*',
-        nargs='*',
+        nargs='+',
         help='default="%(default)s"; <common-name>@<modhash>; glob expressions '
             'also accepted; if only a common-name is given, "*" will be appended'
     ),

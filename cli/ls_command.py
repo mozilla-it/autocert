@@ -20,4 +20,4 @@ def add_parser(subparsers):
     add_argument(parser, '--expired')
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
-    add_argument(parser, 'cert_name_pns')
+    add_argument(parser, 'cert_name_pns', default='*', nargs='*')
