@@ -24,6 +24,11 @@ class OrderCertificateError(AutocertError):
         message = fmt('order certificate error call={0}', call)
         super(OrderCertificateError, self).__init__(message)
 
+class RevokeCertificateError(AutocertError):
+    def __init__(self, call):
+        message = fmt('revoke certificate error call={0}', call)
+        super(RevokeCertificateError, self).__init__(message)
+
 class ApproveCertificateError(AutocertError):
     def __init__(self, call):
         message = fmt('approve certificate error call={0}', call)
@@ -106,8 +111,11 @@ class DigicertAuthority(AuthorityBase):
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
 
-    def revoke_certificates(self, certs):
-        raise NotImplementedError
+    def revoke_certificates(self, certs, bug):
+        app.logger.info(fmt('revoke_certificates:\n{locals}'))
+        paths, jsons = self._prepare_paths_jsons_for_revocations(certs, bug)
+        self._revoke_certificates(paths, jsons, bug)
+        return certs
 
     def _get_organization_container_ids(self, organization_name):
         app.logger.debug(fmt('_get_organization_container_ids:\n{locals}'))
@@ -186,10 +194,19 @@ class DigicertAuthority(AuthorityBase):
             jsons += [json]
         return paths, jsons
 
+    def _prepare_paths_jsons_for_revocations(self, certs, bug):
+        app.logger.debug(fmt('_prepare_paths_jsons_for_revocations:\n{locals}'))
+        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
+        calls = self._get_certificate_order_detail(order_ids)
+        certificate_ids = [call.recv.json.certificate.id for call in calls]
+        paths = [fmt('certificate/{certificate_id}/revoke') for certificate_id in certificate_ids]
+        jsons = [dict(comments=str(bug))]
+        return paths, jsons
+
     def _create_certificates(self, paths, jsons, bug, repeat_delta):
         app.logger.debug(fmt('_create_certificates:\n{locals}'))
         order_ids, request_ids = self._order_certificates(paths, jsons)
-        self._approve_certificates(request_ids, bug)
+        self._update_requests_status(request_ids, 'approved', bug)
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         try:
@@ -205,6 +222,15 @@ class DigicertAuthority(AuthorityBase):
             expiry = None
         return crts, expiries, order_ids
 
+    def _revoke_certificates(self, paths, jsons, bug):
+        app.logger.debug(fmt('_revoke_certificates:\n{locals}'))
+        calls = self.puts(paths=paths, jsons=jsons)
+        for call in calls:
+            if call.recv.status != 201:
+                raise RevokeCertificateError(call)
+        request_ids = [call.recv.json.id for call in calls]
+        self._update_requests_status(request_ids, 'approved', bug)
+
     def _order_certificates(self, paths, jsons):
         app.logger.debug(fmt('_order_certificates:\n{locals}'))
         calls = self.posts(paths=paths, jsons=jsons)
@@ -213,10 +239,10 @@ class DigicertAuthority(AuthorityBase):
                 raise OrderCertificateError(call)
         return zip(*[(call.recv.json.id, call.recv.json.requests[0].id) for call in calls])
 
-    def _approve_certificates(self, request_ids, bug):
-        app.logger.debug(fmt('_approve_certificates:\n{locals}'))
+    def _update_requests_status(self, request_ids, status,bug):
+        app.logger.debug(fmt('_update_requests_status:\n{locals}'))
         paths = [fmt('request/{request_id}/status') for request_id in request_ids]
-        jsons = [dict(status='approved', processor_comment=bug)]
+        jsons = [dict(status=status, processor_comment=bug)]
         app.logger.debug(fmt('calling digicert api with paths={paths} and jsons={jsons}'))
         calls = self.puts(paths=paths, jsons=jsons)
         for call in calls:
