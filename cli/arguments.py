@@ -5,7 +5,7 @@ cli.arguments: default arguments with the ability to override them
 '''
 import re
 
-from utils.format import fmt
+from utils.format import fmt, pfmt
 from utils.dictionary import merge
 from cli.config import CFG
 
@@ -37,6 +37,18 @@ def organization_type(string):
     elif string == 'c':
         return 'Mozilla Corporation'
     return string
+
+from argparse import Action
+
+class SansAction(Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        sans = getattr(namespace, 'sans', [])
+        if option_string in ('-s', '--sans'):
+            sans += values
+        elif option_string in ('-S', '--sans-file'):
+            with open(values) as f:
+                sans = [san for san in f.read().strip().split('\n') if not san.startswith('#')]
+        setattr(namespace, 'sans', sans)
 
 # these are the default values for these arguments
 ARGS = {
@@ -79,8 +91,14 @@ ARGS = {
     ),
     ('-s', '--sans'): dict(
         default=[],
+        action=SansAction,
         nargs='+',
         help='add additional [s]ubject [a]lternative [n]ame(s)'
+    ),
+    ('-S', '--sans-file'): dict(
+        metavar='FILEPATH',
+        action=SansAction,
+        help='supply a file to add additional [s]ubject [a]lternative [n]ame(s)'
     ),
     ('-y', '--validity-years'): dict(
         metavar='YEARS',
@@ -100,6 +118,10 @@ ARGS = {
         choices=CALLS_STYLE,
         nargs='?',
         help='const="%(const)s"; toggle and choose the call output format; choices=[%(choices)s]'
+    ),
+    ('-n', '--nerf',): dict(
+        action='store_true',
+        help='dry-run or nerf the command'
     ),
     ('-v', '--verbose'): dict(
         metavar='LEVEL',

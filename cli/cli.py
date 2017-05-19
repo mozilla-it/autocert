@@ -29,6 +29,7 @@ from cli.utils.output import output
 from cli.utils.format import fmt, pfmt
 from cli.namespace import jsonify
 from cli import requests
+from cli.arguments import add_argument
 
 from cli.config import CFG
 
@@ -100,8 +101,6 @@ def do_request(ns):
     validate(ns.api_url, throw=True)
     response = requests.request(method, ns.api_url / 'autocert', json=json)
     status = response.status_code
-    if ns.debug:
-        print('status =', status)
     try:
         json = response.json()
         output(json)
@@ -120,10 +119,6 @@ def main():
         action='store_true',
         help='show loaded CFG values')
     parser.add_argument(
-        '-D', '--debug',
-        action='store_true',
-        help='turn on debug mode')
-    parser.add_argument(
         '-V', '--version',
         choices = VERSIONS,
         const=VERSIONS[0],
@@ -136,12 +131,13 @@ def main():
         type=URL,
         help='default=%(default)s; set the api url to use')
     parser.add_argument(
-        '-S', '--sort',
+        '--sort',
         dest='sorting',
         metavar='SORT',
         default=SORTING[0],
         choices=SORTING,
         help='default="%(default)s"; set the sorting method; choices=[%(choices)s]')
+    add_argument(parser, '-n', '--nerf')
 
     parser.set_defaults(**CFG)
     ns, rem = parser.parse_known_args()
@@ -161,8 +157,9 @@ def main():
     parser.set_defaults(**CFG)
 
     ns = parser.parse_args()
-    if ns.debug:
-        print('ns =', ns)
+    if ns.nerf:
+        output(dict(ns=ns.__dict__))
+        sys.exit(0)
 
     status = do_request(ns)
 
