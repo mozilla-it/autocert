@@ -45,7 +45,10 @@ class AuthorityBase(object):
             raise AuthorityPathError(path)
         kw['url'] = str(self.cfg.baseurl / path)
         kw['auth'] = kw.get('auth', self.cfg.auth)
-        kw['headers'] = kw.get('headers', self.cfg.headers)
+        kw['headers'] = kw.get('headers', {
+            'Content-Type': 'application/json',
+            'User-Agent': 'autocert',
+        })
         return kw
 
     def request(self, method, **kw):

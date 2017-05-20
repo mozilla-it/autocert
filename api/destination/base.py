@@ -55,7 +55,10 @@ class DestinationBase(object):
         cfg = AttrDict(self.cfg[dest])
         kw['url'] = str(cfg.baseurl / path)
         kw['auth'] = kw.get('auth', cfg.auth)
-        kw['headers'] = kw.get('headers', cfg.headers)
+        kw['headers'] = kw.get('headers', {
+            'Content-Type': 'application/json',
+            'User-Agent': 'autocert',
+        })
         return kw
 
     def request(self, method, **kw):
