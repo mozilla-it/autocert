@@ -11,6 +11,8 @@ from attrdict import AttrDict
 from urlpath import URL
 from pathlib2 import Path
 
+from utils.format import fmt
+
 try:
     from utils.dictionary import merge
     from utils.exceptions import AutocertError
@@ -57,6 +59,10 @@ def _fixup(obj):
                     d[k] = URL(v)
                 elif 'path' in k:
                     d[k] = Path(v)
+                elif 'auth' == k:
+                    print(os.getcwd())
+                    with open(fmt('{CONFIG_DIR}/{v}'), 'r') as f:
+                        d[k] = yaml.safe_load(f.read())
             elif isinstance(v, dict):
                 d[k] = _fixup(v)
         return d

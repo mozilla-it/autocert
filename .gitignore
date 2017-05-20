@@ -101,6 +101,9 @@ LOG_LEVEL
 api/config.yml
 api/.config.yml
 
+# prevent apikey files from being checked in
+api/*apikey.yml
+
 # skip .bak files
 *.bak
 
