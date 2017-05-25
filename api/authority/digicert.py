@@ -40,8 +40,9 @@ class OrganizationNameNotFoundError(AutocertError):
         super(OrganizationNameNotFoundError, self).__init__(message)
 
 class NotValidatedDomainError(AutocertError):
-    def __init__(self, common_name):
-        message = fmt('domain not validated for {common_name}')
+    def __init__(self, domains):
+        domains = ', '.join(domains)
+        message = fmt('list of domains NOT validated: {domains}')
         super(NotValidatedDomainError, self).__init__(message)
 
 def expiryify(valid_till):
@@ -78,8 +79,9 @@ class DigicertAuthority(AuthorityBase):
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
-        if not self._is_validated_domain(common_name, organization_id, container_id):
-            raise NotValidatedDomainError(common_name)
+        domains_to_check = [common_name] + sans if sans else []
+        print('domains_to_check =', domains_to_check, type(domains_to_check))
+        self._validate_domains(organization_id, container_id, domains_to_check)
         path, json = self._prepare_path_json(
             organization_id,
             common_name,
@@ -113,21 +115,26 @@ class DigicertAuthority(AuthorityBase):
     def _get_domains(self, organization_id, container_id):
         app.logger.debug(fmt('_get_domains:\n{locals}'))
         call = self.get(fmt('domain?container_id={container_id}'))
-        return [domain for domain in call.recv.json.domains if domain.organization.id == organization_id]
+        return [domain for domain in call.recv.json.domains if domain.is_active and domain.organization.id == organization_id]
 
-    def _is_validated_domain(self, common_name, organization_id, container_id):
-        app.logger.debug(fmt('_is_validated_domain:\n{locals}'))
-        domains = self._get_domains(organization_id, container_id)
-        matched_domains = [domain for domain in domains if common_name == domain.name]
-        if matched_domains:
-            domain = matched_domains[0]
-        else:
-            matched_subdomains = [domain for domain in domains if common_name.endswith('.'+domain.name)]
-            if matched_subdomains:
-                domain = matched_subdomains[0]
+    def _validate_domains(self, organization_id, container_id, domains):
+        app.logger.debug(fmt('_validate_domains:\n{locals}'))
+        active_domains = self._get_domains(organization_id, container_id)
+        def _is_validated(domain_to_check):
+            matched_domains = [ad for ad in active_domains if domain_to_check == ad.name]
+            if matched_domains:
+                domain = matched_domains[0]
             else:
-                return False
-        return domain.is_active
+                matched_subdomains = [ad for ad in active_domains if domain_to_check.endswith('.'+ad.name)]
+                if matched_subdomains:
+                    domain = matched_subdomains[0]
+                else:
+                    return False
+            return True
+        denied_domains = [domain for domain in domains if not _is_validated(domain)]
+        if denied_domains:
+            raise NotValidatedDomainError(denied_domains)
+        return True
 
     def _prepare_path_json(self, organization_id, common_name, validity_years, csr, bug, sans=None, renewal_of_order_id=None):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
