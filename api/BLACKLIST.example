@@ -1,0 +1,6 @@
+# to use the BLACKLIST rename the file to BLACKLIST and enter your list of globs
+# used to match common_name and sans of any of the certs being tracked by
+# Autocert
+some.common_name.org
+
+*.wildcards-aswell.com
