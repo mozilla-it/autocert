@@ -13,4 +13,5 @@ def add_parser(subparsers):
     add_argument(parser, '-d', '--destinations')
     add_argument(parser, '-c', '--calls')
     add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '--blacklist-overrides',)
     add_argument(parser, 'cert_name_pns')

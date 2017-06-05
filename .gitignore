@@ -94,6 +94,9 @@ ENV/
 # prevent version file from being checked in
 api/VERSION
 
+# prevent blacklist file from being checked in
+api/BLACKLIST
+
 # prevent default default LOG_LEVEL file from being checked in
 LOG_LEVEL
 

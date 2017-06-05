@@ -136,6 +136,12 @@ ARGS = {
         action='store_true',
         help='force verification with authority'
     ),
+    ('--blacklist-overrides',): dict(
+        nargs='+',
+        metavar='OVERRIDES',
+        default=[''],
+        help='list of glob expressions to override blacklist behavior'
+    ),
     ('--expired',): dict(
         action='store_true',
         help='show expired certs'

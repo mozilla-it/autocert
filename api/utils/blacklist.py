@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 from utils import sift
 from utils.format import fmt
 
 from utils.exceptions import AutocertError
 
 try:
-    BLACKLIST = [item for item in open('../BLACKLIST').read().strip().split() if not item.startswith('#')]
-except:
+    thisdir = os.path.dirname(os.path.abspath(__file__))
+    items = open(fmt('{thisdir}/../BLACKLIST')).read().strip().split()
+    BLACKLIST = [item for item in items if not item.startswith('#')]
+except Exception as ex:
+    print('error happened when loading the BLACKLIST')
+    print(ex)
     BLACKLIST = ['']
 
 class BlacklistError(AutocertError):
@@ -16,14 +21,12 @@ class BlacklistError(AutocertError):
         msg = fmt('these certs caused a blacklist error: {names}')
         super(BlacklistError, self).__init__(msg)
 
-def check(certs):
+def check(certs, overrides):
+    print('blacklist.check: overrides =', overrides)
     blacklist_names = []
     for cert in certs:
-        if sift.fnmatches(cert.common_name, BLACKLIST):
-            blacklist_names += [cert.common_name]
-        if cert.sans:
-            for san in cert.sans:
-                if sift.fnmatches(san, BLACKLIST):
-                    blacklist_names += [san]
+        domains = [cert.common_name] + (cert.sans if cert.sans else [])
+        print('domains =', domains)
+        blacklist_names += sift.fnmatches(domains, BLACKLIST, overrides)
     if blacklist_names:
         raise BlacklistError(blacklist_names)
