@@ -51,6 +51,13 @@ def expiryify(valid_till):
         return string2int(valid_till)
     return valid_till
 
+def combine_sans(sans1, sans2):
+    if sans1 is None:
+        return list(sans2)
+    elif sans2 is None:
+        return list(sans1)
+    return list(set(list(sans1) + list(sans2)))
+
 class DigicertAuthority(AuthorityBase):
     def __init__(self, ar, cfg, verbosity):
         super(DigicertAuthority, self).__init__(ar, cfg, verbosity)
@@ -80,7 +87,6 @@ class DigicertAuthority(AuthorityBase):
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
         domains_to_check = [common_name] + sans if sans else []
-        print('domains_to_check =', domains_to_check, type(domains_to_check))
         self._validate_domains(organization_id, container_id, domains_to_check)
         path, json = self._prepare_path_json(
             organization_id,
@@ -93,9 +99,11 @@ class DigicertAuthority(AuthorityBase):
         authority = dict(digicert=dict(order_id=order_ids[0]))
         return crts[0], expiries[0], authority
 
-    def renew_certificates(self, certs, bug, validity_years, repeat_delta=None):
+    def renew_certificates(self, certs, bug, validity_years, sans=None, repeat_delta=None):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
-        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, bug, validity_years)
+        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, bug, validity_years, sans)
+        from pprint import pprint
+        pprint(jsons)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
@@ -159,13 +167,15 @@ class DigicertAuthority(AuthorityBase):
                 renewal_of_order_id=renewal_of_order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs, bug, validity_years):
+    def _prepare_paths_jsons_for_renewals(self, certs, bug, validity_years, sans_to_add):
         app.logger.debug(fmt('_prepare_paths_jsons_for_renewals:\n{locals}'))
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
         paths = []
         jsons = []
+
         for cert, call in zip(certs, calls):
+            cert.sans=combine_sans(cert.sans, sans_to_add)
             path, json = self._prepare_path_json(
                 call.recv.json.organization.id,
                 cert.common_name,
