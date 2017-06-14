@@ -102,8 +102,6 @@ class DigicertAuthority(AuthorityBase):
     def renew_certificates(self, certs, bug, validity_years, sans=None, repeat_delta=None):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
         paths, jsons = self._prepare_paths_jsons_for_renewals(certs, bug, validity_years, sans)
-        from pprint import pprint
-        pprint(jsons)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
