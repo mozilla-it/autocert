@@ -106,12 +106,10 @@ def route():
         request.method,
         request.path,
         args)
-    endpoint = create_endpoint(request.method, cfg, args)
     try:
+        endpoint = create_endpoint(request.method, cfg, args)
         json, status = endpoint.execute()
     except AutocertError as ae:
-        print('try except AutocertError')
-        print(80*'*')
         status = 500
         json = dict(errors={ae.name: ae.message})
         return make_response(jsonify(json), status)
@@ -120,9 +118,7 @@ def route():
     return make_response(jsonify(json), status)
 
 @app.errorhandler(AutocertError)
-def unhandled_error(ex):
-    print('unhandled_error: AutocertError')
-    print(80*'*')
+def unhandled_error(ae):
     import traceback
     tb = traceback.format_exc()
     app.logger.error(tb)

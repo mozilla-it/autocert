@@ -6,11 +6,11 @@ from config import CFG
 
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
-
 from utils.output import yaml_format
-
 from utils.format import fmt, pfmt
+
 from asyncio import TimeoutError
+from aiohttp import ClientConnectorError
 
 from app import app
 
@@ -30,8 +30,11 @@ class ZeusDestination(DestinationBase):
     def has_connectivity(self, *dests):
         try:
             calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=3)
-        except TimeoutError as te:
-            raise DestinationConnectivityError(te)
+        except (TimeoutError, ClientConnectorError) as ex:
+            raise DestinationConnectivityError(ex)
+        except Exception as ex:
+            print('OOPS!', type(ex))
+            print('Exception: ', ex)
         return True
 
     def fetch_certificates(self, certs, *dests):
