@@ -9,8 +9,8 @@ from ruamel import yaml
 from attrdict import AttrDict
 
 CFG_FILES = [
-    '{0}/autocert.yml'.format(os.path.dirname(__file__)),
-    '~/.config/autocert/autocert.yml',
+    '{0}/config.yml'.format(os.path.dirname(__file__)),
+    '~/.config/autocert/config.yml',
 ]
 
 def _load_config(cfgs):
