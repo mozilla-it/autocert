@@ -67,7 +67,7 @@ def _fixup(obj):
         return d
     return obj
 
-def _load_config(filename, roundtrip=False, fixup=True):
+def _load_config(filename=DOT_CONFIG_YML, roundtrip=False, fixup=True):
     cfg = {}
     if os.path.isfile(filename):
         try:
@@ -103,4 +103,4 @@ def _update_config(filename, *cfgs):
             updated += cfg
     return _write_config(filename, updated, roundtrip=True)
 
-CFG = _load_config(DOT_CONFIG_YML)
+CFG = _load_config()
