@@ -3,14 +3,8 @@
 '''
 cli.ls
 '''
-import requests
 
-from attrdict import AttrDict
-
-from cli.utils.output import output
 from cli.arguments import add_argument, get_authorities, get_destinations
-
-from cli.config import CFG
 
 def add_parser(subparsers, api_config):
     parser = subparsers.add_parser('ls')

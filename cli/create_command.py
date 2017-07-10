@@ -4,14 +4,7 @@
 cli.create
 '''
 
-import json
-import requests
-
-from cli.utils.output import output
-from cli.namespace import jsonify
 from cli.arguments import add_argument, get_authorities, get_destinations
-
-from utils.dictionary import dictify
 
 def add_parser(subparsers, api_config):
     parser = subparsers.add_parser('create')

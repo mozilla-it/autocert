@@ -4,7 +4,6 @@
 cli.revoke
 '''
 
-from cli.namespace import jsonify
 from cli.arguments import add_argument, get_authorities, get_destinations
 
 def add_parser(subparsers, api_config):
