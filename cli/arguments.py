@@ -50,6 +50,19 @@ class SansAction(Action):
                 sans = [san for san in f.read().strip().split('\n') if not san.startswith('#')]
         setattr(namespace, 'sans', sans)
 
+def get_authorities(authorities=None, **kwargs):
+    if authorities is not None:
+        return list(authorities.keys())
+    return []
+
+def get_destinations(destinations=None, **kwargs):
+    d = []
+    if destinations is not None:
+        for k, v in destinations.items():
+            for i in v.keys():
+                d += [fmt('{k}:{i}')]
+    return d
+
 # these are the default values for these arguments
 ARGS = {
     ('-o', '--organization-name'): dict(
@@ -61,21 +74,23 @@ ARGS = {
     ),
     ('-a', '--authority'): dict(
         metavar='AUTH',
-        default=CFG.AUTHORITIES[0],
-        choices=CFG.AUTHORITIES,
+        default=None,
+        choices=[],
         help='default="%(default)s"; choose authority; choices=[%(choices)s]'
     ),
     ('-a', '--authorities'): dict(
         metavar='AUTH',
         required=True,
-        choices=CFG.AUTHORITIES,
+        choices=[],
+        default=[],
         nargs='+',
         help='default="%(default)s"; choose authorities; choices=[%(choices)s]'
     ),
     ('-d', '--destinations'): dict(
         metavar='DEST',
         required=True,
-        choices=CFG.DESTINATIONS,
+        choices=[],
+        default=[],
         nargs='+',
         help='default="%(default)s"; choose destinations; choices=[%(choices)s]'
     ),

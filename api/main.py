@@ -11,7 +11,7 @@ from pdb import set_trace as breakpoint
 from pprint import pformat
 
 from endpoint.factory import create_endpoint
-from utils.version import version as api_version
+from utils.version import get_version as get_api_version
 from utils.format import fmt
 from utils.exceptions import AutocertError
 
@@ -91,8 +91,24 @@ def version():
         request.method,
         request.path,
         args)
-    version = api_version()
-    return jsonify({'version': api_version()})
+    version = get_api_version()
+    return jsonify({'version': version})
+
+@app.route('/autocert/config', methods=['GET'])
+def config():
+    args = request.json
+    args = args if args else {}
+    cfg = args.get('cfg', None)
+    log_request(
+        args.get('user', 'unknown'),
+        args.get('hostname', 'unknown'),
+        request.remote_addr,
+        request.method,
+        request.path,
+        args)
+    from config import _load_config
+    cfg = _load_config(fixup=False)
+    return jsonify({'config': cfg})
 
 @app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():

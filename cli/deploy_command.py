@@ -12,7 +12,7 @@ from cli.arguments import add_argument
 
 from utils.dictionary import dictify
 
-def add_parser(subparsers):
+def add_parser(subparsers, api_config):
     parser = subparsers.add_parser('deploy')
     add_argument(parser, '-b', '--bug')
     add_argument(parser, '-d', '--destinations')

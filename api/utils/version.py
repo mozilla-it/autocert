@@ -17,7 +17,7 @@ def describe():
 
 
 _version = None
-def version():
+def get_version():
     global _version
     versionfile = dirname(__file__, 2) + '/VERSION'
     if not _version:

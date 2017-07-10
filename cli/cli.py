@@ -22,7 +22,7 @@ except ImportError as ie:
     print('perhaps you need to install cli/requirements.txt via pip3')
 
 from cli.utils.importer import import_modules
-from cli.utils.version import version as cli_version
+from cli.utils.version import get_version as get_cli_version
 from utils.dictionary import dictify
 from utils.url import validate
 from cli.utils.output import output
@@ -33,7 +33,7 @@ from cli.arguments import add_argument
 
 from cli.config import CFG
 
-VERSIONS = [
+LOC = [
     'cli',
     'api'
 ]
@@ -53,33 +53,37 @@ METHODS = {
 }
 
 class VersionCheckFailedError(Exception):
-    def __init__(self, version, required):
-        message = 'autocert/api {version} is not at least {required}'.format(**locals())
+    def __init__(self, required, version):
+        message = fmt('autocert/api {version} is not at least {required}')
         super(VersionCheckFailedError, self).__init__(message)
 
-def api_version(ns):
+class FetchApiConfigError(Exception):
+    def __init__(self, response):
+        message = fmt('response = {response}')
+        super(FetchApiConfigError, self).__init__(message)
+
+def fetch_api_version(ns):
+    api_version = 'unknown'
     response = requests.get(ns.api_url / 'autocert/version')
-    version = 'unknown'
     if response.status_code == 200:
         obj = response.json()
-        version = obj['version']
-    return version
+        api_version = obj['version']
+    return api_version
 
-def version_check(ns):
-    if ns.version not in VERSIONS:
-        version = api_version(ns)
-        version = version.split('-')[0]
-        if  version_parse(version) >= version_parse(cli_version()):
-            logging.debug('version_check: PASSED')
-            return
-        raise VersionCheckFailedError(version, cli_version())
-    if ns.version == VERSIONS[0]:
-        output({'cli-version': cli_version()})
-    elif ns.version == VERSIONS[1]:
-        output({'api-version': api_version(ns)})
-    sys.exit(0)
+def version_check(version):
+    if version_parse(version.api) >= version_parse(version.cli):
+        logging.debug('version_check: PASSED')
+    else:
+        raise VersionCheckFailedError(version.cli, version.api)
 
-def add_subparsers(parser):
+def fetch_api_config(ns):
+    response = requests.get(ns.api_url / 'autocert/config')
+    if response.status_code == 200:
+        obj = response.json()
+        return obj['config']
+    raise FetchApiConfigError(response)
+
+def add_subparsers(parser, api_config):
     '''
     add all files that end with _parser.py in the cli/ directory
     call 'add_parser', passing subparsers to each found module
@@ -90,7 +94,7 @@ def add_subparsers(parser):
         description='choose a command to run')
     dirpath = os.path.dirname(__file__)
     endswith = '_command.py'
-    [mod.add_parser(subparsers) for mod in import_modules(dirpath, endswith)]
+    [mod.add_parser(subparsers, api_config) for mod in import_modules(dirpath, endswith)]
     subparsers.required = True
     return subparsers
 
@@ -116,20 +120,22 @@ def main():
         add_help=False)
     parser.add_argument(
         '-C', '--config',
-        action='store_true',
-        help='show loaded CFG values')
+        choices=LOC,
+        const=LOC[0],
+        nargs='?',
+        help='default="%(const)s"; show the config')
     parser.add_argument(
         '-V', '--version',
-        choices = VERSIONS,
-        const=VERSIONS[0],
+        choices=LOC,
+        const=LOC[0],
         nargs='?',
-        help='default=%(const)s; show the version')
+        help='default="%(const)s"; show the version')
     parser.add_argument(
         '-U', '--api-url',
         metavar='URL',
         default='http://0.0.0.0',
         type=URL,
-        help='default=%(default)s; set the api url to use')
+        help='default="%(default)s"; set the api url to use')
     parser.add_argument(
         '--sort',
         dest='sorting',
@@ -141,11 +147,20 @@ def main():
 
     parser.set_defaults(**CFG)
     ns, rem = parser.parse_known_args()
-    if not any([h in rem for h in ('-h', '--help')]):
-        version_check(ns)
 
+    config = AttrDict(
+        cli=dict(CFG),
+        api=fetch_api_config(ns))
+    version = AttrDict(
+        cli=get_cli_version().split('-')[0],
+        api=fetch_api_version(ns))
+    version_check(version)
+
+    if ns.version:
+        output({'{version}-version'.format(**ns.__dict__): version[ns.version]})
+        sys.exit(0)
     if ns.config:
-        output(dict(CFG=dict(CFG)))
+        output({'{config}-config'.format(**ns.__dict__): config[ns.config]})
         sys.exit(0)
 
     parser = ArgumentParser(
@@ -153,7 +168,7 @@ def main():
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter)
 
-    add_subparsers(parser)
+    add_subparsers(parser, config.api)
     parser.set_defaults(**CFG)
 
     ns = parser.parse_args()

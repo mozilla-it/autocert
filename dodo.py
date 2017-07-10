@@ -335,7 +335,7 @@ def task_setup():
     '''
     setup venv
     '''
-    from utils.version import version
+    from utils.version import get_version
     return {
         'actions': [
             'rm -rf auto_cert_cli.egg-info/ venv/ dist/ __pycache__/',
@@ -343,7 +343,7 @@ def task_setup():
             'venv/bin/pip3 install --upgrade pip',
             'venv/bin/pip3 install -r cli/requirements.txt',
             'venv/bin/python3 ./setup.py install',
-            'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-{0}-py3.5.egg'.format(version()),
+            'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-{0}-py3.5.egg'.format(get_version()),
         ],
     }
 

@@ -11,7 +11,7 @@ from subprocess import check_output
 from utils.docstr import docstr
 from utils.json import jsonify
 
-from utils.version import version
+from utils.version import get_version
 
 from main import app
 
@@ -20,7 +20,7 @@ def test_version():
     expect:
         version: git describe
     '''
-    expect = {'version': version()}
+    expect = {'version': get_version()}
     client = app.test_client()
     client.testing = True
     result = client.get('/autocert/version')
