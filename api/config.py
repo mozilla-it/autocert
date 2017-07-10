@@ -60,7 +60,6 @@ def _fixup(obj):
                 elif 'path' in k:
                     d[k] = Path(v)
                 elif 'auth' == k:
-                    print(os.getcwd())
                     with open(fmt('{CONFIG_DIR}/{v}'), 'r') as f:
                         d[k] = yaml.safe_load(f.read())
             elif isinstance(v, dict):
