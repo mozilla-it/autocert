@@ -70,14 +70,14 @@ class EndpointBase(object):
         json = dict(
             certs=[cert.transform(self.verbosity) for cert in sorted(certs, key=self.sorting_func)],
         )
-        if self.args.calls:
+        if self.args.call_detail:
             calls = [self.transform_call(call) for call in self.ar.calls]
             json['calls'] = calls
         return json
 
     def transform_call(self, call):
         name = '{0} {1} {2}'.format(call.recv.status, call.send.method, call.send.url)
-        if self.args.calls == 'simple':
+        if self.args.call_detail == 'summary':
             return name
         return {name: dict(send=call.send, recv=call.recv)}
 

@@ -13,7 +13,7 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-d', '--destinations',
         required=False,
         choices=destinations)
-    add_argument(parser, '-c', '--calls')
+    add_argument(parser, '-c', '--call-detail')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, '--blacklist-overrides',)
     add_argument(parser, 'cert_name_pns')

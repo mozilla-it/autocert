@@ -251,6 +251,11 @@ class DigicertAuthority(AuthorityBase):
                     raise ApproveCertificateError(call)
         return True
 
+    def _get_certificate_order_summary(self):
+        app.logger.debug(fmt('_get_certificate_order_summary:\n{locals}'))
+        call = self.get(path='order/certificate')
+        return call
+
     def _get_certificate_order_detail(self, order_ids):
         app.logger.debug(fmt('_get_certificate_order_detail:\n{locals}'))
         paths = [fmt('order/certificate/{order_id}') for order_id in order_ids]

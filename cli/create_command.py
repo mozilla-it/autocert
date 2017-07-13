@@ -22,7 +22,7 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-S', '--sans-file')
     add_argument(parser, '-y', '--validity-years')
     add_argument(parser, '--repeat-delta')
-    add_argument(parser, '-c', '--calls')
+    add_argument(parser, '-c', '--call-detail')
     add_argument(parser, '-n', '--nerf')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'common_name')

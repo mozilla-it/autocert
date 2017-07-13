@@ -14,6 +14,11 @@ CALLS_STYLE = [
     'detail',
 ]
 
+DETAIL = [
+    'summary',
+    'detailed'
+]
+
 ORGANIZATIONS = [
     'f', 'Mozilla Foundation',
     'c', 'Mozilla Corporation',
@@ -128,13 +133,20 @@ ARGS = {
         type=int,
         help='default="%(default)s"; repeat delta when getting cert from digicert'
     ),
-    ('-c', '--calls'): dict(
-        const=CALLS_STYLE[0],
-        choices=CALLS_STYLE,
+    ('-c', '--call-detail'): dict(
+        const=DETAIL[0],
+        choices=DETAIL,
         nargs='?',
         help='const="%(const)s"; toggle and choose the call output format; choices=[%(choices)s]'
     ),
-    ('-n', '--nerf',): dict(
+    ('-r', '--result-detail'): dict(
+        default=DETAIL[0],
+        const=DETAIL[0],
+        choices=DETAIL,
+        nargs='?',
+        help='const="%(const)s"; toggle and choose the detail output format; choices=[%(choices)s]'
+    ),
+    ('-n', '--nerf'): dict(
         action='store_true',
         help='dry-run or nerf the command'
     ),
@@ -146,6 +158,10 @@ ARGS = {
         type=int,
         nargs='?',
         help='set verbosity level'
+    ),
+    ('-i', '--order-id'): dict(
+        metavar='ID',
+        help='match on order id'
     ),
     ('--verify',): dict(
         action='store_true',
@@ -171,6 +187,11 @@ ARGS = {
         help='default="%(default)s"; <common-name>@<modhash>; glob expressions '
             'also accepted; if only a common-name is given, "*" will be appended'
     ),
+    ('domain_name_pns',): dict(
+        metavar='domain-name',
+        nargs='+',
+        help='default="%(default)s"; <domain-name>; glob expressions also accepted'
+    )
 }
 
 # they can be overridden by supplying kwargs to this function

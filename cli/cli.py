@@ -46,6 +46,7 @@ SORTING = [
 
 METHODS = {
     'ls': 'GET',
+    'query': 'GET',
     'create': 'POST',
     'renew': 'PUT',
     'deploy': 'PUT',
@@ -100,7 +101,7 @@ def add_subparsers(parser, api_config):
 
 def do_request(ns):
     method = METHODS[ns.command]
-    destinations = dictify(ns.destinations)
+    destinations = dictify(ns.destinations) if hasattr(ns, 'destinations') else None
     json = jsonify(ns, destinations=destinations if destinations else None)
     validate(ns.api_url, throw=True)
     response = requests.request(method, ns.api_url / 'autocert', json=json)
