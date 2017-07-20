@@ -91,10 +91,9 @@ class DigicertAuthority(AuthorityBase):
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
-        domains_to_check = [common_name] + sans if sans else []
-        self._validate_domains(organization_id, container_id, domains_to_check)
         path, json = self._prepare_path_json(
             organization_id,
+            container_id,
             common_name,
             validity_years,
             csr,
@@ -150,8 +149,10 @@ class DigicertAuthority(AuthorityBase):
             raise NotValidatedDomainError(denied_domains)
         return True
 
-    def _prepare_path_json(self, organization_id, common_name, validity_years, csr, bug, sans=None, renewal_of_order_id=None):
+    def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, renewal_of_order_id=None):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
+        domains_to_check = [common_name] + sans if sans else []
+        self._validate_domains(organization_id, container_id, domains_to_check)
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
             validity_years=validity_years,
@@ -179,11 +180,11 @@ class DigicertAuthority(AuthorityBase):
         calls = self._get_certificate_order_detail(order_ids)
         paths = []
         jsons = []
-
         for cert, call in zip(certs, calls):
             cert.sans=combine_sans(cert.sans, sans_to_add)
             path, json = self._prepare_path_json(
                 call.recv.json.organization.id,
+                call.recv.json.container.id,
                 cert.common_name,
                 validity_years,
                 cert.csr,
