@@ -8,6 +8,7 @@ from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
 from utils.output import yaml_format
 from utils.format import fmt, pfmt
+from utils.exceptions import AutocertError
 
 from asyncio import TimeoutError
 from aiohttp import ClientConnectorError
@@ -22,6 +23,11 @@ def compose_json(key, csr, crt, note):
         request=csr,
         public=crt,
         note=note)))
+
+class ZeusSSLServerKeysError(AutocertError):
+    def __init__(self, call):
+        message = fmt('zeus ssl/server_keys error call={0}', call)
+        super(DownloadCertificateError, self).__init__(message)
 
 class ZeusDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity):
@@ -72,6 +78,8 @@ class ZeusDestination(DestinationBase):
         summary = []
         for dest, call in zip(dests, calls):
             app.logger.debug(fmt('dest={dest} call=\n{call}'))
+            if call.recv.status != 200:
+                raise ZeusSSLServerKeysError(call)
             for child in call.recv.json.children:
                 if child.name in common_names:
                     summary += [(child.name, ZEUS_PATH+child.name, dest)]
