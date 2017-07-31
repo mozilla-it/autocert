@@ -27,7 +27,7 @@ def compose_json(key, csr, crt, note):
 class ZeusSSLServerKeysError(AutocertError):
     def __init__(self, call):
         message = fmt('zeus ssl/server_keys error call={0}', call)
-        super(DownloadCertificateError, self).__init__(message)
+        super(AutocertError, self).__init__(message)
 
 class ZeusDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity):
