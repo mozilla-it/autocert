@@ -27,7 +27,7 @@ class QueryEndpoint(EndpointBase):
         return dict(query='results'), 200
 
     def filter(self, order):
-        if sift.fnmatches(order.certificate.dns_names, self.args.domain_name_pns):
+        if sift.fnmatches(order.certificate.get('dns_names', []), self.args.domain_name_pns):
             return True
         return False
 
