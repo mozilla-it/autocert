@@ -134,6 +134,16 @@ def task_noroot():
         ],
     }
 
+def task_pull():
+    '''
+    do a safe git pull
+    '''
+    return {
+        'actions': [
+            'git diff-index --quiet HEAD -- && echo "clean" || echo "dirty"',
+        ],
+    }
+
 def task_test():
     '''
     setup venv and run pytest
