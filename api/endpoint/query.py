@@ -37,4 +37,7 @@ class QueryEndpoint(EndpointBase):
         summaries = [dict(order) for order in results.orders if self.filter(order)]
         if self.args.result_detail == 'summary':
             return dict(results=summaries), call.recv.status
-        return dict(foo='bar'), 200
+        order_ids = [summary['id'] for summary in summaries]
+        calls = self.authorities.digicert._get_certificate_order_detail(order_ids)
+        details = [call.recv.json for call in calls]
+        return dict(results=details), 200
