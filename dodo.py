@@ -138,9 +138,13 @@ def task_pull():
     '''
     do a safe git pull
     '''
+    test = '`git diff-index --quiet HEAD --`'
+    pull = '`git pull --rebase`'
+    dirty = fmt('echo "refusing to {pull} because the tree is dirty"')
     return {
         'actions': [
-            'git diff-index --quiet HEAD -- && echo "clean" || echo "dirty"',
+            #fmt('if {test}; then {pull}; else {dirty}; fi')
+            'if `git diff-index --quiet HEAD --`; then git pull --rebase; else echo "refusing to pull because the tree is dirty"; fi',
         ],
     }
 
@@ -159,7 +163,6 @@ def task_test():
             'venv/bin/pip install -r api/requirements.txt',
             'venv/bin/pip install -r tests/requirements.txt',
             fmt('{ENVS} venv/bin/pytest -s -vv tests/'),
-            #'venv/bin/pytest -v tests/',
         ],
     }
 
