@@ -144,7 +144,7 @@ def task_pull():
     dirty = fmt('echo "refusing to \'{pull}\' because the tree is dirty"')
     return {
         'actions': [
-            fmt('if {test}; then {pull}; else {dirty}; fi'),
+            fmt('if {test}; then {pull}; else {dirty}; exit 1; fi'),
         ],
     }
 
