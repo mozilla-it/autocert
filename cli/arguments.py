@@ -19,6 +19,18 @@ DETAIL = [
     'detailed'
 ]
 
+STATUS = [
+    'issued',
+    'pending',
+    'rejected',
+    'processing',
+    'issued',
+    'revoked',
+    'canceled',
+    'needs_csr',
+    'needs_approval',
+]
+
 ORGANIZATIONS = [
     'f', 'Mozilla Foundation',
     'c', 'Mozilla Corporation',
@@ -162,6 +174,12 @@ ARGS = {
     ('-i', '--order-id'): dict(
         metavar='ID',
         help='match on order id'
+    ),
+    ('-s', '--status'): dict(
+        metavar='STATUS',
+        default=STATUS[0],
+        choices=STATUS,
+        help='default="%(default)s"; toggle and choose the detail output format; choices=[%(choices)s]'
     ),
     ('-R', '--is-renewed'): dict(
         action='store_true',

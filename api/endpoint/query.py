@@ -27,9 +27,14 @@ class QueryEndpoint(EndpointBase):
         return dict(query='results'), 200
 
     def filter(self, order):
-        if sift.fnmatches(order.certificate.get('dns_names', []), self.args.domain_name_pns):
-            return True
-        return False
+        if not sift.fnmatches(order.certificate.get('dns_names', []), self.args.domain_name_pns):
+            print('filter: return False')
+            return False
+        if not sift.fnmatches([order.status], self.args.status):
+            print('filter: return False')
+            return False
+        print('filter: return True')
+        return True
 
     def query_digicert(self, **kwargs):
         call = self.authorities.digicert._get_certificate_order_summary()
