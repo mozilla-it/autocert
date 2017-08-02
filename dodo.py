@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 
 import os
@@ -8,7 +9,7 @@ from ruamel import yaml
 
 from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
-from utils.format import fmt
+from utils.format import fmt, pfmt
 from utils.timestamp import utcnow
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -29,7 +30,7 @@ LOG_LEVELS = [
 ]
 
 DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
+    'default_tasks': ['pull', 'deploy', 'rmimages', 'rmvolumes', 'count'],
     'verbosity': 2,
 }
 
@@ -134,6 +135,19 @@ def task_noroot():
         ],
     }
 
+def task_pull():
+    '''
+    do a safe git pull
+    '''
+    test = '`git diff-index --quiet HEAD --`'
+    pull = 'git pull --rebase'
+    dirty = fmt('echo "refusing to \'{pull}\' because the tree is dirty"')
+    return {
+        'actions': [
+            fmt('if {test}; then {pull}; else {dirty}; fi'),
+        ],
+    }
+
 def task_test():
     '''
     setup venv and run pytest
@@ -149,7 +163,6 @@ def task_test():
             'venv/bin/pip install -r api/requirements.txt',
             'venv/bin/pip install -r tests/requirements.txt',
             fmt('{ENVS} venv/bin/pytest -s -vv tests/'),
-            #'venv/bin/pytest -v tests/',
         ],
     }
 
