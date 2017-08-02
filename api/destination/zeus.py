@@ -52,7 +52,7 @@ class ZeusDestination(DestinationBase):
                 if destinations:
                     for dest, (key, csr, crt, note) in destinations.items():
                         zeus_detail = cert.destinations.get('zeus', {})
-                        matched = csr == cert.csr and crt == cert.crt
+                        matched = crt == cert.crt
                         zeus_detail[dest] = dict(
                             matched=matched,
                             note=note)
