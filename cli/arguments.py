@@ -163,6 +163,10 @@ ARGS = {
         metavar='ID',
         help='match on order id'
     ),
+    ('-R', '--is-renewed'): dict(
+        action='store_true',
+        help='toggle matching the is_renewed field to true'
+    ),
     ('--verify',): dict(
         action='store_true',
         help='force verification with authority'

@@ -21,6 +21,7 @@ def add_digicert(subparsers, api_config):
     add_argument(parser, '-r', '--result-detail')
     add_argument(parser, '-c', '--call-detail')
     add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '-R', '--is-renewed')
     add_argument(parser, 'domain_name_pns', default='*', nargs='*')
 
 def add_zeus(subparsers, api_config):
