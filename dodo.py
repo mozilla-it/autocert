@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 
 import os
@@ -8,7 +9,7 @@ from ruamel import yaml
 
 from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
-from utils.format import fmt
+from utils.format import fmt, pfmt
 from utils.timestamp import utcnow
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -139,12 +140,11 @@ def task_pull():
     do a safe git pull
     '''
     test = '`git diff-index --quiet HEAD --`'
-    pull = '`git pull --rebase`'
-    dirty = fmt('echo "refusing to {pull} because the tree is dirty"')
+    pull = 'git pull --rebase'
+    dirty = fmt('echo "refusing to \'{pull}\' because the tree is dirty"')
     return {
         'actions': [
-            #fmt('if {test}; then {pull}; else {dirty}; fi')
-            'if `git diff-index --quiet HEAD --`; then git pull --rebase; else echo "refusing to pull because the tree is dirty"; fi',
+            fmt('if {test}; then {pull}; else {dirty}; fi'),
         ],
     }
 
