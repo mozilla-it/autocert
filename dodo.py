@@ -30,7 +30,7 @@ LOG_LEVELS = [
 ]
 
 DOIT_CONFIG = {
-    'default_tasks': ['deploy', 'rmimages', 'rmvolumes', 'count'],
+    'default_tasks': ['pull', 'deploy', 'rmimages', 'rmvolumes', 'count'],
     'verbosity': 2,
 }
 
