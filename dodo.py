@@ -78,6 +78,16 @@ def task_count():
         ],
     }
 
+def task_checkpath():
+    '''
+    check for required path /data/autocert/certs
+    '''
+    return {
+        'actions': [
+            'test -d /data/autocert/certs',
+        ],
+    }
+
 def task_checkreqs():
     '''
     check for required software
@@ -211,6 +221,7 @@ def task_deploy():
     return {
         'task_dep': [
             'noroot',
+            'checkpath',
             'checkreqs',
             'version',
             'test',
