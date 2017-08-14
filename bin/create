@@ -13,6 +13,6 @@ TWO="${TWO%\'*}"
 #lowercase and add tercotua domain
 COMMON_NAME="${ONE,,}-${TWO,,}.tercotua.org"
 
-cmd="$BIN/autocert create -o c -b 0000000 $COMMON_NAME $@"
+cmd="$BIN/autocert create $COMMON_NAME -b -o c $@"
 echo $cmd
 exec $cmd

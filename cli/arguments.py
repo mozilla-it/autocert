@@ -102,6 +102,8 @@ ARGS = {
     ('-b', '--bug'): dict(
         required=True,
         type=bug_type,
+        const='0000000',
+        nargs='?',
         help='the bug number assocated with this ssl|tls certificate'
     ),
     ('-w', '--within'): dict(
