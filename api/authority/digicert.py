@@ -50,6 +50,12 @@ class NotValidatedDomainError(AutocertError):
         message = fmt('list of domains NOT validated: {domains}')
         super(NotValidatedDomainError, self).__init__(message)
 
+class DigicertError(AutocertError):
+    def __init__(self, call):
+        message = call.recv.json['errors'][0]['message']
+        super(DigicertError, self).__init__(message)
+
+
 def expiryify(valid_till):
     from utils.timestamp import string2int
     if valid_till and valid_till != 'null':
@@ -120,6 +126,8 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('_get_organization_container_ids:\n{locals}'))
         path = 'organization'
         call = self.get(path)
+        if call.recv.status != 200:
+            raise DigicertError(call)
         for organization in call.recv.json.organizations:
             if organization.name == organization_name:
                 return organization.id, organization.container.id
@@ -128,6 +136,8 @@ class DigicertAuthority(AuthorityBase):
     def _get_domains(self, organization_id, container_id):
         app.logger.debug(fmt('_get_domains:\n{locals}'))
         call = self.get(fmt('domain?container_id={container_id}'))
+        if call.recv.status != 200:
+            raise DigicertError(call)
         return [domain for domain in call.recv.json.domains if domain.is_active and domain.organization.id == organization_id]
 
     def _validate_domains(self, organization_id, container_id, domains):
