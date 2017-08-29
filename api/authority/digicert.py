@@ -127,6 +127,12 @@ class DigicertAuthority(AuthorityBase):
         path = 'organization'
         call = self.get(path)
         if call.recv.status != 200:
+            print('*'*80)
+            print(call.send.method)
+            print(call.send.url)
+            print(call.send.json)
+            print(call.send.headers)
+            print('*'*80)
             raise DigicertError(call)
         for organization in call.recv.json.organizations:
             if organization.name == organization_name:
@@ -137,6 +143,12 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('_get_domains:\n{locals}'))
         call = self.get(fmt('domain?container_id={container_id}'))
         if call.recv.status != 200:
+            print('*'*80)
+            print(call.send.method)
+            print(call.send.url)
+            print(call.send.json)
+            print(call.send.headers)
+            print('*'*80)
             raise DigicertError(call)
         return [domain for domain in call.recv.json.domains if domain.is_active and domain.organization.id == organization_id]
 
