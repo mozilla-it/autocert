@@ -134,6 +134,10 @@ class DigicertAuthority(AuthorityBase):
             print(call.send.headers)
             print('*'*80)
             raise DigicertError(call)
+        print('*'*80)
+        for o in call.recv.json.organizations:
+            print('orgname:', o.name, 'orgid:', o.id, 'contid:', o.container.id)
+        print('*'*80)
         for organization in call.recv.json.organizations:
             if organization.name == organization_name:
                 return organization.id, organization.container.id
