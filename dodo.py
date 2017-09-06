@@ -371,6 +371,22 @@ def task_setup():
         ],
     }
 
+def task_zeus():
+    '''
+    launch zeus containers
+    '''
+    image = 'zeus17.3'
+    container1 = fmt('{image}_test1')
+    container2 = fmt('{image}_test2')
+    return {
+        'actions': [
+            fmt('[ -n "`docker ps -q -f name={container1}`" ] && docker rm -f {container1} || true'),
+            fmt('[ -n "`docker ps -q -f name={container2}`" ] && docker rm -f {container2} || true'),
+            fmt('docker run -d --name {container1} {image}'),
+            fmt('docker run -d --name {container2} {image}'),
+        ],
+    }
+
 if __name__ == '__main__':
     print('should be run with doit installed')
     import doit
