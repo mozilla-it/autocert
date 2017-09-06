@@ -128,6 +128,7 @@ class DigicertAuthority(AuthorityBase):
         call = self.get(path)
         if call.recv.status != 200:
             print('*'*80)
+            print('call.recv.status =', call.recv.status)
             print(call.send.method)
             print(call.send.url)
             print(call.send.json)
@@ -148,6 +149,7 @@ class DigicertAuthority(AuthorityBase):
         call = self.get(fmt('domain?container_id={container_id}'))
         if call.recv.status != 200:
             print('*'*80)
+            print('call.recv.status =', call.recv.status)
             print(call.send.method)
             print(call.send.url)
             print(call.send.json)
