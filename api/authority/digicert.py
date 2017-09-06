@@ -133,22 +133,27 @@ class DigicertAuthority(AuthorityBase):
                 return organization.id, organization.container.id
         raise OrganizationNameNotFoundError(organization_name)
 
-    def _get_domains(self, organization_id, container_id):
-        app.logger.debug(fmt('_get_domains:\n{locals}'))
-        call = self.get(fmt('domain?container_id={container_id}'))
+    def _get_allowed_domains(self, organization_id, container_id):
+        app.logger.debug(fmt('_get_allowed_domains:\n{locals}'))
+        call = self.get(fmt('container/{container_id}'))
         if call.recv.status != 200:
             raise DigicertError(call)
-        return [domain for domain in call.recv.json.domains if domain.is_active and domain.organization.id == organization_id]
+        if 'allowed_domain_names' in call.recv.json:
+            return [domain for domain in call.recv.json.allowed_domain_names if domain.is_active and domain.organization.id == organization_id]
+        return True
 
     def _validate_domains(self, organization_id, container_id, domains):
         app.logger.debug(fmt('_validate_domains:\n{locals}'))
-        active_domains = self._get_domains(organization_id, container_id)
+        allowed_domains = self._get_allowed_domains(organization_id, container_id)
+        app.logger.debug(fmt('allowed_domains: {allowed_domains}'))
+        if allowed_domains == True:
+            return True
         def _is_validated(domain_to_check):
-            matched_domains = [ad for ad in active_domains if domain_to_check == ad.name]
+            matched_domains = [ad for ad in allowed_domains if domain_to_check == ad.name]
             if matched_domains:
                 domain = matched_domains[0]
             else:
-                matched_subdomains = [ad for ad in active_domains if domain_to_check.endswith('.'+ad.name)]
+                matched_subdomains = [ad for ad in allowed_domains if domain_to_check.endswith('.'+ad.name)]
                 if matched_subdomains:
                     domain = matched_subdomains[0]
                 else:
