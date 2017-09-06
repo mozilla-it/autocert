@@ -56,11 +56,16 @@ class DigicertError(AutocertError):
         super(DigicertError, self).__init__(message)
 
 
-def expiryify(valid_till):
+def expiryify(call):
     from utils.timestamp import string2int
-    if valid_till and valid_till != 'null':
-        return string2int(valid_till)
-    return valid_till
+    if call.recv.status != 200:
+        raise DigicertError(call)
+    try:
+        valid_till = call.recv.json.certificate.valid_till
+        if valid_till and valid_till != 'null':
+            return string2int(valid_till)
+    except AttributeError as ae:
+        raise DigicertError(call)
 
 def combine_sans(sans1, sans2):
     if sans1 is None:
@@ -85,7 +90,7 @@ class DigicertAuthority(AuthorityBase):
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
-        expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
+        expiries = [expiryify(call) for call in calls]
         csrs = [windows2unix(call.recv.json.certificate.csr) for call in calls]
         for expiry, csr, crt, cert in zip(expiries, csrs, crts, certs):
             matched = csr.strip() == cert.csr.strip() and crt.strip() == cert.crt.strip()
@@ -228,10 +233,7 @@ class DigicertAuthority(AuthorityBase):
         try:
             crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
             calls = self._get_certificate_order_detail(order_ids)
-            expiries = [expiryify(call.recv.json.certificate.valid_till) for call in calls]
-        except AttributeError as ae:
-            pprint(calls[0].recv.json)
-            raise ae
+            expiries = [expiryify(call) for call in calls]
         except DownloadCertificateError as dce:
             app.logger.warning(str(dce))
             crt = None
