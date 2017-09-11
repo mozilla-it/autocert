@@ -41,7 +41,7 @@ class DownloadCertificateError(AutocertError):
 
 class WrongContainerIdFoundError(AutocertError):
     def __init__(self, container_id):
-        message = fmt('wrong container_id={0} found error')
+        message = fmt('wrong container_id={container_id} found error')
         super(WrongContainerIdFoundError, self).__init__(message)
 
 class OrganizationNameNotFoundError(AutocertError):
@@ -140,7 +140,7 @@ class DigicertAuthority(AuthorityBase):
             raise DigicertError(call)
         for organization in call.recv.json.organizations:
             if organization.name == organization_name:
-                if organization.container.id not in (76769, 76348):
+                if organization.container.id not in (76769, 76398):
                     raise WrongContainerIdFoundError(organization.container.id)
                 return organization.id, organization.container.id
         raise OrganizationNameNotFoundError(organization_name)
