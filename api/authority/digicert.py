@@ -39,11 +39,6 @@ class DownloadCertificateError(AutocertError):
         message = fmt('download certificate error call={0}', call)
         super(DownloadCertificateError, self).__init__(message)
 
-class WrongContainerIdFoundError(AutocertError):
-    def __init__(self, container_id):
-        message = fmt('wrong container_id={container_id} found error')
-        super(WrongContainerIdFoundError, self).__init__(message)
-
 class OrganizationNameNotFoundError(AutocertError):
     def __init__(self, organization_name):
         message = fmt('organization name {organization_name} not found')
@@ -119,9 +114,18 @@ class DigicertAuthority(AuthorityBase):
         authority = dict(digicert=dict(order_id=order_ids[0]))
         return crts[0], expiries[0], authority
 
-    def renew_certificates(self, certs, bug, validity_years, sans=None, repeat_delta=None):
+    def renew_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
-        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, bug, validity_years, sans)
+        if not sans:
+            sans = []
+        organization_id, container_id = self._get_organization_container_ids(organization_name)
+        paths, jsons = self._prepare_paths_jsons_for_renewals(
+            certs,
+            organization_id,
+            container_id,
+            bug,
+            validity_years,
+            sans)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
@@ -140,32 +144,25 @@ class DigicertAuthority(AuthorityBase):
             raise DigicertError(call)
         for organization in call.recv.json.organizations:
             if organization.name == organization_name:
-                if organization.container.id not in (76769, 76398):
-                    raise WrongContainerIdFoundError(organization.container.id)
                 return organization.id, organization.container.id
         raise OrganizationNameNotFoundError(organization_name)
 
-    def _get_allowed_domains(self, organization_id, container_id):
-        app.logger.debug(fmt('_get_allowed_domains:\n{locals}'))
-        call = self.get(fmt('container/{container_id}'))
+    def _get_domains(self, organization_id, container_id):
+        app.logger.debug(fmt('_get_domains:\n{locals}'))
+        call = self.get(fmt('domain?container_id={container_id}'))
         if call.recv.status != 200:
             raise DigicertError(call)
-        if 'allowed_domain_names' in call.recv.json:
-            return [domain for domain in call.recv.json.allowed_domain_names if domain.is_active and domain.organization.id == organization_id]
-        return True
+        return [domain for domain in call.recv.json.domains if domain.is_active and domain.organization.id == organization_id]
 
     def _validate_domains(self, organization_id, container_id, domains):
         app.logger.debug(fmt('_validate_domains:\n{locals}'))
-        allowed_domains = self._get_allowed_domains(organization_id, container_id)
-        app.logger.debug(fmt('allowed_domains: {allowed_domains}'))
-        if allowed_domains == True:
-            return True
+        active_domains = self._get_domains(organization_id, container_id)
         def _is_validated(domain_to_check):
-            matched_domains = [ad for ad in allowed_domains if domain_to_check == ad.name]
+            matched_domains = [ad for ad in active_domains if domain_to_check == ad.name]
             if matched_domains:
                 domain = matched_domains[0]
             else:
-                matched_subdomains = [ad for ad in allowed_domains if domain_to_check.endswith('.'+ad.name)]
+                matched_subdomains = [ad for ad in active_domains if domain_to_check.endswith('.'+ad.name)]
                 if matched_subdomains:
                     domain = matched_subdomains[0]
                 else:
@@ -201,7 +198,7 @@ class DigicertAuthority(AuthorityBase):
                 renewal_of_order_id=renewal_of_order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs, bug, validity_years, sans_to_add):
+    def _prepare_paths_jsons_for_renewals(self, certs, organization_id, container_id, bug, validity_years, sans_to_add):
         app.logger.debug(fmt('_prepare_paths_jsons_for_renewals:\n{locals}'))
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
@@ -210,8 +207,8 @@ class DigicertAuthority(AuthorityBase):
         for cert, call in zip(certs, calls):
             cert.sans=combine_sans(cert.sans, sans_to_add)
             path, json = self._prepare_path_json(
-                call.recv.json.organization.id,
-                call.recv.json.container.id,
+                organization_id,
+                container_id,
                 cert.common_name,
                 validity_years,
                 cert.csr,
