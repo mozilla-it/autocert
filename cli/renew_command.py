@@ -10,6 +10,7 @@ def add_parser(subparsers, api_config):
     parser = subparsers.add_parser('renew')
     authorities = get_authorities(**api_config)
     destinations = get_destinations(**api_config)
+    add_argument(parser, '-o', '--organization-name')
     add_argument(parser, '-b', '--bug')
     add_argument(parser, '-a', '--authority',
         default=authorities[0],

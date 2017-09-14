@@ -114,9 +114,18 @@ class DigicertAuthority(AuthorityBase):
         authority = dict(digicert=dict(order_id=order_ids[0]))
         return crts[0], expiries[0], authority
 
-    def renew_certificates(self, certs, bug, validity_years, sans=None, repeat_delta=None):
+    def renew_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
-        paths, jsons = self._prepare_paths_jsons_for_renewals(certs, bug, validity_years, sans)
+        if not sans:
+            sans = []
+        organization_id, container_id = self._get_organization_container_ids(organization_name)
+        paths, jsons = self._prepare_paths_jsons_for_renewals(
+            certs,
+            organization_id,
+            container_id,
+            bug,
+            validity_years,
+            sans)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
@@ -189,7 +198,7 @@ class DigicertAuthority(AuthorityBase):
                 renewal_of_order_id=renewal_of_order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs, bug, validity_years, sans_to_add):
+    def _prepare_paths_jsons_for_renewals(self, certs, organization_id, container_id, bug, validity_years, sans_to_add):
         app.logger.debug(fmt('_prepare_paths_jsons_for_renewals:\n{locals}'))
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
@@ -198,8 +207,8 @@ class DigicertAuthority(AuthorityBase):
         for cert, call in zip(certs, calls):
             cert.sans=combine_sans(cert.sans, sans_to_add)
             path, json = self._prepare_path_json(
-                call.recv.json.organization.id,
-                call.recv.json.container.id,
+                organization_id,
+                container_id,
                 cert.common_name,
                 validity_years,
                 cert.csr,
