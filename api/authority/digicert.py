@@ -52,7 +52,9 @@ class NotValidatedDomainError(AutocertError):
 
 class DigicertError(AutocertError):
     def __init__(self, call):
-        message = call.recv.json['errors'][0]['message']
+        message = 'digicert error without errors field'
+        if 'errors' in call.recv.json:
+            message = call.recv.json['errors'][0]['message']
         super(DigicertError, self).__init__(message)
 
 
