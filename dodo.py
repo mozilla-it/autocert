@@ -182,6 +182,8 @@ def task_version():
     '''
     return {
         'actions': [
+            'echo "task_version"',
+            'pwd',
             'git describe | xargs echo -n > api/VERSION',
         ],
     }
