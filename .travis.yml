@@ -4,5 +4,6 @@ python:
 install:
   - "git fetch --unshallow --tags"
   - "pip install -r requirements.txt"
-before_script: "cp api/config.yml.example api/config.yml"
+before_script:
+  - "cp api/config.yml.example api/config.yml"
 script: "$(which doit) test"

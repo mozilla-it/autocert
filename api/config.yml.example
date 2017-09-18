@@ -33,7 +33,7 @@ authorities:
         # this url will have the REST api endpoint appended to it
         baseurl: https://www.digicert.com:443/services/v2
         # default headers used on digicert calls
-        auth: ./path/to/apikey.yml
+        auth: ./apikey.yml.example
         # this is some default values, used when requesting a cert from digicert
         template:
             certificate:
@@ -49,21 +49,10 @@ destinations:
     zeus:
         test1:
             baseurl: https://10.248.28.246:9070/api/tm/3.9/config/active
-            auth: ./path/to/apikey.yml
+            auth: ./apikey.yml.example
         test2:
             baseurl: https://10.0.0.90:9070/api/tm/3.9/config/active
-            auth: ./path/to/apikey.yml
-        scl3-ext:
-            baseurl: https://external.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9/config/active
-            auth: ./path/to/apikey.yml
-        scl3-int:
-            baseurl: https://internal.zlb.ops.scl3.mozilla.com:9070/api/tm/3.9/config/active
-            auth: ./path/to/apikey.yml
-            baseurl: https://external.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9/config/active
-            auth: ./path/to/apikey.yml
-        phx1-int:
-            baseurl: https://internal.zlb.ops.phx1.mozilla.com:9070/api/tm/3.9/config/active
-            auth: ./path/to/apikey.yml
+            auth: ./apikey.yml.example
 
 # this section becomes a nested dict that is then used in logging.config.dictConfig
 # https://docs.python.org/3/library/logging.config.html
