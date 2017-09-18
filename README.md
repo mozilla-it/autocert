@@ -10,7 +10,7 @@ The source code can be found here: https://github.com/mozilla-it/autocert
 cli
 
 The cli, or commandline of autocert is simply an argparse interface that calls
-the api via the requests library.  The config file for autocert is located in
+the api via the aiohttp library.  The config file for autocert is located in
 ~/.config/autocert/config.yml
 
 
