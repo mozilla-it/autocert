@@ -81,10 +81,19 @@ class Tardata(object):
         cert = Cert.load(self.tarpath, cert_name)
         return cert
 
-    def load_certs(self, *cert_name_pns, expired=False):
+    def load_certs(self, *cert_name_pns, within=None, expired=False):
         certs = []
+        if within is None:
+            from datetime import timedelta
+            within = timedelta(0)
         for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
             cert = self.load_cert(cert_name)
-            if expired or cert.expiry > self.timestamp:
+            if within:
+                if (self.timestamp - cert.expiry) < within:
+                    certs += [cert]
+            elif expired:
+                if cert.expiry > self.timestamp:
+                    certs += [cert]
+            else:
                 certs += [cert]
         return certs

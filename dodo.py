@@ -10,7 +10,7 @@ from ruamel import yaml
 from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 from utils.format import fmt, pfmt
-from utils.timestamp import utcnow
+from utils.timestamp import utcnow, datetime2int
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
@@ -202,7 +202,8 @@ def task_savelogs():
     '''
     save the logs to a timestamped file
     '''
-    timestamp = utcnow()
+    timestamp = datetime2int(utcnow())
+
     return {
         'task_dep': [
             'checkreqs',

@@ -16,6 +16,7 @@ from utils.dictionary import head, body, head_body, keys_ending
 from utils.exceptions import AutocertError
 
 from pprint import pprint
+from datetime import datetime
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -68,6 +69,8 @@ def visit(obj, func=printit):
         for item in obj:
             obj1.append(visit(item, func=func))
     elif isscalar(obj) or istuple(obj) and len(obj) == 2:
+        obj1 = func(obj)
+    elif isinstance(obj, datetime):
         obj1 = func(obj)
     else:
         raise VisitError(obj)
