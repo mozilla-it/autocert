@@ -59,13 +59,13 @@ class DigicertError(AutocertError):
 
 
 def expiryify(call):
-    from utils.timestamp import string2int
+    from utils.timestamp import string2datetime
     if call.recv.status != 200:
         raise DigicertError(call)
     try:
         valid_till = call.recv.json.certificate.valid_till
         if valid_till and valid_till != 'null':
-            return string2int(valid_till)
+            return string2datetime(valid_till)
     except AttributeError as ae:
         raise DigicertError(call)
 

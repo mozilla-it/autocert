@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-
 from utils.format import fmt, pfmt
 
 def utcnow():
-    return datetime2int(datetime.utcnow())
+    return datetime.utcnow()
+    #return datetime2int(datetime.utcnow())
 
 def datetime2int(dt, pattern='%Y%m%d%H%M%S'):
     return int(dt.strftime(pattern))

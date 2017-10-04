@@ -18,6 +18,7 @@ def add_parser(subparsers, api_config):
         required=False,
         default=destinations,
         choices=destinations)
+    add_argument(parser, '-w', '--within', default=None)
     add_argument(parser, '--verify')
     add_argument(parser, '--expired')
     add_argument(parser, '-c', '--call-detail')
