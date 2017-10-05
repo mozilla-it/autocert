@@ -5,6 +5,7 @@ cli.arguments: default arguments with the ability to override them
 '''
 import re
 
+from datetime import timedelta
 from utils.format import fmt, pfmt
 from utils.dictionary import merge
 from cli.config import CFG
@@ -109,6 +110,7 @@ ARGS = {
     ('-w', '--within'): dict(
         metavar='DAYS',
         default=14,
+        type=int,
         help='default="%(default)s"; within number of days from expiring'
     ),
     ('-s', '--sans'): dict(

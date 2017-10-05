@@ -4,13 +4,16 @@
 import os
 import glob
 
-#from utils import tar
+from datetime import timedelta
+
 from utils import sift
 from utils import timestamp
 from utils.cert import Cert
 from utils.format import fmt, pfmt
 from utils.dictionary import merge, body
 from utils.exceptions import AutocertError
+
+TIMEDELTA_ZERO = timedelta(0)
 
 class DecomposeTarpathError(AutocertError):
     def __init__(self, tarpath):
@@ -83,13 +86,13 @@ class Tardata(object):
 
     def load_certs(self, *cert_name_pns, within=None, expired=False):
         certs = []
-        if within is None:
-            from datetime import timedelta
-            within = timedelta(0)
+        if isinstance(within, int):
+            within = timedelta(within)
         for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
             cert = self.load_cert(cert_name)
             if within:
-                if (self.timestamp - cert.expiry) < within:
+                delta = cert.expiry - self.timestamp
+                if TIMEDELTA_ZERO < delta and delta < within:
                     certs += [cert]
             elif expired:
                 if cert.expiry > self.timestamp:
