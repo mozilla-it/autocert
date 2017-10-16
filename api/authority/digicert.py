@@ -242,8 +242,8 @@ class DigicertAuthority(AuthorityBase):
             expiries = [expiryify(call) for call in calls]
         except DownloadCertificateError as dce:
             app.logger.warning(str(dce))
-            crt = None
-            expiry = None
+            crts = []
+            expiries = []
         return crts, expiries, order_ids
 
     def _revoke_certificates(self, paths, jsons, bug):
