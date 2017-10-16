@@ -292,5 +292,10 @@ class DigicertAuthority(AuthorityBase):
             repeat_delta = timedelta(seconds=repeat_delta)
         paths = [fmt('certificate/{certificate_id}/download/format/{format_type}') for certificate_id in certificate_ids]
         calls = self.gets(paths=paths, repeat_delta=repeat_delta, repeat_if=not_200)
-        texts = [call.recv.text if call.recv.status == 200 else DownloadCertificateError(call) for call in calls]
+        texts = []
+        for call in calls:
+            if call.recv.status == 200:
+                texts += [call.recv.text]
+            else:
+                raise DownloadCertificateError(call)
         return texts
