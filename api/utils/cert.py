@@ -132,8 +132,7 @@ class Cert(object):
             else:
                 key, csr, crt = [None] * 3
         except AssertionError as ae:
-            print('ASSERT ERROR')
-            pfmt(cert)
+            print('ASSERT ERROR cert =', cert)
         except KeyError as ke:
             print(ke)
             pprint(cert)
