@@ -131,6 +131,9 @@ class Cert(object):
                 crt = files[fmt('{cert_name}.crt')]
             else:
                 key, csr, crt = [None] * 3
+        except AssertError as ae:
+            print('ASSERT ERROR')
+            pfmt(cert)
         except KeyError as ke:
             print(ke)
             pprint(cert)
