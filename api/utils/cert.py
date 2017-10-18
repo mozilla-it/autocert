@@ -20,6 +20,11 @@ from datetime import datetime
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
 
+class DecomposeCertError(AutocertError):
+    def __init__(self, cert):
+        message = fmt('decompose cert error; cert={cert}')
+        super(DecomposeCertError, self).__init__(message)
+
 class CertFromJsonError(AutocertError):
     def __init__(self, ex):
         message = 'cert.from_json error'
@@ -114,6 +119,8 @@ class Cert(object):
 
     @staticmethod
     def _decompose(cert, tardata=False):
+        if cert is None:
+            raise DecomposeCertError(cert)
         try:
             cert_name, cert_body = head_body(cert)
             common_name = cert_body['common_name']
@@ -131,8 +138,6 @@ class Cert(object):
                 crt = files[fmt('{cert_name}.crt')]
             else:
                 key, csr, crt = [None] * 3
-        except AssertionError as ae:
-            print('ASSERT ERROR cert =', cert)
         except KeyError as ke:
             print(ke)
             pprint(cert)
@@ -142,7 +147,11 @@ class Cert(object):
     @staticmethod
     def load(tarpath, cert_name):
         key, csr, crt, yml, readme = tar.unbundle(tarpath, cert_name)
-        common_name, timestamp, modhash, _, _, _, bug, sans, expiry, authority, destinations = Cert._decompose(yml)
+        try:
+            common_name, timestamp, modhash, _, _, _, bug, sans, expiry, authority, destinations = Cert._decompose(yml)
+        except DecomposeCertError as dce:
+            pfmt('cert_name={cert_name} caused decompose cert error')
+            raise dce
         return Cert(
             common_name,
             timestamp,
