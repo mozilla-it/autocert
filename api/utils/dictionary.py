@@ -14,6 +14,12 @@ class DictDoesntHaveHeadError(AutocertError):
         message = 'dictionary.keys(): {keys} does not have a single key to be considered a head'.format(**locals())
         super(DictDoesntHaveHeadError, self).__init__(message)
 
+class NotDictError(AutocertError):
+    def __init__(self, o):
+        t = type(o)
+        message = '{o} is {t}, not a dict as required'.format(**locals())
+        super(NotDictError, self).__init__(message)
+
 def dict_to_attrs(obj, d):
     for k, v in d.items():
         setattr(obj, k, v)
@@ -75,7 +81,8 @@ def merge(*objs):
     return result
 
 def head(d):
-    assert isinstance(d, dict)
+    if not isinstance(d, dict):
+        raise NotDictError(d)
     keys = list(d.keys())
     if len(keys) == 1:
         return keys[0]
