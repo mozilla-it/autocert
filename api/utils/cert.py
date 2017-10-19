@@ -26,6 +26,12 @@ class CertFromJsonError(AutocertError):
         super(CertFromJsonError, self).__init__(message)
         self.errors = [ex]
 
+class CertLoadError(AutocertError):
+    def __init__(self, tarpath, cert_name, ex):
+        message = fmt('error loading {cert_name}.tar.gz from {tarpath}')
+        super(CertLoadError, self).__init__(message)
+        self.errors = [ex]
+
 class VisitError(AutocertError):
     def __init__(self, obj):
         message = fmt('unknown type obj = {obj}')
@@ -140,7 +146,11 @@ class Cert(object):
     @staticmethod
     def load(tarpath, cert_name):
         key, csr, crt, yml, readme = tar.unbundle(tarpath, cert_name)
-        common_name, timestamp, modhash, _, _, _, bug, sans, expiry, authority, destinations = Cert._decompose(yml)
+        try:
+            common_name, timestamp, modhash, _, _, _, bug, sans, expiry, authority, destinations = Cert._decompose(yml)
+        except AutocertError as ae:
+            raise CertLoadError(tarpath, cert_name, ae)
+
         return Cert(
             common_name,
             timestamp,
