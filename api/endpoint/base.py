@@ -85,11 +85,11 @@ class EndpointBase(object):
         if cert_name_pn.endswith(ext):
             cert_name_pn = cert_name_pn[0:-len(ext)]
         cert_name_pn = os.path.basename(cert_name_pn)
-        regex = re.compile('([A-Za-z0-9\.\-_]+)(@([0-9]{14}))?')
+        regex = re.compile('([A-Za-z0-9\.\-_]+)(@([A-Fa-f0-9]{8}))?')
         match = regex.search(cert_name_pn)
         if match:
-            common_name, _, timestamp = match.groups()
-            if timestamp:
+            common_name, _, modhash = match.groups()
+            if modhash:
                 return cert_name_pn
             if common_name.endswith('*'):
                 return common_name
