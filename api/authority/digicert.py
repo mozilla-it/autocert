@@ -7,6 +7,7 @@ from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
 from datetime import timedelta #FIXME: do we import this here?
+from whois import whois
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
@@ -49,6 +50,12 @@ class NotValidatedDomainError(AutocertError):
         domains = ', '.join(domains)
         message = fmt('list of domains NOT validated: {domains}')
         super(NotValidatedDomainError, self).__init__(message)
+
+class WhoisDoesntMatchError(AutocertError):
+    def __init__(self, domains):
+        domains = ', '.join(domains)
+        message = fmt('list of domains with whois emails not matching hostmaster@mozilla.com: {domains}')
+        super(WhoisDoesntMatchError, self).__init__(message)
 
 class DigicertError(AutocertError):
     def __init__(self, call):
@@ -170,6 +177,14 @@ class DigicertAuthority(AuthorityBase):
                 else:
                     return False
             return True
+        def _whois_email(domain_to_check):
+            try:
+                return 'hostmaster@mozilla.com' in whois(domain_to_check)['emails']
+            except Exception as ex:
+                return False
+        not_whois_domains = [domain for domain in domains if not _whois_email(domain)]
+        if not_whois_domains:
+            raise WhoisDoesntMatchError(not_whois_domains)
         denied_domains = [domain for domain in domains if not _is_validated(domain)]
         if denied_domains:
             raise NotValidatedDomainError(denied_domains)
