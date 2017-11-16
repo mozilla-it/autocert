@@ -11,3 +11,4 @@ gunicorn>=19.3.0
 cryptography>=1.8.1
 packaging>=16.8
 dnspython3>=1.15.0
+python-whois>=0.6.5
