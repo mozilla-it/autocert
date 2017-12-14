@@ -8,6 +8,7 @@ from pprint import pprint, pformat
 from fnmatch import fnmatch
 from datetime import timedelta #FIXME: do we import this here?
 from whois import whois
+from tld import get_tld
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
@@ -179,9 +180,10 @@ class DigicertAuthority(AuthorityBase):
             return True
         def _whois_email(domain_to_check):
             try:
-                return 'hostmaster@mozilla.com' in whois(domain_to_check)['emails']
+                return 'hostmaster@mozilla.com' in whois(get_tld('http://'+domain_to_check))['emails']
             except Exception as ex:
                 return False
+            return False
         not_whois_domains = [domain for domain in domains if not _whois_email(domain)]
         if not_whois_domains:
             raise WhoisDoesntMatchError(not_whois_domains)
@@ -192,7 +194,8 @@ class DigicertAuthority(AuthorityBase):
 
     def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, renewal_of_order_id=None):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
-        domains_to_check = [common_name] + sans if sans else []
+        domains_to_check = [common_name]
+        domains_to_check += [sans] if sans else []
         self._validate_domains(organization_id, container_id, domains_to_check)
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
