@@ -192,10 +192,15 @@ class DigicertAuthority(AuthorityBase):
             raise NotValidatedDomainError(denied_domains)
         return True
 
+    def _domains_to_check(self, common_name, sans):
+        app.logger.debug(fmt('_domains_to_check:\n{locals}'))
+        domains_to_check = [(common_name[2:] if common_name.startswith('*.') else common_name)]
+        domains_to_check += sans if sans else []
+        return list(set(domains_to_check))
+
     def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, renewal_of_order_id=None):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
-        domains_to_check = [common_name]
-        domains_to_check += [sans] if sans else []
+        domains_to_check = self._domains_to_check(common_name, sans)
         self._validate_domains(organization_id, container_id, domains_to_check)
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
