@@ -179,8 +179,11 @@ class DigicertAuthority(AuthorityBase):
                     return False
             return True
         def _whois_email(domain_to_check):
+            app.logger.debug(fmt('_whois_email:\n{locals}'))
             try:
-                return 'hostmaster@mozilla.com' in whois(get_tld('http://'+domain_to_check))['emails']
+                emails = whois(get_tld('http://'+domain_to_check))['emails']
+                app.logger.debug(fmt('emails={emails}'))
+                return 'hostmaster@mozilla.com' in emails
             except Exception as ex:
                 app.logger.debug('WHOIS_ERROR')
                 app.logger.debug(ex)
