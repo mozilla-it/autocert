@@ -182,6 +182,8 @@ class DigicertAuthority(AuthorityBase):
             try:
                 return 'hostmaster@mozilla.com' in whois(get_tld('http://'+domain_to_check))['emails']
             except Exception as ex:
+                app.logger.debug('WHOIS_ERROR')
+                app.logger.debug(ex)
                 return False
             return False
         not_whois_domains = [domain for domain in domains if not _whois_email(domain)]
