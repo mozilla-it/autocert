@@ -190,7 +190,7 @@ class DigicertAuthority(AuthorityBase):
                 return False
             return False
         app.logger.debug(fmt('domains={domains}'))
-        domains = list(set([get_tld('http//:'+domain) for domain in domains]))
+        domains = list(set([get_tld('http://'+domain) for domain in domains]))
         app.logger.debug(fmt('domains={domains}'))
         not_whois_domains = [domain for domain in domains if not _whois_email(domain)]
         if not_whois_domains:
