@@ -181,7 +181,7 @@ class DigicertAuthority(AuthorityBase):
         def _whois_email(domain_to_check):
             app.logger.debug(fmt('_whois_email:\n{locals}'))
             try:
-                emails = whois(get_tld('http://'+domain_to_check))['emails']
+                emails = whois(domain_to_check)['emails']
                 app.logger.debug(fmt('emails={emails}'))
                 return 'hostmaster@mozilla.com' in emails
             except Exception as ex:
@@ -189,6 +189,9 @@ class DigicertAuthority(AuthorityBase):
                 app.logger.debug(ex)
                 return False
             return False
+        app.logger.debug(fmt('domains={domains}'))
+        domains = list(set([get_tld('http//:'+domain) for domain in domains]))
+        app.logger.debug(fmt('domains={domains}'))
         not_whois_domains = [domain for domain in domains if not _whois_email(domain)]
         if not_whois_domains:
             raise WhoisDoesntMatchError(not_whois_domains)
