@@ -90,6 +90,8 @@ class Tardata(object):
             within = timedelta(within)
         for cert_name in sorted(sift.fnmatches(self.cert_names, cert_name_pns)):
             cert = self.load_cert(cert_name)
+            if cert.sans:
+                cert.sans = sorted(cert.sans)
             if within:
                 delta = cert.expiry - self.timestamp
                 if TIMEDELTA_ZERO < delta and delta < within:
