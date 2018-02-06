@@ -381,6 +381,7 @@ def task_zeus():
     container2 = fmt('{image}_test2')
     return {
         'actions': [
+            'docker rm `docker ps -q -f "status=exited"`',
             fmt('[ -n "`docker ps -q -f name={container1}`" ] && docker rm -f {container1} || true'),
             fmt('[ -n "`docker ps -q -f name={container2}`" ] && docker rm -f {container2} || true'),
             fmt('docker run -d --name {container1} {image}'),
