@@ -41,13 +41,14 @@ class ZeusDestination(DestinationBase):
         except Exception as ex:
             print('OOPS!', type(ex))
             print('Exception: ', ex)
+            raise ex
         return True
 
     def fetch_certificates(self, certs, *dests):
         details = self._get_installed_certificates_details(certs, *dests)
         if details:
             for cert in certs:
-                detail_key = (cert.common_name, cert.crt[:40])
+                detail_key = (cert.friendly_common_name, cert.crt[:40])
                 destinations = details.get(detail_key, {})
                 if destinations:
                     for dest, (key, csr, crt, note) in destinations.items():
@@ -60,7 +61,12 @@ class ZeusDestination(DestinationBase):
         return certs
 
     def install_certificates(self, note, certs, *dests):
-        paths, jsons = zip(*[(ZEUS_PATH+cert.common_name, compose_json(cert.key, cert.csr, cert.crt, note)) for cert in certs])
+        paths, jsons = zip(*[(ZEUS_PATH+cert.friendly_common_name, compose_json(cert.key, cert.csr, cert.crt, note)) for cert in certs])
+
+        app.logger.debug('install_certificates:')
+        for path, json in zip(paths, jsons):
+            app.logger.debug(fmt('path={path}'))
+            app.logger.debug(fmt('json={json}'))
         calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
         certs = self.fetch_certificates(certs, *dests)
         return certs
@@ -72,7 +78,9 @@ class ZeusDestination(DestinationBase):
         raise NotImplementedError
 
     def _get_installed_summary(self, certs, *dests):
-        common_names = [cert.common_name for cert in certs]
+        app.logger.debug('_get_installed_summary:')
+        friendly_common_names = [cert.friendly_common_name for cert in certs]
+        app.logger.debug(fmt('friendly_common_names={friendly_common_names}'))
         calls = self.gets(paths=[ZEUS_PATH], dests=dests, timeout=10, verify_ssl=False)
         assert len(dests) == len(calls)
         summary = []
@@ -81,17 +89,23 @@ class ZeusDestination(DestinationBase):
             if call.recv.status != 200:
                 raise ZeusSSLServerKeysError(call)
             for child in call.recv.json.children:
-                if child.name in common_names:
+                app.logger.debug(fmt('child.name={0}:', child.name))
+                if child.name in friendly_common_names:
+                    app.logger.debug('\tfound in friendly_common_names above; added to summar')
                     summary += [(child.name, ZEUS_PATH+child.name, dest)]
+                else:
+                    app.logger.debug('\tnot found in friendly_common_names above')
         return summary
 
     def _get_installed_certificates_details(self, certs, *dests):
+        app.logger.debug('_get_installed_certificates_details:')
         summary = self._get_installed_summary(certs, *dests)
         details = {}
         if summary:
             common_names, paths, dests = zip(*summary)
             calls = self.gets(paths=paths, dests=dests, product=False, verify_ssl=False)
             for common_name, path, dest, call in zip(common_names, paths, dests, calls):
+                app.logger.debug(fmt('common_name={common_name}, path={path}, dest={dest}'))
                 try:
                     crt = windows2unix(call.recv.json.properties.basic.get('public', 'missing'))
                     csr = windows2unix(call.recv.json.properties.basic.get('request', 'missing'))
@@ -100,6 +114,7 @@ class ZeusDestination(DestinationBase):
                 except Exception as ex:
                     app.logger.debug(fmt('call.send.url={0}', call.send.url))
                     app.logger.debug(fmt('call.recv.json=\n{0}', call.recv.json))
+                    raise ex
                 details[(common_name, crt[:40])] = details.get((common_name, crt[:40]), {})
                 details[(common_name, crt[:40])][dest] = (
                     key,
