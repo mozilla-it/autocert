@@ -181,6 +181,10 @@ ARGS = {
         default=[''],
         help='list of glob expressions to override blacklist behavior'
     ),
+    ('--no-whois-check',): dict(
+        action='store_true',
+        help='defeat the whois check; only if you know what you are doing'
+    ),
     ('--expired',): dict(
         action='store_true',
         help='show expired certs'

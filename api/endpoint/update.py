@@ -53,7 +53,8 @@ class UpdateEndpoint(EndpointBase):
             self.args.validity_years,
             self.args.bug,
             self.args.sans,
-            self.args.repeat_delta)
+            self.args.repeat_delta,
+            self.args.no_whois_check)
         for cert, crt, expiry, authority in zip(certs, crts, expiries, authorities):
             cert.crt = crt
             cert.expiry = expiry
