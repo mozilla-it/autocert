@@ -182,7 +182,7 @@ def task_version():
     '''
     return {
         'actions': [
-            'git describe | xargs echo -n > api/VERSION',
+            'git describe --abbrev=7 | xargs echo -n > api/VERSION',
         ],
     }
 

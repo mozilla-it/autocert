@@ -13,7 +13,7 @@ def dirname(path, count=1):
 def describe():
     from subprocess import check_output
     cwd=os.path.dirname(__file__)
-    return check_output('git describe', cwd=cwd, shell=True).decode('utf-8').strip()
+    return check_output('git describe --abbrev=7', cwd=cwd, shell=True).decode('utf-8').strip()
 
 
 _version = None

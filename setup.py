@@ -8,7 +8,7 @@ import re
 
 def version():
     from subprocess import check_output
-    version = check_output('git describe', shell=True).decode('utf-8').strip()
+    version = check_output('git describe --abbrev=7', shell=True).decode('utf-8').strip()
     version, *suffix = version.split('-')
     if suffix:
         version = version.replace('v', '') + '.dev{0}+{1}'.format(*suffix)
