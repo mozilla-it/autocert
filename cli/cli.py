@@ -45,12 +45,13 @@ SORTING = [
 ]
 
 METHODS = {
-    'ls': 'GET',
-    'query': 'GET',
-    'create': 'POST',
-    'renew': 'PUT',
-    'deploy': 'PUT',
-    'revoke': 'DELETE',
+    'ls':       'GET',
+    'query':    'GET',
+    'create':   'POST',
+    'renew':    'PUT',
+    'reissue':  'PUT',
+    'deploy':   'PUT',
+    'revoke':   'DELETE',
 }
 
 class VersionCheckFailedError(Exception):
@@ -86,7 +87,7 @@ def fetch_api_config(ns):
 
 def add_subparsers(parser, api_config):
     '''
-    add all files that end with _parser.py in the cli/ directory
+    add all files that end with _command.py in the cli/ directory
     call 'add_parser', passing subparsers to each found module
     '''
     subparsers = parser.add_subparsers(

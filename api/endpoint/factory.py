@@ -13,18 +13,13 @@ from endpoint.create import CreateEndpoint
 from endpoint.update import UpdateEndpoint
 from endpoint.revoke import RevokeEndpoint
 
-method2endpoint = dict(
-    GET=ListEndpoint,
-    PUT=UpdateEndpoint,
-    POST=CreateEndpoint,
-    DELETE=RevokeEndpoint)
-
 command2endpoint = dict(
     ls=ListEndpoint,
     query=QueryEndpoint,
     create=CreateEndpoint,
     deploy=UpdateEndpoint,
     renew=UpdateEndpoint,
+    reissue=UpdateEndpoint,
     revoke=RevokeEndpoint)
 
 def create_endpoint(method, cfg, args):

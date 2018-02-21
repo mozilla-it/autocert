@@ -31,6 +31,8 @@ class UpdateEndpoint(EndpointBase):
         super(UpdateEndpoint, self).__init__(cfg, args)
 
     def execute(self, **kwargs):
+        app.logger.debug(fmt('Update.execute:\n{locals}'))
+        app.logger.debug(fmt('self.args:\n{0}', self.args))
         status = 201
         cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
         certs = self.tardata.load_certs(*cert_name_pns)
@@ -39,14 +41,19 @@ class UpdateEndpoint(EndpointBase):
         destinations = self.args.get('destinations', None)
         if authority == None and destinations == None:
             raise MissingUpdateArgumentsError(self.args)
-        if self.args.get('authority', None):
+
+        #if self.args.get('authority', None):
+        if self.args.command == 'renew':
             certs = self.renew(certs, **kwargs)
+        elif self.args.command == 'reissue':
+            certs = self.reissue(certs, **kwargs)
         if self.args.get('destinations', None):
             certs = self.deploy(certs, **kwargs)
         json = self.transform(certs)
         return json, status
 
     def renew(self, certs, **kwargs):
+        app.logger.debug(fmt('renew:\n{locals}'))
         crts, expiries, authorities = self.authority.renew_certificates(
             certs,
             self.args.organization_name,
@@ -62,7 +69,28 @@ class UpdateEndpoint(EndpointBase):
             self.tardata.update_cert(cert)
         return certs
 
+    def reissue(self, certs, **kwargs):
+        app.logger.debug(fmt('reissue:\n{locals}'))
+        modhashes, keys, csrs, crts, expiries, authorities = self.authority.reissue_certificates(
+            certs,
+            self.args.organization_name,
+            self.args.validity_years,
+            self.args.bug,
+            self.args.sans,
+            self.args.repeat_delta,
+            self.args.no_whois_check)
+        for cert, modhash, key, csr, crt, expiry, authority in zip(certs, modhashes, keys, csrs, crts, expiries, authorities):
+            cert.modhash = modhash
+            cert.key = key
+            cert.csr = csr
+            cert.crt = crt
+            cert.expiry = expiry
+            cert.authority = authority
+            self.tardata.update_cert(cert)
+        return certs
+
     def deploy(self, certs, **kwargs):
+        app.logger.debug(fmt('deploy:\n{locals}'))
         installed_certs = []
         note = 'bug {bug}'.format(**self.args)
         for name, dests in self.args.destinations.items():

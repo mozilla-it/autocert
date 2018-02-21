@@ -9,6 +9,7 @@ from fnmatch import fnmatch
 from datetime import timedelta #FIXME: do we import this here?
 from whois import whois
 from tld import get_tld
+from utils import pki
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
@@ -107,8 +108,9 @@ class DigicertAuthority(AuthorityBase):
             cert.authority['digicert']['matched'] = matched
         return certs
 
-    def create_certificate(self, organization_name, common_name, validity_years, csr, bug, sans=None, repeat_delta=None, no_whois_check=False):
+    def create_certificate(self, organization_name, common_name, validity_years, bug, csr=None, sans=None, repeat_delta=None, no_whois_check=False):
         app.logger.info(fmt('create_certificate:\n{locals}'))
+        modhash, key, csr = pki.create_modhash_key_and_csr(common_name, sans)
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
@@ -123,24 +125,54 @@ class DigicertAuthority(AuthorityBase):
             no_whois_check=no_whois_check)
         crts, expiries, order_ids = self._create_certificates([path], [json], bug, repeat_delta)
         authority = dict(digicert=dict(order_id=order_ids[0]))
-        return crts[0], expiries[0], authority
+        return modhash, key, csr, crts[0], expiries[0], authority
 
     def renew_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None, no_whois_check=False):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
-        paths, jsons = self._prepare_paths_jsons_for_renewals(
+        if sans:
+            for cert in certs:
+                cert.sans = combine_sans(cert.sans, sans)
+        paths, jsons = self._prepare_paths_jsons_for_re(
             certs,
             organization_id,
             container_id,
             bug,
             validity_years,
-            sans,
-            no_whois_check)
+            is_reissue=False,
+            no_whois_check=no_whois_check)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
+
+    def reissue_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None, no_whois_check=False):
+        app.logger.info(fmt('reissue_certificates:\n{locals}'))
+        organization_id, container_id = self._get_organization_container_ids(organization_name)
+        modhashes = []
+        keys = []
+        csrs = []
+        for cert in certs:
+            cert.sans = combine_sans(cert.sans, sans)
+            modhash, key, csr = pki.create_modhash_key_and_csr(cert.common_name, cert.sans)
+            cert.modhash = modhash
+            cert.key = key
+            cert.csr = csr
+            modhashes += [modhash]
+            keys += [key]
+            csrs += [csr]
+        paths, jsons = self._prepare_paths_jsons_for_re(
+            certs,
+            organization_id,
+            container_id,
+            bug,
+            validity_years,
+            is_reissue=True,
+            no_whois_check=no_whois_check)
+        crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
+        authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
+        return modhashes, keys, csrs, crts, expiries, authorities
 
     def revoke_certificates(self, certs, bug):
         app.logger.info(fmt('revoke_certificates:\n{locals}'))
@@ -213,11 +245,12 @@ class DigicertAuthority(AuthorityBase):
         domains_to_check += sans if sans else []
         return list(set(domains_to_check))
 
-    def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, no_whois_check=False, renewal_of_order_id=None):
+    def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, is_reissue=False, order_id=None, no_whois_check=False):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
         domains_to_check = self._domains_to_check(common_name, sans)
         self._validate_domains(organization_id, container_id, domains_to_check, no_whois_check)
-        path = 'order/certificate/ssl_plus'
+        order_path = 'order/certificate'
+        path = fmt('{order_path}/ssl_plus')
         json = merge(self.cfg.template, dict(
             validity_years=validity_years,
             certificate=dict(
@@ -227,25 +260,28 @@ class DigicertAuthority(AuthorityBase):
                 id=organization_id),
             comments=bug))
         if common_name.startswith('*.'):
-            path = 'order/certificate/ssl_wildcard'
+            path = fmt('{order_path}/ssl_wildcard')
         elif sans:
-            path = 'order/certificate/ssl_multi_domain'
+            path = fmt('{order_path}/ssl_multidomain')
             json = merge(json, dict(
                 certificate=dict(
                     dns_names=sans)))
-        if renewal_of_order_id:
-            json = merge(json, dict(
-                renewal_of_order_id=renewal_of_order_id))
+        if order_id:
+            if is_reissue:
+                path = fmt('{order_path}/{order_id}/reissue')
+            else:
+                json = merge(json, dict(
+                    renewal_of_order_id=order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs, organization_id, container_id, bug, validity_years, sans_to_add, no_whois_check=False):
-        app.logger.debug(fmt('_prepare_paths_jsons_for_renewals:\n{locals}'))
-        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
-        calls = self._get_certificate_order_detail(order_ids)
+    def _prepare_paths_jsons_for_re(self, certs, organization_id, container_id, bug, validity_years, is_reissue, no_whois_check=False):
+        app.logger.debug(fmt('_prepare_paths_jsons_for_re:\n{locals}'))
         paths = []
         jsons = []
-        for cert, call in zip(certs, calls):
-            cert.sans=combine_sans(cert.sans, sans_to_add)
+        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
+        calls = self._get_certificate_order_detail(order_ids)
+        for cert, call, order_id in zip(certs, calls, order_ids):
+            #cert.sans = combine_sans(cert.sans, sans_to_add)
             path, json = self._prepare_path_json(
                 organization_id,
                 container_id,
@@ -254,8 +290,9 @@ class DigicertAuthority(AuthorityBase):
                 cert.csr,
                 bug,
                 sans=cert.sans,
-                no_whois_check=no_whois_check,
-                renewal_of_order_id=cert.authority['digicert']['order_id'])
+                is_reissue=is_reissue,
+                order_id=order_id,
+                no_whois_check=no_whois_check)
             paths += [path]
             jsons += [json]
         return paths, jsons
