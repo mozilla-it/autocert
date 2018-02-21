@@ -372,22 +372,27 @@ def task_setup():
         ],
     }
 
+def task_prune():
+    '''
+    prune stopped containers
+    '''
+    return {
+        'actions': ['docker rm `docker ps -q -f "status=exited"`'],
+        'uptodate': ['[ -n "`docker ps -q -f status=exited`" ] && exit 1 || exit 0']
+    }
+
 def task_zeus():
     '''
     launch zeus containers
     '''
     image = 'zeus17.3'
-    container1 = fmt('{image}_test1')
-    container2 = fmt('{image}_test2')
-    return {
-        'actions': [
-            'docker rm `docker ps -q -f "status=exited"`',
-            fmt('[ -n "`docker ps -q -f name={container1}`" ] && docker rm -f {container1} || true'),
-            fmt('[ -n "`docker ps -q -f name={container2}`" ] && docker rm -f {container2} || true'),
-            fmt('docker run -d --name {container1} {image}'),
-            fmt('docker run -d --name {container2} {image}'),
-        ],
-    }
+    for container in [ fmt('{image}_test{num}') for num in (1, 2)]:
+        yield {
+            'task_dep': ['prune'],
+            'name': container,
+            'actions': [fmt('docker run -d --name {container} {image}')],
+            'uptodate': [fmt('[ -n "`docker ps -q -f name={container}`" ] && exit 0 || exit 1')]
+        }
 
 if __name__ == '__main__':
     print('should be run with doit installed')
