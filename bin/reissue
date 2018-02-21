@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ -n "$DEBUG" ]; then
+    PS4=':${LINENO}+'
+    set -x
+fi
+
+if [ -z "$1" ]; then
+    echo "must pass cert_name or common_name"
+    exit -1
+fi
+
+autocert reissue "$1" -o c -b -c
