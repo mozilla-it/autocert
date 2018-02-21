@@ -47,9 +47,8 @@ class OrganizationNameNotFoundError(AutocertError):
         super(OrganizationNameNotFoundError, self).__init__(message)
 
 class NotValidatedDomainError(AutocertError):
-    def __init__(self, domains):
-        domains = ', '.join(domains)
-        message = fmt('list of domains NOT validated: {domains}')
+    def __init__(self, denied_domains, active_domains):
+        message = fmt('these denied_domains: {denied_domains} were not found in these active_domains: {active_domains}')
         super(NotValidatedDomainError, self).__init__(message)
 
 class WhoisDoesntMatchError(AutocertError):
@@ -204,7 +203,7 @@ class DigicertAuthority(AuthorityBase):
             raise WhoisDoesntMatchError(not_whois_domains)
         denied_domains = [domain for domain in domains if not _is_validated(domain)]
         if denied_domains:
-            raise NotValidatedDomainError(denied_domains)
+            raise NotValidatedDomainError(denied_domains, active_domains)
         return True
 
     def _domains_to_check(self, common_name, sans):
