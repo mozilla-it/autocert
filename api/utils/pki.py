@@ -13,27 +13,9 @@ from cryptography.hazmat.primitives import hashes, serialization
 
 import tarfile
 
+from config import CFG
 from utils.format import fmt
 from utils.exceptions import AutocertError
-
-from app import app
-
-from config import CFG
-
-class KeyExistError(AutocertError):
-    def __init__(self, keyfile):
-        message = 'key file {keyfile} does not exist'.format(**locals())
-        super(KeyExistError, self).__init__(message)
-
-class CsrExistError(AutocertError):
-    def __init__(self, csrfile):
-        message = 'csr file {csrfile} does not exist'.format(**locals())
-        super(CsrExistError, self).__init__(message)
-
-class CertNameDecomposeError(AutocertError):
-    def __init__(self, pattern, cert_name):
-        message = '"{cert_name}" could not be decomposed with pattern "{pattern}"'.format(**locals())
-        super(CertNameDecomposeError, self).__init__(message)
 
 OIDS_MAP = dict(
     common_name =              NameOID.COMMON_NAME,
@@ -56,13 +38,46 @@ ENCODING = dict(
     PEM = serialization.Encoding.PEM,
 )
 
-def _create_key(common_name, **kwargs):
-    app.logger.info('called create_key:\n{0}'.format(pformat(locals())))
-    key = rsa.generate_private_key(
-        public_exponent=kwargs.get('public_exponent', CFG.key.public_exponent),
-        key_size=kwargs.get('key_size', CFG.key.key_size),
+KEY_LOAD_FUNC = dict(
+    DER = serialization.load_der_private_key,
+    PEM = serialization.load_pem_private_key,
+)
+
+CSR_LOAD_FUNC = dict(
+    DER = x509.load_der_x509_csr,
+    PEM = x509.load_pem_x509_csr,
+)
+
+CRT_LOAD_FUNC = dict(
+    DER = x509.load_der_x509_certificate,
+    PEM = x509.load_pem_x509_certificate,
+)
+
+def _keyobj_to_keystr(keyobj):
+    return keyobj.private_bytes(
+        encoding=ENCODING[CFG.key.encoding],
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption()).decode('utf-8')
+
+def _keystr_to_keyobj(keystr):
+    return KEY_LOAD_FUNC[CFG.key.encoding](
+        keystr.encode('utf-8'),
+        password=None,
         backend=default_backend())
-    return key
+
+def _csrobj_to_csrstr(csrobj):
+    return csrobj.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8')
+
+def _csrstr_to_csrobj(csrstr):
+    return CSR_LOAD_FUNC[CFG.csr.encoding](
+        csrstr.encode('utf-8'),
+        backend=default_backend())
+
+def _create_keyobj(common_name, public_exponent=None, key_size=None):
+    return rsa.generate_private_key(
+        public_exponent=public_exponent if public_exponent else CFG.key.public_exponent,
+        key_size=key_size if key_size else CFG.key.key_size,
+        backend=default_backend())
 
 def _create_oids(common_name, oids):
     attrs = [x509.NameAttribute(NameOID.COMMON_NAME, common_name)]
@@ -78,21 +93,30 @@ def _create_oids(common_name, oids):
 
 def _add_sans(subject, sans):
     subject.add_extension(
-        [x509.DNSName(dns_name) for dns_name in dns_names],
+        x509.SubjectAlernativeName([x509.DNSName(san) for san in sans]),
         critical=False)
 
-def _create_csr(common_name, key, oids=None, sans=None):
-    app.logger.info('called create_csr:\n{0}'.format(pformat(locals())))
+def _create_csrobj(common_name, keyobj, oids=None, sans=None):
     builder = x509.CertificateSigningRequestBuilder()
     oids = _create_oids(common_name, oids if oids else {})
     subject = builder.subject_name(x509.Name(oids))
-    if sans:
-        _add_sans(subject, sans)
-    csr = subject.sign(key, hashes.SHA256(), default_backend())
+    #if sans:
+        #_add_sans(subject, sans)
+    csr = subject.sign(keyobj, hashes.SHA256(), default_backend())
     return csr
 
-def _create_modhash(key):
-    modulus_int = key.private_numbers().public_numbers.n
+def create_key(common_name, public_exponent=None, key_size=None):
+    keyobj = _create_keyobj(common_name, public_exponent=None, key_size=None)
+    return _keyobj_to_keystr(keyobj)
+
+def create_csr(common_name, key, oids=None, sans=None):
+    keyobj = _keystr_to_keyobj(key) if isinstance(key, str) else key
+    csrobj = _create_csrobj(common_name, keyobj, oids, sans)
+    return _csrobj_to_csrstr(csrobj)
+
+def create_modhash(key):
+    keyobj = _keystr_to_keyobj(key) if isinstance(key, str) else key
+    modulus_int = keyobj.private_numbers().public_numbers.n
     modulus_hex = hex(modulus_int).rstrip('L').lstrip('0x').upper()
     modulus_bytes = fmt('Modulus={modulus_hex}\n').encode('utf-8')
     md5 = hashlib.md5()
@@ -100,13 +124,7 @@ def _create_modhash(key):
     return md5.hexdigest()
 
 def create_modhash_key_and_csr(common_name, oids=None, sans=None):
-    key = _create_key(common_name)
-    csr = _create_csr(common_name, key)
-    modhash = _create_modhash(key)
-    return (
-        modhash,
-        key.private_bytes(
-            encoding=ENCODING[CFG.key.encoding],
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=serialization.NoEncryption()).decode('utf-8'),
-        csr.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8'))
+    key = create_key(common_name)
+    csr = create_csr(common_name, key, oids, sans)
+    modhash = create_modhash(key)
+    return (modhash, key, csr)

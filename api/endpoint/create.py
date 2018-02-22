@@ -10,7 +10,6 @@ from pprint import pformat
 from attrdict import AttrDict
 from datetime import timedelta
 
-#from utils import pki
 from utils.format import fmt
 from utils.exceptions import AutocertError
 
@@ -29,7 +28,6 @@ class CreateEndpoint(EndpointBase):
 
     def execute(self):
         status = 201
-        #modhash, key, csr = pki.create_modhash_key_and_csr(self.args.common_name, self.args.sans)
         modhash, key, csr, crt, expiry, authority = self.authority.create_certificate(
             self.args.organization_name,
             self.args.common_name,

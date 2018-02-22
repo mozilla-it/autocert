@@ -155,13 +155,10 @@ class DigicertAuthority(AuthorityBase):
         csrs = []
         for cert in certs:
             cert.sans = combine_sans(cert.sans, sans)
-            modhash, key, csr = pki.create_modhash_key_and_csr(cert.common_name, cert.sans)
-            cert.modhash = modhash
-            cert.key = key
-            cert.csr = csr
-            modhashes += [modhash]
-            keys += [key]
-            csrs += [csr]
+            cert.csr = pki.create_csr(cert.common_name, cert.key, sans=cert.sans)
+            modhashes += [cert.modhash]
+            keys += [cert.key]
+            csrs += [cert.csr]
         paths, jsons = self._prepare_paths_jsons_for_re(
             certs,
             organization_id,
