@@ -93,7 +93,7 @@ def _create_oids(common_name, oids):
 
 def _add_sans(subject, sans):
     subject.add_extension(
-        x509.SubjectAlernativeName([x509.DNSName(san) for san in sans]),
+        x509.SubjectAlternativeName([x509.DNSName(san) for san in sans]),
         critical=False)
 
 def _create_csrobj(common_name, keyobj, oids=None, sans=None):
