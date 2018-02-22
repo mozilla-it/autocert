@@ -259,7 +259,7 @@ class DigicertAuthority(AuthorityBase):
         if common_name.startswith('*.'):
             path = fmt('{order_path}/ssl_wildcard')
         elif sans:
-            path = fmt('{order_path}/ssl_multidomain')
+            path = fmt('{order_path}/ssl_multi_domain')
             json = merge(json, dict(
                 certificate=dict(
                     dns_names=sans)))
