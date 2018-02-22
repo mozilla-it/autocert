@@ -100,8 +100,8 @@ def _create_csrobj(common_name, keyobj, oids=None, sans=None):
     builder = x509.CertificateSigningRequestBuilder()
     oids = _create_oids(common_name, oids if oids else {})
     subject = builder.subject_name(x509.Name(oids))
-    #if sans:
-        #_add_sans(subject, sans)
+    if sans:
+        _add_sans(subject, sans)
     csr = subject.sign(keyobj, hashes.SHA256(), default_backend())
     return csr
 
