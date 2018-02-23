@@ -54,7 +54,7 @@ class UpdateEndpoint(EndpointBase):
 
     def renew(self, certs, **kwargs):
         app.logger.debug(fmt('renew:\n{locals}'))
-        crts, expiries, authorities = self.authority.renew_certificates(
+        csrs, crts, expiries, authorities = self.authority.renew_certificates(
             certs,
             self.args.organization_name,
             self.args.validity_years,
@@ -62,7 +62,8 @@ class UpdateEndpoint(EndpointBase):
             self.args.sans,
             self.args.repeat_delta,
             self.args.no_whois_check)
-        for cert, crt, expiry, authority in zip(certs, crts, expiries, authorities):
+        for cert, csr, crt, expiry, authority in zip(certs, csrs, crts, expiries, authorities):
+            cert.csr = csr
             cert.crt = crt
             cert.expiry = expiry
             cert.authority = authority

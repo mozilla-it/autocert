@@ -91,27 +91,26 @@ def _create_oids(common_name, oids):
             attrs += [x509.NameAttribute(oid, value)]
     return attrs
 
-def _add_sans(subject, sans):
-    subject.add_extension(
-        x509.SubjectAlternativeName([x509.DNSName(san) for san in sans]),
-        critical=False)
+def _add_sans(sans):
+    return x509.SubjectAlternativeName([x509.DNSName(san) for san in sans])
 
-def _create_csrobj(common_name, keyobj, oids=None, sans=None):
+def _create_csrobj(common_name, keyobj, sans=None, oids=None):
     builder = x509.CertificateSigningRequestBuilder()
-    oids = _create_oids(common_name, oids if oids else {})
+    oids = _create_oids(common_name, oids if oids else CFG.csr.oids)
     subject = builder.subject_name(x509.Name(oids))
     if sans:
-        _add_sans(subject, sans)
-    csr = subject.sign(keyobj, hashes.SHA256(), default_backend())
-    return csr
+        sans = _add_sans(sans)
+        subject = subject.add_extension(sans, critical=False)
+    csrobj = subject.sign(keyobj, hashes.SHA256(), default_backend())
+    return csrobj
 
 def create_key(common_name, public_exponent=None, key_size=None):
     keyobj = _create_keyobj(common_name, public_exponent=None, key_size=None)
     return _keyobj_to_keystr(keyobj)
 
-def create_csr(common_name, key, oids=None, sans=None):
+def create_csr(common_name, key, sans=None, oids=None):
     keyobj = _keystr_to_keyobj(key) if isinstance(key, str) else key
-    csrobj = _create_csrobj(common_name, keyobj, oids, sans)
+    csrobj = _create_csrobj(common_name, keyobj, sans, oids)
     return _csrobj_to_csrstr(csrobj)
 
 def create_modhash(key):
@@ -123,7 +122,7 @@ def create_modhash(key):
     md5.update(modulus_bytes)
     return md5.hexdigest()
 
-def create_modhash_key_and_csr(common_name, oids=None, sans=None):
+def create_modhash_key_and_csr(common_name, sans=None, oids=None):
     key = create_key(common_name)
     csr = create_csr(common_name, key, oids, sans)
     modhash = create_modhash(key)

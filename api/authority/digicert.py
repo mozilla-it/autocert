@@ -129,12 +129,8 @@ class DigicertAuthority(AuthorityBase):
 
     def renew_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None, no_whois_check=False):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
-        if not sans:
-            sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
-        if sans:
-            for cert in certs:
-                cert.sans = combine_sans(cert.sans, sans)
+        csrs = self._generate_csrs(certs, sans)
         paths, jsons = self._prepare_paths_jsons_for_re(
             certs,
             organization_id,
@@ -145,16 +141,12 @@ class DigicertAuthority(AuthorityBase):
             no_whois_check=no_whois_check)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
-        return crts, expiries, authorities
+        return csrs, crts, expiries, authorities
 
     def reissue_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None, no_whois_check=False):
         app.logger.info(fmt('reissue_certificates:\n{locals}'))
         organization_id, container_id = self._get_organization_container_ids(organization_name)
-        csrs = []
-        for cert in certs:
-            cert.sans = combine_sans(cert.sans, sans)
-            cert.csr = pki.create_csr(cert.common_name, cert.key, sans=cert.sans)
-            csrs += [cert.csr]
+        csrs = self._generate_csrs(certs, sans)
         paths, jsons = self._prepare_paths_jsons_for_re(
             certs,
             organization_id,
@@ -166,6 +158,16 @@ class DigicertAuthority(AuthorityBase):
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return csrs, crts, expiries, authorities
+
+    def _generate_csrs(self, certs, sans):
+        app.logger.info(fmt('_generate_csrs:\n{locals}'))
+        csrs = []
+        for cert in certs:
+            cert.sans = combine_sans(cert.sans, sans)
+            csr = pki.create_csr(cert.common_name, cert.key, sans=cert.sans)
+            csrs += [csr]
+            cert.csr = csr
+        return csrs
 
     def revoke_certificates(self, certs, bug):
         app.logger.info(fmt('revoke_certificates:\n{locals}'))
@@ -274,7 +276,6 @@ class DigicertAuthority(AuthorityBase):
         order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
         calls = self._get_certificate_order_detail(order_ids)
         for cert, call, order_id in zip(certs, calls, order_ids):
-            #cert.sans = combine_sans(cert.sans, sans_to_add)
             path, json = self._prepare_path_json(
                 organization_id,
                 container_id,
