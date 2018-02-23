@@ -119,8 +119,8 @@ class DigicertAuthority(AuthorityBase):
             container_id,
             common_name,
             validity_years,
-            csr,
             bug,
+            csr,
             sans=sans,
             no_whois_check=no_whois_check)
         crts, expiries, order_ids = self._create_certificates([path], [json], bug, repeat_delta)
@@ -242,7 +242,7 @@ class DigicertAuthority(AuthorityBase):
         domains_to_check += sans if sans else []
         return list(set(domains_to_check))
 
-    def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, is_reissue=False, order_id=None, no_whois_check=False):
+    def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, bug, csr, sans=None, is_reissue=False, order_id=None, no_whois_check=False):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
         domains_to_check = self._domains_to_check(common_name, sans)
         self._validate_domains(organization_id, container_id, domains_to_check, no_whois_check)
@@ -284,8 +284,8 @@ class DigicertAuthority(AuthorityBase):
                 container_id,
                 cert.common_name,
                 validity_years,
-                cert.csr,
                 bug,
+                cert.csr,
                 sans=cert.sans,
                 is_reissue=is_reissue,
                 order_id=order_id,
