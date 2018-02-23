@@ -71,7 +71,7 @@ class UpdateEndpoint(EndpointBase):
 
     def reissue(self, certs, **kwargs):
         app.logger.debug(fmt('reissue:\n{locals}'))
-        modhashes, keys, csrs, crts, expiries, authorities = self.authority.reissue_certificates(
+        csrs, crts, expiries, authorities = self.authority.reissue_certificates(
             certs,
             self.args.organization_name,
             self.args.validity_years,
@@ -79,9 +79,7 @@ class UpdateEndpoint(EndpointBase):
             self.args.sans,
             self.args.repeat_delta,
             self.args.no_whois_check)
-        for cert, modhash, key, csr, crt, expiry, authority in zip(certs, modhashes, keys, csrs, crts, expiries, authorities):
-            cert.modhash = modhash
-            cert.key = key
+        for cert, csr, crt, expiry, authority in zip(certs, csrs, crts, expiries, authorities):
             cert.csr = csr
             cert.crt = crt
             cert.expiry = expiry

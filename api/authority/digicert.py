@@ -150,14 +150,10 @@ class DigicertAuthority(AuthorityBase):
     def reissue_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None, no_whois_check=False):
         app.logger.info(fmt('reissue_certificates:\n{locals}'))
         organization_id, container_id = self._get_organization_container_ids(organization_name)
-        modhashes = []
-        keys = []
         csrs = []
         for cert in certs:
             cert.sans = combine_sans(cert.sans, sans)
             cert.csr = pki.create_csr(cert.common_name, cert.key, sans=cert.sans)
-            modhashes += [cert.modhash]
-            keys += [cert.key]
             csrs += [cert.csr]
         paths, jsons = self._prepare_paths_jsons_for_re(
             certs,
@@ -169,7 +165,7 @@ class DigicertAuthority(AuthorityBase):
             no_whois_check=no_whois_check)
         crts, expiries, order_ids = self._create_certificates(paths, jsons, bug, repeat_delta)
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
-        return modhashes, keys, csrs, crts, expiries, authorities
+        return csrs, crts, expiries, authorities
 
     def revoke_certificates(self, certs, bug):
         app.logger.info(fmt('revoke_certificates:\n{locals}'))
