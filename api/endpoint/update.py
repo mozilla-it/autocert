@@ -63,7 +63,11 @@ class UpdateEndpoint(EndpointBase):
             self.args.repeat_delta,
             self.args.no_whois_check)
         for cert, csr, crt, expiry, authority in zip(certs, csrs, crts, expiries, authorities):
+            if cert.csr != csr:
+                app.logger.debug('updating csr')
             cert.csr = csr
+            if cert.crt != crt:
+                app.logger.debug('updating crt')
             cert.crt = crt
             cert.expiry = expiry
             cert.authority = authority
@@ -81,7 +85,11 @@ class UpdateEndpoint(EndpointBase):
             self.args.repeat_delta,
             self.args.no_whois_check)
         for cert, csr, crt, expiry, authority in zip(certs, csrs, crts, expiries, authorities):
+            if cert.csr != csr:
+                app.logger.debug('updating csr')
             cert.csr = csr
+            if cert.crt != crt:
+                app.logger.debug('updating crt')
             cert.crt = crt
             cert.expiry = expiry
             cert.authority = authority

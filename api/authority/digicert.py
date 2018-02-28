@@ -333,7 +333,7 @@ class DigicertAuthority(AuthorityBase):
                 raise OrderCertificateError(call)
         return zip(*[(call.recv.json.id, call.recv.json.requests[0].id) for call in calls])
 
-    def _update_requests_status(self, request_ids, status,bug):
+    def _update_requests_status(self, request_ids, status, bug):
         app.logger.debug(fmt('_update_requests_status:\n{locals}'))
         paths = [fmt('request/{request_id}/status') for request_id in request_ids]
         jsons = [dict(status=status, processor_comment=bug)]
