@@ -42,7 +42,6 @@ class UpdateEndpoint(EndpointBase):
         if authority == None and destinations == None:
             raise MissingUpdateArgumentsError(self.args)
 
-        #if self.args.get('authority', None):
         if self.args.command == 'renew':
             certs = self.renew(certs, **kwargs)
         elif self.args.command == 'reissue':
@@ -70,6 +69,9 @@ class UpdateEndpoint(EndpointBase):
                 app.logger.debug('updating crt')
             cert.crt = crt
             cert.expiry = expiry
+            app.logger.debug('UPDATE AUTHORITY:')
+            app.logger.debug(fmt('cert.authority = {0}', cert.authority))
+            app.logger.debug(fmt('authority = {authority}'))
             cert.authority = authority
             self.tardata.update_cert(cert)
         return certs
@@ -92,6 +94,9 @@ class UpdateEndpoint(EndpointBase):
                 app.logger.debug('updating crt')
             cert.crt = crt
             cert.expiry = expiry
+            app.logger.debug('UPDATE AUTHORITY:')
+            app.logger.debug(fmt('cert.authority = {0}', cert.authority))
+            app.logger.debug(fmt('authority = {authority}'))
             cert.authority = authority
             self.tardata.update_cert(cert)
         return certs

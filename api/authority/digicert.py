@@ -196,6 +196,7 @@ class DigicertAuthority(AuthorityBase):
     def _validate_domains(self, organization_id, container_id, domains, no_whois_check=False):
         app.logger.debug(fmt('_validate_domains:\n{locals}'))
         active_domains = self._get_domains(organization_id, container_id)
+
         def _is_validated(domain_to_check):
             matched_domains = [ad for ad in active_domains if domain_to_check == ad.name]
             if matched_domains:
@@ -207,6 +208,7 @@ class DigicertAuthority(AuthorityBase):
                 else:
                     return False
             return True
+
         def _whois_email(domain_to_check):
             app.logger.debug(fmt('_whois_email:\n{locals}'))
             try:
@@ -218,11 +220,9 @@ class DigicertAuthority(AuthorityBase):
                 app.logger.debug(ex)
                 return False
             return False
-        app.logger.debug(fmt('domains={domains}'))
-        domains = list(set([get_tld('http://'+domain) for domain in domains]))
-        app.logger.debug(fmt('domains={domains}'))
 
         not_whois_domains = []
+        domains = list(set([get_tld('http://'+domain) for domain in domains]))
         if no_whois_check:
             app.logger.info('the whois check was defeated with --no-whois-check flag for this run')
         else:
@@ -303,6 +303,7 @@ class DigicertAuthority(AuthorityBase):
     def _create_certificates(self, paths, jsons, bug, repeat_delta):
         app.logger.debug(fmt('_create_certificates:\n{locals}'))
         order_ids, request_ids = self._order_certificates(paths, jsons)
+        app.logger.debug(fmt('order_ids = {order_ids}'))
         self._update_requests_status(request_ids, 'approved', bug)
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
@@ -328,8 +329,10 @@ class DigicertAuthority(AuthorityBase):
     def _order_certificates(self, paths, jsons):
         app.logger.debug(fmt('_order_certificates:\n{locals}'))
         calls = self.posts(paths=paths, jsons=jsons)
+        app.logger.debug(fmt('calls={calls}'))
         for call in calls:
             if call.recv.status != 201:
+                app.logger.debug(fmt('_order_certificates: call.recv.status = {0}', call.recv.status))
                 raise OrderCertificateError(call)
         return zip(*[(call.recv.json.id, call.recv.json.requests[0].id) for call in calls])
 
@@ -339,6 +342,7 @@ class DigicertAuthority(AuthorityBase):
         jsons = [dict(status=status, processor_comment=bug)]
         app.logger.debug(fmt('calling digicert api with paths={paths} and jsons={jsons}'))
         calls = self.puts(paths=paths, jsons=jsons)
+        app.logger.debug(fmt('calls={calls}'))
         for call in calls:
             if call.recv.status != 204:
                 if call.recv.json.errors[0].code != 'request_already_processed':
