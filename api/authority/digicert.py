@@ -309,7 +309,10 @@ class DigicertAuthority(AuthorityBase):
         statuses = [call.recv.json.status for call in calls]
         app.logger.debug(fmt('FIXME: order_ids={order_ids}, statuses={statuses}'))
         certificate_ids = [call.recv.json.certificate.id for call in calls]
+        certificate_details = [call.recv.json for call in calls]
+        app.logger.debug(fmt('certificate_details = {certificate_details}'))
         try:
+
             crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
             calls = self._get_certificate_order_detail(order_ids)
             expiries = [expiryify(call) for call in calls]
@@ -366,9 +369,6 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('_download_certificates:\n{locals}'))
         if repeat_delta is not None and isinstance(repeat_delta, int):
             repeat_delta = timedelta(seconds=repeat_delta)
-        call = self.get('order/certificate')
-        certificate_order_detail = call.recv.json['orders'][0]
-        app.logger.debug(fmt('order/certificate: json = \n{certificate_order_detail}'))
         paths = [fmt('certificate/{certificate_id}/download/format/{format_type}') for certificate_id in certificate_ids]
         calls = self.gets(paths=paths, repeat_delta=repeat_delta, repeat_if=not_200)
         texts = []
