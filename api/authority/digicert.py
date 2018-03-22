@@ -309,7 +309,7 @@ class DigicertAuthority(AuthorityBase):
         statuses = [call.recv.json.status for call in calls]
         app.logger.debug(fmt('FIXME: order_ids={order_ids}, statuses={statuses}'))
         certificate_ids = [call.recv.json.certificate.id for call in calls]
-        certificate_details = [call.recv.json for call in calls]
+        certificate_details = [dict(call.recv.json) for call in calls]
         app.logger.debug(fmt('certificate_details = {certificate_details}'))
         try:
 
