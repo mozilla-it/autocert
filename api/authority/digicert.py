@@ -307,7 +307,7 @@ class DigicertAuthority(AuthorityBase):
         self._update_requests_status(request_ids, 'approved', bug)
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
-        certificate_details = [dict(call.recv.json) for call in calls]
+        certificate_details = dict(calls[0].recv.json)
         app.logger.debug(fmt('FIXME certificate_details:\n{certificate_details}'))
         try:
 
