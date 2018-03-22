@@ -306,6 +306,8 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('order_ids = {order_ids}'))
         self._update_requests_status(request_ids, 'approved', bug)
         calls = self._get_certificate_order_detail(order_ids)
+        statuses = [call.recv.json.status for call in calls]
+        app.logger.debug(fmt('FIXME: statuses = {statuses}'))
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         try:
             crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
