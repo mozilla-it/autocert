@@ -367,7 +367,8 @@ class DigicertAuthority(AuthorityBase):
         if repeat_delta is not None and isinstance(repeat_delta, int):
             repeat_delta = timedelta(seconds=repeat_delta)
         call = self.get('order/certificate')
-        app.logger.debug(fmt('order/certificate: json = \n{0}', call.recv.json))
+        certificate_order_detail = call.recv.json['orders'][0]
+        app.logger.debug(fmt('order/certificate: json = \n{certificate_order_detail}'))
         paths = [fmt('certificate/{certificate_id}/download/format/{format_type}') for certificate_id in certificate_ids]
         calls = self.gets(paths=paths, repeat_delta=repeat_delta, repeat_if=not_200)
         texts = []
