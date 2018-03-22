@@ -1,13 +1,24 @@
 #!/bin/bash
 
-if [ -n "$DEBUG" ]; then
-    PS4=':${LINENO}+'
-    set -x
-fi
+BIN="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ -z "$1" ]; then
-    echo "must pass cert_name or common_name"
-    exit -1
-fi
+BASE="tercotua.org"
 
-autocert reissue "$1" -o c -b -c
+#two random words
+ONE=`shuf -n1 /usr/share/dict/words`
+TWO=`shuf -n1 /usr/share/dict/words`
+
+#trim apostrophes
+ONE="${ONE%\'*}"
+TWO="${TWO%\'*}"
+
+#lowercase and add tercotua domain
+COMMON_NAME="${ONE,,}-${TWO,,}.$BASE"
+
+cmd="$BIN/autocert create $COMMON_NAME -b -o c --sans n1.$BASE n2.$BASE $@"
+echo $cmd
+exec $cmd
+
+cmd="$BIN/autocert reissue $COMMON_NAME -b -o c --sans n3.$BASE $@"
+echo $cmd
+exec $cmd
