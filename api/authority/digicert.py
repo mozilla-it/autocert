@@ -310,7 +310,8 @@ class DigicertAuthority(AuthorityBase):
         certificate_details = dict(calls[0].recv.json)
         app.logger.debug(fmt('FIXME certificate_details:\n{certificate_details}'))
         try:
-
+            reissued_processing_order_ids = self._get_reissued_processing_order_ids()
+            app.logger.debug(fmt('reissued_processing_order_ids={reissued_processing_order_ids}'))
             crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
             calls = self._get_certificate_order_detail(order_ids)
             expiries = [expiryify(call) for call in calls]
@@ -351,6 +352,11 @@ class DigicertAuthority(AuthorityBase):
                 if call.recv.json.errors[0].code != 'request_already_processed':
                     raise ApproveCertificateError(call)
         return True
+
+    def _get_reissued_processing_order_ids(self):
+        app.logger.debug(fmt('_get_reissued_processing_order_ids:\n{locals}'))
+        call = self.get(path='order/certificate?filters[status]=reissue_processing')
+        return [order.id for order in call.recv.json.orders]
 
     def _get_certificate_order_summary(self):
         app.logger.debug(fmt('_get_certificate_order_summary:\n{locals}'))
