@@ -303,15 +303,11 @@ class DigicertAuthority(AuthorityBase):
     def _create_certificates(self, paths, jsons, bug, repeat_delta):
         app.logger.debug(fmt('_create_certificates:\n{locals}'))
         order_ids, request_ids = self._order_certificates(paths, jsons)
-        app.logger.debug(fmt('order_ids = {order_ids}'))
         self._update_requests_status(request_ids, 'approved', bug)
+        self._ensure_order_not_processing(order_ids, repeat_delta=repeat_delta)
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
-        certificate_details = dict(calls[0].recv.json)
-        app.logger.debug(fmt('FIXME certificate_details:\n{certificate_details}'))
         try:
-            reissued_processing_order_ids = self._get_reissued_processing_order_ids()
-            app.logger.debug(fmt('reissued_processing_order_ids={reissued_processing_order_ids}'))
             crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
             calls = self._get_certificate_order_detail(order_ids)
             expiries = [expiryify(call) for call in calls]
@@ -353,10 +349,19 @@ class DigicertAuthority(AuthorityBase):
                     raise ApproveCertificateError(call)
         return True
 
-    def _get_reissued_processing_order_ids(self):
-        app.logger.debug(fmt('_get_reissued_processing_order_ids:\n{locals}'))
-        call = self.get(path='order/certificate?filters[status]=reissue_processing')
-        return [order.id for order in call.recv.json.orders]
+    def _ensure_order_not_processing(self, order_ids, repeat_delta=None):
+        app.logger.debug(fmt('_ensure_order_not_processing:\n{locals}'))
+        if repeat_delta is not None and isinstance(repeat_delta, int):
+            repeat_delta = timedelta(seconds=repeat_delta)
+        path='order/certificate?filters[status]=reissue_processing'
+        def reissue_processing(call):
+            processing_ids = [order.id for order in call.recv.json.orders]
+            is_reissue_processing = any([True for order_id in order_ids if order_id in processing_ids])
+            app.logger.debug(fmt('FIXME: are any of order_ids={order_ids} in processing_ids={processing_ids} => {is_reissue_processing}'))
+            return is_reissue_processing
+        call = self.get(path=path, repeat_delta=repeat_delta, repeat_if=reissue_processing)
+        if call.recv.status != 200:
+            raise EnsureOrderNotProcessingError(order_ids)
 
     def _get_certificate_order_summary(self):
         app.logger.debug(fmt('_get_certificate_order_summary:\n{locals}'))
@@ -382,3 +387,6 @@ class DigicertAuthority(AuthorityBase):
             else:
                 raise DownloadCertificateError(call)
         return texts
+
+def make_reissue_processing(order_ids):
+
