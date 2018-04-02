@@ -19,9 +19,6 @@ from utils.exceptions import AutocertError
 
 from app import app
 
-def not_200(call):
-    return call.recv.status != 200
-
 class OrderCertificateError(AutocertError):
     def __init__(self, call):
         message = fmt('order certificate error call={0}', call)
@@ -378,6 +375,8 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('_download_certificates:\n{locals}'))
         if repeat_delta is not None and isinstance(repeat_delta, int):
             repeat_delta = timedelta(seconds=repeat_delta)
+        def not_200(call):
+            return call.recv.status != 200
         paths = [fmt('certificate/{certificate_id}/download/format/{format_type}') for certificate_id in certificate_ids]
         calls = self.gets(paths=paths, repeat_delta=repeat_delta, repeat_if=not_200)
         texts = []
@@ -387,6 +386,4 @@ class DigicertAuthority(AuthorityBase):
             else:
                 raise DownloadCertificateError(call)
         return texts
-
-def make_reissue_processing(order_ids):
 
