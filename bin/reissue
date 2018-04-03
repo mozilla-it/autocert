@@ -15,10 +15,10 @@ TWO="${TWO%\'*}"
 #lowercase and add tercotua domain
 COMMON_NAME="${ONE,,}-${TWO,,}.$BASE"
 
-cmd="$BIN/autocert create $COMMON_NAME -b -o c --sans n1.$BASE n2.$BASE -v4 $@ > create.out"
+cmd="time $BIN/autocert create $COMMON_NAME -b -o c --sans n1.$BASE n2.$BASE -v4 $@ > create.out"
 echo $cmd
 eval $cmd
 
-cmd="$BIN/autocert reissue $COMMON_NAME -b -o c --sans n3.$BASE $@ -v4 > reissue.out"
+cmd="time $BIN/autocert reissue $COMMON_NAME -b -o c --sans n3.$BASE $@ -v4 > reissue.out"
 echo $cmd
 eval $cmd
