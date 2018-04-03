@@ -353,10 +353,13 @@ class DigicertAuthority(AuthorityBase):
         path='order/certificate?filters[status]=reissue_processing'
         def reissue_processing(call):
             app.logger.debug(fmt('reissue_processing:\n{locals}'))
-            processing_ids = [order.id for order in call.recv.json.orders]
-            is_reissue_processing = any([True for order_id in order_ids if order_id in processing_ids])
-            app.logger.debug(fmt('FIXME: are any of order_ids={order_ids} in processing_ids={processing_ids} => {is_reissue_processing}'))
-            return is_reissue_processing
+            if call.recv.json:
+                processing_ids = [order.id for order in call.recv.json.orders]
+                is_reissue_processing = any([True for order_id in order_ids if order_id in processing_ids])
+                app.logger.debug(fmt('FIXME: are any of order_ids={order_ids} in processing_ids={processing_ids} => {is_reissue_processing}'))
+                return is_reissue_processing
+            app.logger.debug(fmt('FIXME: json missing; call.recv.status={0}', call.recv.status))
+            return True
         call = self.get(path=path, repeat_delta=repeat_delta, repeat_if=reissue_processing)
         if call.recv.status != 200:
             raise EnsureOrderNotProcessingError(order_ids)
