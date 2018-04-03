@@ -15,4 +15,4 @@ COMMON_NAME="${ONE,,}-${TWO,,}.tercotua.org"
 
 cmd="time $BIN/autocert create $COMMON_NAME -b -o c $@"
 echo $cmd
-exec $cmd
+eval $cmd
