@@ -354,7 +354,7 @@ class DigicertAuthority(AuthorityBase):
         def reissue_processing(call):
             app.logger.debug(fmt('FIXME: status={0} url={1}', call.recv.status, call.send.url))
             if call.recv.json:
-                app.logger.debug(call.recv.json)
+                app.logger.debug(dict(call.recv.json))
             else:
                 app.logger.debug(call.recv.text)
             if call.recv.status == 200:
