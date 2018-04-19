@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 
 import os
+import re
 import pwd
 
 from doit import get_var
@@ -41,6 +42,16 @@ ENVS = ' '.join([
 class UnknownPkgmgrError(Exception):
     def __init__(self):
         super(UnknownPkgmgrError, self).__init__('unknown pkgmgr!')
+
+def get_user_uid_gid():
+    return [
+        fmt('AC_USER={USER}'),
+        fmt('AC_UID={UID}'),
+        fmt('AC_GID={GID}'),
+    ]
+
+def get_env_vars(regex=None):
+    return [key+'='+value for key, value in os.environ.items() if regex == None or regex.search(key)]
 
 def check_hash(program):
     from subprocess import check_call, CalledProcessError, PIPE
@@ -186,18 +197,6 @@ def task_version():
         ],
     }
 
-def task_dotenv():
-    '''
-    write environment variables to .env file in reporoot
-    '''
-    def write_dotenv():
-        with open(DIR+'/.env', 'w') as f:
-            for k,v in ENV.items():
-                f.write(fmt('{k}={v}\n'))
-    return {
-        'actions': [write_dotenv],
-    }
-
 def task_savelogs():
     '''
     save the logs to a timestamped file
@@ -215,6 +214,33 @@ def task_savelogs():
         ]
     }
 
+def task_environment():
+    '''
+    set the env vars to be used inside of the container
+    '''
+    def add_env_vars():
+        print('docker-compose.yml.wo-envs -> docker-compose.yml')
+        print('adding env vars to docker-compose.yml file')
+        dcy = yaml.safe_load(open('docker-compose.yml.wo-envs'))
+        for svc in dcy['services'].keys():
+            envs = dcy['services'][svc].get('environment', [])
+            envs += get_user_uid_gid()
+            envs += get_env_vars(re.compile('(http|https)_proxy', re.IGNORECASE))
+            pfmt('{svc}:')
+            for env in envs:
+                pfmt('  - {env}')
+            dcy['services'][svc]['environment'] = envs
+        with open('docker-compose.yml', 'w') as f:
+            yaml.dump(dcy, f, default_flow_style=False)
+
+    return {
+        'task_dep': [
+        ],
+        'actions': [
+            add_env_vars,
+        ]
+    }
+
 def task_deploy():
     '''
     deloy flask app via docker-compose
@@ -227,13 +253,13 @@ def task_deploy():
             'version',
             'test',
             'config',
-            'dotenv',
             'dockercompose',
+            'environment',
             'savelogs',
         ],
         'actions': [
             'docker-compose build',
-            fmt('env AC_UID={UID} AC_GID={GID} AC_USER={USER} docker-compose up --remove-orphans -d'),
+            fmt('docker-compose up --remove-orphans -d'),
         ],
     }
 

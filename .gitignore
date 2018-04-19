@@ -114,3 +114,6 @@ digitool.py
 
 #prevent checking in old logs that are generated on each deploy
 oldlogs/
+
+# prevent docker-compose.yml from being check in
+docker-compose.yml
