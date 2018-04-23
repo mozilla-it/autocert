@@ -168,12 +168,13 @@ class DigicertAuthority(AuthorityBase):
     def _validate_domains(self, organization_id, container_id, domains, no_whois_check=False):
         app.logger.debug(fmt('_validate_domains:\n{locals}'))
         active_domains = self._get_domains(organization_id, container_id)
+        active_domains = [ad.name for ad in active_domains]
         def _is_validated(domain_to_check):
-            matched_domains = [ad for ad in active_domains if domain_to_check == ad.name]
+            matched_domains = [ad for ad in active_domains if domain_to_check == ad]
             if matched_domains:
                 domain = matched_domains[0]
             else:
-                matched_subdomains = [ad for ad in active_domains if domain_to_check.endswith('.'+ad.name)]
+                matched_subdomains = [ad for ad in active_domains if domain_to_check.endswith('.'+ad)]
                 if matched_subdomains:
                     domain = matched_subdomains[0]
                 else:
