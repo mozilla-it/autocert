@@ -97,8 +97,9 @@ class Tardata(object):
                 if TIMEDELTA_ZERO < delta and delta < within:
                     certs += [cert]
             elif expired:
-                if cert.expiry > self.timestamp:
+                if cert.expiry < self.timestamp:
                     certs += [cert]
             else:
-                certs += [cert]
+                if cert.expiry > self.timestamp:
+                    certs += [cert]
         return certs
