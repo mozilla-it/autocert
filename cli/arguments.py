@@ -30,6 +30,11 @@ class WrongBugFormatError(Exception):
         msg = fmt('WrongBugFormatError: bug should be 7-8 digits long but was, {bug}')
         super(WrongBugFormatError, self).__init__(msg)
 
+def load_file(path):
+    if path == 'stdin':
+        raise NotImplementedError
+    return open(path).read().decode('utf-8').strip()
+
 def bug_type(bug):
     pattern = '\d{7,8}'
     regex = re.compile(pattern)
@@ -71,6 +76,14 @@ def get_destinations(destinations=None, **kwargs):
 
 # these are the default values for these arguments
 ARGS = {
+    ('-k', '--key'): dict(
+        type=load_file,
+        help='optionally specify path to KEY'
+    ),
+    ('-c', '--csr'): dict(
+        type=load_file,
+        help='optionally specify path to CSR'
+    ),
     ('-o', '--organization-name'): dict(
         metavar='ORG',
         required=True,
@@ -137,7 +150,7 @@ ARGS = {
         type=int,
         help='default="%(default)s"; repeat delta when getting cert from digicert'
     ),
-    ('-c', '--call-detail'): dict(
+    ('-C', '--call-detail'): dict(
         const=DETAIL[0],
         choices=DETAIL,
         nargs='?',

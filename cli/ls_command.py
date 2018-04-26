@@ -21,6 +21,6 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-w', '--within', default=None)
     add_argument(parser, '--verify')
     add_argument(parser, '--expired')
-    add_argument(parser, '-c', '--call-detail')
+    add_argument(parser, '-C', '--call-detail')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'cert_name_pns', default='*', nargs='*')

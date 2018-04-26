@@ -18,12 +18,14 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-d', '--destinations',
         required=False,
         choices=destinations)
+    add_argument(parser, '-k', '--key')
+    add_argument(parser, '-c', '--csr')
     add_argument(parser, '-s', '--sans')
     add_argument(parser, '-S', '--sans-file')
     add_argument(parser, '-y', '--validity-years')
     add_argument(parser, '--repeat-delta')
     add_argument(parser, '--no-whois-check')
-    add_argument(parser, '-c', '--call-detail')
+    add_argument(parser, '-C', '--call-detail')
     add_argument(parser, '-n', '--nerf')
     add_argument(parser, '-v', '--verbose')
     add_argument(parser, 'common_name')
