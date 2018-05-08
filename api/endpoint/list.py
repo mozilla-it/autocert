@@ -13,8 +13,6 @@ from utils.format import fmt, pfmt
 from app import app
 from config import CFG
 from endpoint.base import EndpointBase
-from authority.factory import create_authority
-from destination.factory import create_destination
 from utils.output import yaml_format
 
 class ListEndpoint(EndpointBase):
