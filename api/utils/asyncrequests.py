@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import re
 import aiohttp
 import asyncio
-
 
 from json import dumps as json_dumps
 from pprint import pprint, pformat
 from attrdict import AttrDict
 from datetime import datetime
+from urllib.parse import urlparse
+from fnmatch import fnmatch
 
 from utils.format import fmt, pfmt
 from utils.newline import windows2unix
@@ -21,16 +24,51 @@ class RaiseIfError(AutocertError):
         message = fmt('raise if error with {call}')
         super(RaiseIfError, self).__init__(message)
 
+class ConflictingProxyEnv(Exception):
+    def __init__(self, key, values):
+        message = fmt('too many proxy values={values} for key={key} in env')
+        super(ConflictingProxyEnv, self).__init__(message)
+
+def get_proxy_value_from_env(key):
+    values = [
+        os.environ.get(key.lower(), None),
+        os.environ.get(key.upper(), None),
+    ]
+    values = list(set([value for value in values if value is not None]))
+    if len(values) == 2:
+        raise ConflictingProxyEnv(key, values)
+    return values[0] if values else None
+
+def ensure_http(url):
+    if url:
+        p = urlparse(url)
+        if p.scheme in ('', 'https'):
+            return 'http://'+url
+    return url
+
 class AsyncRequests(Singleton):
     def __init__(self):
-        self._loop = asyncio.get_event_loop()
         self.calls = []
+        self._loop = asyncio.get_event_loop()
+        self.http_proxy = ensure_http(get_proxy_value_from_env('http_proxy'))
+        self.https_proxy = ensure_http(get_proxy_value_from_env('https_proxy'))
+        self.no_proxy = get_proxy_value_from_env('no_proxy')
+        self.no_proxies = re.split('[, ]+', self.no_proxy) if self.no_proxy else []
 
     @property
     def call(self):
         if self.calls:
             return self.calls[-1]
         return None
+
+    def proxy(self, url):
+        p = urlparse(url)
+        if any([fnmatch(p.hostname, no_proxy) for no_proxy in self.no_proxies]):
+            return None
+        return {
+            'http': self.http_proxy,
+            'https': self.https_proxy,
+        }[p.scheme]
 
     async def _request(self,
         method,
@@ -52,10 +90,12 @@ class AsyncRequests(Singleton):
             repeat = 0
             while True:
                 send_datetime = datetime.utcnow()
+                proxy = self.proxy(url)
                 async with session.request(
                     method,
                     url,
                     headers=headers,
+                    proxy=proxy,
                     auth=aiohttp.helpers.BasicAuth(*auth),
                     data=json_dumps(json) if json else None,
                     **kwargs) as response:
@@ -66,6 +106,7 @@ class AsyncRequests(Singleton):
                         method=method,
                         url=url,
                         json=json,
+                        proxy=proxy,
                         headers=headers,
                         datetime=send_datetime)
                     json = None
