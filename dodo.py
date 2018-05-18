@@ -225,7 +225,7 @@ def task_environment():
         for svc in dcy['services'].keys():
             envs = dcy['services'][svc].get('environment', [])
             envs += get_user_uid_gid()
-            envs += get_env_vars(re.compile('(http|https)_proxy', re.IGNORECASE))
+            envs += get_env_vars(re.compile('(no|http|https)_proxy', re.IGNORECASE))
             pfmt('{svc}:')
             for env in envs:
                 pfmt('  - {env}')
