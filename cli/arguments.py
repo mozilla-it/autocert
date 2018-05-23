@@ -25,6 +25,15 @@ ORGANIZATIONS = [
     'c', 'Mozilla Corporation',
 ]
 
+STATUS_TYPES = [
+    'issued',
+    'pending',
+    'expired',
+    'revoked',
+    'rejected',
+    'canceled',
+]
+
 class WrongBugFormatError(Exception):
     def __init__(self, bug):
         msg = fmt('WrongBugFormatError: bug should be 7-8 digits long but was, {bug}')
@@ -188,6 +197,13 @@ ARGS = {
     ('--expired',): dict(
         action='store_true',
         help='show expired certs'
+    ),
+    ('-s', '--status',): dict(
+        metavar='STATUS',
+        default=[STATUS_TYPES[0]],
+        choices=STATUS_TYPES,
+        nargs='+',
+        help='default=%(default)s; choose which status type(s) to return; choices=[%(choices)s]'
     ),
     ('common_name',): dict(
         metavar='common-name',
