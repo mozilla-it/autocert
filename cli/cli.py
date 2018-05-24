@@ -54,8 +54,8 @@ METHODS = {
 }
 
 OUTPUT = [
-    'yaml',
     'json',
+    'yaml',
 ]
 
 class VersionCheckFailedError(Exception):
@@ -69,7 +69,7 @@ class FetchApiConfigError(Exception):
         super(FetchApiConfigError, self).__init__(message)
 
 def default_output():
-    return OUTPUT[0]
+    return OUTPUT[int(sys.stdout.isatty())]
 
 def output_print(json, output):
     if output == 'yaml':
