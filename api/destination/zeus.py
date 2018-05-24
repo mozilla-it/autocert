@@ -6,7 +6,7 @@ from config import CFG
 
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
-from utils.output import yaml_format
+from utils.yaml import yaml_format
 from utils.format import fmt, pfmt
 from utils.exceptions import AutocertError
 

@@ -13,7 +13,7 @@ from utils.format import fmt, pfmt
 from app import app
 from config import CFG
 from endpoint.base import EndpointBase
-from utils.output import yaml_format
+from utils.yaml import yaml_format
 
 class ListEndpoint(EndpointBase):
     def __init__(self, cfg, args):

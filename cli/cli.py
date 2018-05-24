@@ -8,7 +8,7 @@ import os
 import imp
 import sys
 import logging
-from json import JSONDecodeError
+from json import JSONDecodeError, dumps
 from subprocess import check_output
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
@@ -25,7 +25,7 @@ from cli.utils.importer import import_modules
 from cli.utils.version import get_version as get_cli_version
 from utils.dictionary import dictify
 from utils.url import validate
-from cli.utils.output import output
+from cli.utils.yaml import yaml_print
 from cli.utils.format import fmt, pfmt
 from cli.namespace import jsonify
 from cli import requests
@@ -53,6 +53,11 @@ METHODS = {
     'revoke': 'DELETE',
 }
 
+OUTPUT = [
+    'yaml',
+    'json',
+]
+
 class VersionCheckFailedError(Exception):
     def __init__(self, required, version):
         message = fmt('autocert/api {version} is not at least {required}')
@@ -62,6 +67,15 @@ class FetchApiConfigError(Exception):
     def __init__(self, response):
         message = fmt('response = {response}')
         super(FetchApiConfigError, self).__init__(message)
+
+def default_output():
+    return OUTPUT[0]
+
+def output_print(json, output):
+    if output == 'yaml':
+        yaml_print(json)
+    elif output == 'json':
+        print(dumps(json, indent=2))
 
 def fetch_api_version(ns):
     api_version = 'unknown'
@@ -108,7 +122,7 @@ def do_request(ns):
     status = response.status_code
     try:
         json = response.json()
-        output(json)
+        output_print(json, ns.output)
     except JSONDecodeError as jde:
         print('status =', status)
         print('JSONDecodeError =', jde)
@@ -144,6 +158,13 @@ def main():
         default=SORTING[0],
         choices=SORTING,
         help='default="%(default)s"; set the sorting method; choices=[%(choices)s]')
+    parser.add_argument(
+        '-O', '--output',
+        metavar='OUPUT',
+        default=default_output(),
+        choices=OUTPUT,
+        help='default="%(default)s"; set the output type; choices=[%(choices)s]')
+
     add_argument(parser, '-n', '--nerf')
 
     parser.set_defaults(**CFG)
@@ -158,10 +179,10 @@ def main():
     version_check(version)
 
     if ns.version:
-        output({'{version}-version'.format(**ns.__dict__): version[ns.version]})
+        ouput_print({'{version}-version'.format(**ns.__dict__): version[ns.version]}, ns.output)
         sys.exit(0)
     if ns.config:
-        output({'{config}-config'.format(**ns.__dict__): config[ns.config]})
+        output_print({'{config}-config'.format(**ns.__dict__): config[ns.config]}, ns.output)
         sys.exit(0)
 
     parser = ArgumentParser(
@@ -174,7 +195,7 @@ def main():
 
     ns = parser.parse_args()
     if ns.nerf:
-        output(dict(ns=ns.__dict__))
+        output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)
 
     status = do_request(ns)

@@ -37,6 +37,6 @@ def yaml_format(obj):
             return yaml.Dumper.represent_mapping(self, tag, mapping, flow_style)
     return yaml.dump(obj, Dumper=MyDumper).strip()
 
-def output(obj):
+def yaml_print(obj):
     return print(yaml_format(obj))
 

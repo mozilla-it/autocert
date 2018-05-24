@@ -8,7 +8,7 @@ from pprint import pformat
 from attrdict import AttrDict
 
 from utils.format import fmt, pfmt
-from utils.output import yaml_format
+from utils.yaml import yaml_format
 from utils.exceptions import AutocertError
 from utils import blacklist
 

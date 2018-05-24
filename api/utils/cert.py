@@ -11,7 +11,7 @@ from utils import tar
 from utils.format import fmt, pfmt
 from utils.isinstance import *
 
-from utils.output import yaml_format, output
+from utils.yaml import yaml_format, yaml_print
 from utils.dictionary import head, body, head_body, keys_ending
 from utils.exceptions import AutocertError
 

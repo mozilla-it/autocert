@@ -7,7 +7,7 @@ from io import BytesIO
 from ruamel import yaml
 
 from utils.format import fmt
-from utils.output import yaml_format
+from utils.yaml import yaml_format
 from utils.dictionary import merge
 from utils.exceptions import AutocertError
 
