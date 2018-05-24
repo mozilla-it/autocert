@@ -7,6 +7,7 @@ import re
 from attrdict import AttrDict
 from fnmatch import fnmatch
 from ruamel import yaml
+from datetime import datetime, timedelta
 
 from utils.dictionary import merge, head, head_body
 from utils.format import fmt, pfmt
@@ -16,6 +17,8 @@ from endpoint.base import EndpointBase
 from utils.output import yaml_format
 
 from utils import sift
+
+TIMEDELTA_ZERO = timedelta(0)
 
 class QueryEndpoint(EndpointBase):
     def __init__(self, cfg, args):
@@ -30,6 +33,10 @@ class QueryEndpoint(EndpointBase):
         if sift.fnmatches(order['certificate'].get('dns_names', []), self.args.domain_name_pns):
             app.logger.info(fmt('order_status={0} args_status={1}', order['status'], self.args.status))
             if sift.fnmatches([order['status']], self.args.status):
+                if isinstance(self.args.within, int):
+                    within = timedelta(self.args.within)
+                    delta = datetime.strptime(order['certificate']['valid_till'], '%Y-%m-%d') - datetime.utcnow()
+                    return TIMEDELTA_ZERO < delta and delta < within
                 return True
         return False
 
