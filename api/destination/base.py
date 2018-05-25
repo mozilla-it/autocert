@@ -116,7 +116,7 @@ class DestinationBase(object):
     def deletes(self, paths=None, dests=None, jsons=None, **kw):
         return self.requests('DELETE', paths=paths, dests=dests, jsons=jsons, **kw)
 
-    def has_conectivity(self, *dests):
+    def has_connectivity(self, timeout, *dests):
         raise NotImplementedError
 
     def add_destinations(self, cert, *dests, **items):

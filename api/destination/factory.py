@@ -18,7 +18,7 @@ class DestinationFactoryError(AutocertError):
         msg = fmt('destination factory error with {destination}')
         super(DestinationFactoryError, self).__init__(msg)
 
-def create_destination(destination, ar, cfg, verbosity):
+def create_destination(destination, ar, cfg, timeout, verbosity):
     d = None
     if destination == 'aws':
         d = AwsDestination(ar, cfg, verbosity)
@@ -27,6 +27,6 @@ def create_destination(destination, ar, cfg, verbosity):
     else:
         raise DestinationFactoryError(destination)
     dests = list(CFG.destinations.zeus.keys())
-    if d.has_connectivity(*dests):
+    if d.has_connectivity(timeout, *dests):
         return d
 

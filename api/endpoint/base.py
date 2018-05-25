@@ -43,7 +43,7 @@ class EndpointBase(object):
         })
         destinations = self.cfg.destinations
         self.destinations = AttrDict({
-            d: create_destination(d, self.ar, destinations[d], self.verbosity) for d in destinations
+            d: create_destination(d, self.ar, destinations[d], self.args.timeout, self.verbosity) for d in destinations
         })
         self.tardata = Tardata(self.cfg.tar.dirpath, self.verbosity)
 

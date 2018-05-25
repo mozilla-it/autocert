@@ -33,15 +33,15 @@ class ZeusDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity):
         super(ZeusDestination, self).__init__(ar, cfg, verbosity)
 
-    def has_connectivity(self, *dests):
+    def has_connectivity(self, timeout, *dests):
         app.logger.info(fmt('has_connectivity:\n{locals}'))
         try:
-            calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=3)
+            calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=timeout)
         except (TimeoutError, ClientConnectorError) as ex:
             dest_ex_pairs = []
             for dest in dests:
                 try:
-                    call = self.get(path='', dest=dest, verify_ssl=False, timeout=3)
+                    call = self.get(path='', dest=dest, verify_ssl=False, timeout=timeout)
                 except (TimeoutError, ClientConnectorError) as ex:
                     dest_ex_pairs += [(dest, ex)]
             if dest_ex_pairs:

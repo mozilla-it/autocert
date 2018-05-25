@@ -164,6 +164,11 @@ def main():
         default=default_output(),
         choices=OUTPUT,
         help='default="%(default)s"; set the output type; choices=[%(choices)s]')
+    parser.add_argument(
+        '-T', '--timeout',
+        metavar='INT',
+        default=2,
+        help='default="%(default)s"; set the timeout used in connectivity check')
 
     add_argument(parser, '-n', '--nerf')
 
