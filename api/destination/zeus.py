@@ -38,7 +38,14 @@ class ZeusDestination(DestinationBase):
         try:
             calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=3)
         except (TimeoutError, ClientConnectorError) as ex:
-            raise DestinationConnectivityError(ex)
+            dest_ex_pairs = []
+            for dest in dests:
+                try:
+                    call = self.get(path='', dest=dest, verify_ssl=False, timeout=3)
+                except (TimeoutError, ClientConnectorError) as ex:
+                    dest_ex_pairs += [(dest, ex)]
+            if dest_ex_pairs:
+                raise DestinationConnectivityError(dest_ex_pairs)
         except Exception as ex:
             print('OOPS!', type(ex))
             print('Exception: ', ex)

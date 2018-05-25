@@ -13,9 +13,11 @@ from utils.exceptions import AutocertError
 from app import app
 
 class DestinationConnectivityError(AutocertError):
-    def __init__(self, ex):
-        error = repr(ex)
-        msg = fmt('destination connectivity error {error}')
+    def __init__(self, dest_ex_pairs):
+        msg = ''
+        for dest, ex in dest_ex_pairs:
+            error = repr(ex)
+            msg += fmt('{error} when attempting destination {dest}')
         super(DestinationConnectivityError, self).__init__(msg)
 
 class DestinationPathError(AutocertError):
