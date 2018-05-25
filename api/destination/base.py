@@ -14,7 +14,8 @@ from app import app
 
 class DestinationConnectivityError(AutocertError):
     def __init__(self, ex):
-        msg = fmt('destination connectivity error {ex}')
+        error = repr(ex)
+        msg = fmt('destination connectivity error {error}')
         super(DestinationConnectivityError, self).__init__(msg)
 
 class DestinationPathError(AutocertError):
