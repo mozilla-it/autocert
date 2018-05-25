@@ -26,8 +26,11 @@ class QueryEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         if self.args.target == 'digicert':
-            return self.query_digicert(**kwargs)
-        return dict(query='results'), 200
+            json = self.query_digicert(**kwargs)
+        if self.args.call_detail:
+            calls = [self.transform_call(call) for call in self.ar.calls]
+            json['calls'] = calls
+        return json, 200
 
     def filter(self, order):
         if sift.fnmatches(order['certificate'].get('dns_names', []), self.args.domain_name_pns):
