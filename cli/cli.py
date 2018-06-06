@@ -184,7 +184,7 @@ def main():
     version_check(version)
 
     if ns.version:
-        ouput_print({'{version}-version'.format(**ns.__dict__): version[ns.version]}, ns.output)
+        output_print({'{version}-version'.format(**ns.__dict__): version[ns.version]}, ns.output)
         sys.exit(0)
     if ns.config:
         output_print({'{config}-config'.format(**ns.__dict__): config[ns.config]}, ns.output)
