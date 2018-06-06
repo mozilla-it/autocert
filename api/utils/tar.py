@@ -1,6 +1,7 @@
 
 import os
 import glob
+import time
 import tarfile
 
 from io import BytesIO
@@ -29,9 +30,10 @@ def get_file_ext(content):
             return ext
     return '.yml'
 
-def tarinfo(cert_name, content):
-    ext = get_file_ext(content)
-    info = tarfile.TarInfo(cert_name + ext)
+def tarinfo(name, content):
+    ext = get_file_ext(content) if name != 'README' else ''
+    info = tarfile.TarInfo(name + ext)
+    info.mtime = time.time()
     info.size = len(content)
     return info
 
@@ -42,9 +44,7 @@ def bundle(dirpath, cert_name, key, csr, crt, yml, readme):
     yml = yaml_format(yml)
     tarpath = fmt('{dirpath}/{cert_name}.tar.gz')
     with tarfile.open(tarpath, 'w:gz') as tar:
-        readme_info = tarfile.TarInfo('README')
-        readme_info.size = len(readme)
-        tar.addfile(readme_info, BytesIO(readme.encode('utf-8')))
+        tar.addfile(tarinfo('README', readme), BytesIO(readme.encode('utf-8')))
         for content in (key, csr, crt, yml):
             if content:
                 tar.addfile(tarinfo(cert_name, content), BytesIO(content.encode('utf-8')))
@@ -55,6 +55,7 @@ def unbundle(dirpath, cert_name):
     tarpath = fmt('{dirpath}/{cert_name}.tar.gz')
     with tarfile.open(tarpath, 'r:gz') as tar:
         for info in tar.getmembers():
+            info.mtime = time.time()
             if info.name.endswith('.key'):
                 key = tar.extractfile(info.name).read().decode('utf-8')
             elif info.name.endswith('.csr'):
