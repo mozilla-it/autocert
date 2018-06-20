@@ -38,7 +38,7 @@ class CreateEndpoint(EndpointBase):
             self.args.bug,
             list(self.args.sans),
             self.args.repeat_delta,
-            self.args.no_whois_check)
+            self.args.whois_check)
         cert = self.tardata.create_cert(
             self.args.common_name,
             modhash,

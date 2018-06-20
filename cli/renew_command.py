@@ -22,7 +22,7 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-S', '--sans-file', help='file of sans to ADD to the existing cert(s)')
     add_argument(parser, '-y', '--validity-years')
     add_argument(parser, '--repeat-delta')
-    add_argument(parser, '--no-whois-check')
+    add_argument(parser, '--whois-check')
     add_argument(parser, '-w', '--within')
     add_argument(parser, '-c', '--call-detail')
     add_argument(parser, '-v', '--verbose')
