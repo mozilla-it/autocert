@@ -122,6 +122,8 @@ def do_request(ns):
     status = response.status_code
     try:
         json = response.json()
+        if not hasattr(ns, 'count') or not ns.count:
+            json.pop('count')
         output_print(json, ns.output)
     except JSONDecodeError as jde:
         print('status =', status)

@@ -198,6 +198,10 @@ ARGS = {
         action='store_true',
         help='show expired certs'
     ),
+    ('--count',): dict(
+        action='store_true',
+        help='add count to certs|result json|yaml returned from api calls'
+    ),
     ('-s', '--status',): dict(
         metavar='STATUS',
         default=[STATUS_TYPES[0]],

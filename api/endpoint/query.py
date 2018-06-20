@@ -47,4 +47,4 @@ class QueryEndpoint(EndpointBase):
             order_ids = [result['id'] for result in results]
             calls = self.authorities.digicert._get_certificate_order_detail(order_ids)
             results = [call.recv.json for call in calls]
-        return dict(results=results), 200
+        return dict(count=len(results), results=results), 200

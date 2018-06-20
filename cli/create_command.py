@@ -26,4 +26,5 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-c', '--call-detail')
     add_argument(parser, '-n', '--nerf')
     add_argument(parser, '-v', '--verbose')
+    add_argument(parser, '--count')
     add_argument(parser, 'common_name')

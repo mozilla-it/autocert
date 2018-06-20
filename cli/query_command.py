@@ -24,6 +24,7 @@ def add_digicert(subparsers, api_config):
     add_argument(parser, '-R', '--is-renewed')
     add_argument(parser, '-s', '--status')
     add_argument(parser, '-w', '--within', default=None)
+    add_argument(parser, '--count')
     add_argument(parser, 'domain_name_pns', default='*', nargs='*')
 
 def add_zeus(subparsers, api_config):

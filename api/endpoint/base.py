@@ -67,8 +67,10 @@ class EndpointBase(object):
         raise NotImplementedError
 
     def transform(self, certs):
+        certs = [cert.transform(self.verbosity) for cert in sorted(certs, key=self.sorting_func)]
         json = dict(
-            certs=[cert.transform(self.verbosity) for cert in sorted(certs, key=self.sorting_func)],
+            count=len(certs),
+            certs=certs,
         )
         if self.args.call_detail:
             calls = [self.transform_call(call) for call in self.ar.calls]
