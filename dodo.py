@@ -66,6 +66,8 @@ def get_pkgmgr():
         return 'deb'
     elif check_hash('rpm'):
         return 'rpm'
+    elif check_hash('brew'):
+        return 'brew'
     raise UnknownPkgmgrError
 
 def task_count():
