@@ -175,16 +175,12 @@ class DigicertAuthority(AuthorityBase):
         active_domains = self._get_domains(organization_id, container_id)
         active_domains = [ad.name for ad in active_domains]
         def _is_validated(domain):
-            matched_domains = [ad for ad in active_domains if domain == ad]
-            if matched_domains:
-                domain = matched_domains[0]
-            else:
-                matched_subdomains = [ad for ad in active_domains if not domain.startswith('*.') and domain.endswith('.'+ad)]
-                if matched_subdomains:
-                    domain = matched_subdomains[0]
-                else:
-                    return False
-            return True
+            app.logger.debug(fmt('_is_validated:\n{locals}'))
+            if domain in active_domains:
+                return True
+            elif get_tld('http://'+domain) in active_domains:
+                return True
+            return False
         def _whois_email(domain):
             app.logger.debug(fmt('_whois_email:\n{locals}'))
             try:
@@ -196,9 +192,6 @@ class DigicertAuthority(AuthorityBase):
                 app.logger.debug(ex)
                 return False
             return False
-        app.logger.debug(fmt('domains={domains}'))
-        domains = list(set([domain_to_check(domain) for domain in domains]))
-        app.logger.debug(fmt('domains={domains}'))
         not_whois_domains = []
         if whois_check:
             app.logger.info('the whois check was enabled with --whois-check flag for this run')
