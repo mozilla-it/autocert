@@ -67,6 +67,8 @@ class DigicertError(AutocertError):
             message = call.recv.json['errors'][0]['message']
         super(DigicertError, self).__init__(message)
 
+def domain_to_check(domain):
+    return domain if domain.startswith('*.') else get_tld('http://'+domain)
 
 def expiryify(call):
     from utils.timestamp import string2datetime
@@ -172,21 +174,21 @@ class DigicertAuthority(AuthorityBase):
         app.logger.debug(fmt('_validate_domains:\n{locals}'))
         active_domains = self._get_domains(organization_id, container_id)
         active_domains = [ad.name for ad in active_domains]
-        def _is_validated(domain_to_check):
-            matched_domains = [ad for ad in active_domains if domain_to_check == ad]
+        def _is_validated(domain):
+            matched_domains = [ad for ad in active_domains if domain == ad]
             if matched_domains:
                 domain = matched_domains[0]
             else:
-                matched_subdomains = [ad for ad in active_domains if domain_to_check.endswith('.'+ad)]
+                matched_subdomains = [ad for ad in active_domains if not domain.startswith('*.') and domain.endswith('.'+ad)]
                 if matched_subdomains:
                     domain = matched_subdomains[0]
                 else:
                     return False
             return True
-        def _whois_email(domain_to_check):
+        def _whois_email(domain):
             app.logger.debug(fmt('_whois_email:\n{locals}'))
             try:
-                emails = whois(domain_to_check)['emails']
+                emails = whois(domain)['emails']
                 app.logger.debug(fmt('emails={emails}'))
                 return 'hostmaster@mozilla.com' in emails
             except Exception as ex:
@@ -195,9 +197,8 @@ class DigicertAuthority(AuthorityBase):
                 return False
             return False
         app.logger.debug(fmt('domains={domains}'))
-        domains = list(set([get_tld('http://'+domain) for domain in domains]))
+        domains = list(set([domain_to_check(domain) for domain in domains]))
         app.logger.debug(fmt('domains={domains}'))
-
         not_whois_domains = []
         if whois_check:
             app.logger.info('the whois check was enabled with --whois-check flag for this run')
@@ -211,8 +212,8 @@ class DigicertAuthority(AuthorityBase):
 
     def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, whois_check=False, renewal_of_order_id=None):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
-        domains_to_check = list(set([common_name] + (sans if sans else [])))
-        self._validate_domains(organization_id, container_id, domains_to_check, whois_check)
+        domains = list(set([common_name] + (sans if sans else [])))
+        self._validate_domains(organization_id, container_id, domains, whois_check)
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
             validity_years=validity_years,
