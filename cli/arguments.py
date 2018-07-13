@@ -192,7 +192,7 @@ ARGS = {
     ),
     ('--whois-check',): dict(
         action='store_true',
-        help='defeat the whois check; only if you know what you are doing'
+        help='enable the whois check'
     ),
     ('--expired',): dict(
         action='store_true',

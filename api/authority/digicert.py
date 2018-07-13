@@ -21,6 +21,9 @@ from app import app
 def not_200(call):
     return call.recv.status != 200
 
+def strip_wildcard(domain):
+    return domain[2:] if domain.startswith('*.') else domain
+
 class OrderCertificateError(AutocertError):
     def __init__(self, call):
         message = fmt('order certificate error call={0}', call)
@@ -206,15 +209,9 @@ class DigicertAuthority(AuthorityBase):
             raise NotValidatedDomainError(denied_domains, active_domains)
         return True
 
-    def _domains_to_check(self, common_name, sans):
-        app.logger.debug(fmt('_domains_to_check:\n{locals}'))
-        domains_to_check = [(common_name[2:] if common_name.startswith('*.') else common_name)]
-        domains_to_check += sans if sans else []
-        return list(set(domains_to_check))
-
     def _prepare_path_json(self, organization_id, container_id, common_name, validity_years, csr, bug, sans=None, whois_check=False, renewal_of_order_id=None):
         app.logger.debug(fmt('_prepare_path_json:\n{locals}'))
-        domains_to_check = self._domains_to_check(common_name, sans)
+        domains_to_check = list(set([common_name] + (sans if sans else [])))
         self._validate_domains(organization_id, container_id, domains_to_check, whois_check)
         path = 'order/certificate/ssl_plus'
         json = merge(self.cfg.template, dict(
