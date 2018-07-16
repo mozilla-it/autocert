@@ -128,7 +128,9 @@ def route():
     except AutocertError as ae:
         status = 500
         json = dict(errors={ae.name: ae.message})
-        return make_response(jsonify(json), status)
+    except Exception as ex:
+        status = 500
+        json = dict(errors={ex.__class__.__name__: sys.exc_info()[0]})
     if not json:
         raise EmptyJsonError(json)
     return make_response(jsonify(json), status)
