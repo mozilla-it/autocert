@@ -18,6 +18,8 @@ from utils.yaml import yaml_format
 
 from utils import sift
 
+import traceback
+
 TIMEDELTA_ZERO = timedelta(0)
 
 class QueryEndpoint(EndpointBase):
@@ -30,14 +32,21 @@ class QueryEndpoint(EndpointBase):
         return dict(query='results'), 200
 
     def filter(self, order):
-        if sift.fnmatches(order['certificate'].get('dns_names', []), self.args.domain_name_pns):
-            app.logger.info(fmt('order_status={0} args_status={1}', order['status'], self.args.status))
-            if sift.fnmatches([order['status']], self.args.status):
-                if isinstance(self.args.within, int):
-                    within = timedelta(self.args.within)
-                    delta = datetime.strptime(order['certificate']['valid_till'], '%Y-%m-%d') - datetime.utcnow()
-                    return TIMEDELTA_ZERO < delta and delta < within
-                return True
+        try:
+            status = order['status']
+            certificate = order['certificate']
+            common_name = certificate.get('common_name', 'UNDEF')
+            dns_names = certificate.get('dns_names', [])
+            valid_till = certificate['valid_till']
+            if sift.fnmatches(dns_names, self.args.domain_name_pns):
+                if sift.fnmatches([status], self.args.status):
+                    if isinstance(self.args.within, int):
+                        within = timedelta(self.args.within)
+                        delta = datetime.strptime(valid_till, '%Y-%m-%d') - datetime.utcnow()
+                        return TIMEDELTA_ZERO < delta and delta < within
+                    return True
+        except Exception as ex:
+            app.logger.debug('FILTER_EX: ' + traceback.format_exc())
         return False
 
     def query_digicert(self, **kwargs):
