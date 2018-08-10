@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from utils.format import fmt
+from utils.fmt import fmt
 
 from config import CFG
 

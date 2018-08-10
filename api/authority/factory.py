@@ -4,11 +4,9 @@
 authority.factory
 '''
 
-from utils.format import fmt
-
 from app import app
 
-from utils.format import fmt
+from utils.fmt import fmt
 from utils.exceptions import AutocertError
 from authority.digicert import DigicertAuthority
 from authority.letsencrypt import LetsEncryptAuthority

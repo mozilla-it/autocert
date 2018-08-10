@@ -6,7 +6,7 @@ import pytest
 
 from subprocess import check_output
 
-from utils.format import fmt, pfmt
+from utils.fmt import fmt, pfmt
 from utils.cert import Cert
 
 DIR = os.path.dirname(os.path.realpath(__file__))

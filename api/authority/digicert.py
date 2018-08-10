@@ -12,7 +12,7 @@ from tld import get_tld
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
-from utils.format import fmt, pfmt
+from utils.fmt import fmt, pfmt
 from utils.newline import windows2unix
 from utils.exceptions import AutocertError
 
@@ -91,6 +91,28 @@ def combine_sans(sans1, sans2):
 class DigicertAuthority(AuthorityBase):
     def __init__(self, ar, cfg, verbosity):
         super(DigicertAuthority, self).__init__(ar, cfg, verbosity)
+
+    def request(self, method, **kw):
+        try:
+            path = kw.pop('path')
+            def next_offset(page):
+                total = page.total
+                limit = page.limit
+                offset = page.offset + page.limit
+                return offset if offset < page.total else None
+            call = super(DigicertAuthority, self).request(method, path=path, **kw)
+            offset = next_offset(call.recv.json.page)
+            while call.recv.status in (200,) and offset:
+                prev = call
+                query_params = fmt('?offset={offset}')
+                call = super(DigicertAuthority, self).request(method, path=path+query_params, **kw)
+                offset = next_offset(call.recv.json.page)
+                call.prev = prev
+            return call
+        except:
+            import traceback
+            traceback.print_exc()
+            app.logger.debug(traceback.format_exc())
 
     def has_connectivity(self):
         call = self.get('user/me')

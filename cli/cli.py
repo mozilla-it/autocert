@@ -26,7 +26,7 @@ from cli.utils.version import get_version as get_cli_version
 from utils.dictionary import dictify
 from utils.url import validate
 from cli.utils.yaml import yaml_print
-from cli.utils.format import fmt, pfmt
+from cli.utils.fmt import fmt, pfmt
 from cli.namespace import jsonify
 from cli import requests
 from cli.arguments import add_argument
