@@ -3,7 +3,7 @@
 
 import os
 from utils import sift
-from utils.format import fmt
+from utils.fmt import fmt
 
 from utils.exceptions import AutocertError
 

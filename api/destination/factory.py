@@ -6,9 +6,8 @@ destination.factory
 
 from app import app
 
-
 from config import CFG
-from utils.format import fmt
+from utils.fmt import fmt
 from utils.exceptions import AutocertError
 from destination.aws import AwsDestination
 from destination.zeus import ZeusDestination

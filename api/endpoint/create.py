@@ -11,7 +11,7 @@ from attrdict import AttrDict
 from datetime import timedelta
 
 from utils import pki
-from utils.format import fmt
+from utils.fmt import fmt
 from utils.exceptions import AutocertError
 
 from app import app

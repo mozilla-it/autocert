@@ -5,7 +5,7 @@ import re
 import glob
 import fnmatch
 
-from utils.format import fmt, pfmt
+from utils.fmt import fmt, pfmt
 
 def regexes(items, includes=None, excludes=None):
     return _sift(items, includes, excludes, _include_regex, _exclude_regex)
