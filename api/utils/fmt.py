@@ -47,7 +47,7 @@ def _dbg(args, kwargs, frame, logger=None):
     if klass:
         string += klass.__class__.__name__ + '.'
     string += frame.f_code.co_name + ': '
-    if args:
+    if args or kwargs:
         context = inspect.getframeinfo(frame).code_context
         callsite = ''.join([line.strip() for line in context])
         match = _dbg_regex.search(callsite)
