@@ -51,7 +51,11 @@ class QueryEndpoint(EndpointBase):
 
     def query_digicert(self, **kwargs):
         call = self.authorities.digicert._get_certificate_order_summary()
-        results = [dict(order) for order in call.recv.json['orders'] if self.filter(order)]
+        def orders(call): #FIXME: ugly hack to compile all orders from 'prev' linked list structure
+            if call:
+                return call.recv.json.orders + orders(call.get('prev', None))
+            return []
+        results = [dict(order) for order in orders(call) if self.filter(order)]
         if self.args.result_detail == 'detailed':
             order_ids = [result['id'] for result in results]
             calls = self.authorities.digicert._get_certificate_order_detail(order_ids)
