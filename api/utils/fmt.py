@@ -15,14 +15,19 @@ __all__ = [
     'pfmt',
 ]
 
-class FmtError(Exception):
+class FmtKeyError(Exception):
     def __init__(self, keys):
         msg = 'fmt error; key not found in keys: ' + ' '.join(keys)
-        super(FmtError, self).__init__(msg)
+        super(FmtKeyError, self).__init__(msg)
 
-def dbg(*args, **kwargs):
+class FmtLiteralError(Exception):
+    def __init__(self, literal):
+        msg = 'fmt error; illegal literal: ' + literal
+        super(FmtLiteralError, self).__init__(msg)
+
+def dbg(*args, logger=None, **kwargs):
     frame = inspect.currentframe().f_back
-    return _dbg(args, kwargs, frame, do_print=True)
+    return _dbg(args, kwargs, frame, logger=logger)
 
 def fmt(string, *args, **kwargs):
     frame = inspect.currentframe().f_back
@@ -32,14 +37,21 @@ def pfmt(string, *args, **kwargs):
     frame = inspect.currentframe().f_back
     return _fmt(string, args, kwargs, frame, do_print=True)
 
-def _is_literal(s):
+def _is_literal(name):
     try:
-        ast.literal_eval(s)
+        ast.literal_eval(name)
         return True
     except:
         return False
 
-def _dbg(args, kwargs, frame, do_print=False):
+def _create_format(name):
+    if _is_literal(name):
+        raise FmtLiteralError(name)
+    return name+'="{'+name+'}"'
+
+_dbg_regex = re.compile(r'p?dbg\s*\((.+?)\)$')
+
+def _dbg(args, kwargs, frame, logger=None):
     klass = frame.f_locals.get('self', None)
     string = 'DBG: '
     if klass:
@@ -48,12 +60,15 @@ def _dbg(args, kwargs, frame, do_print=False):
 
     context = inspect.getframeinfo(frame).code_context
     callsite = ''.join([line.strip() for line in context])
-    match = re.search(r'p?dbg\s*\((.+?)\)$', callsite)
+    match = _dbg_regex.search(callsite)
     if match:
         params = [param.strip() for param in match.group(1).split(',')]
     names = params[:len(args)] + list(kwargs.keys())
-    string += ' '.join([name+'={'+name+'}' for name in names if not _is_literal(name)])
-    return _fmt(string, args, kwargs, frame, do_print=do_print)
+    string += ' '.join([_create_format(name) for name in names])
+    result = _fmt(string, args, kwargs, frame, do_print=logger is None)
+    if logger:
+        logger.debug(result)
+    return result
 
 def _fmt_dict(obj):
     if isinstance(obj, dict):
@@ -73,7 +88,7 @@ def _fmt(string, args, kwargs, frame, do_print=False):
             gl.update(frame.f_back.f_locals)
         result= string.format(*args, **{k:_fmt_dict(v) for k,v in gl.items()})
     except KeyError as ke:
-        raise FmtError(gl)
+        raise FmtKeyError(gl)
     if do_print:
         print(result)
     return result
