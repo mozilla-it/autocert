@@ -20,11 +20,6 @@ class FmtKeyError(Exception):
         msg = 'fmt error; key not found in keys: ' + ' '.join(keys)
         super(FmtKeyError, self).__init__(msg)
 
-class FmtLiteralError(Exception):
-    def __init__(self, literal):
-        msg = 'fmt error; illegal literal: ' + literal
-        super(FmtLiteralError, self).__init__(msg)
-
 def dbg(*args, logger=None, **kwargs):
     frame = inspect.currentframe().f_back
     return _dbg(args, kwargs, frame, logger=logger)
@@ -37,16 +32,11 @@ def pfmt(string, *args, **kwargs):
     frame = inspect.currentframe().f_back
     return _fmt(string, args, kwargs, frame, do_print=True)
 
-def _is_literal(name):
-    try:
-        ast.literal_eval(name)
-        return True
-    except:
-        return False
-
 def _create_format(name):
-    if _is_literal(name):
-        raise FmtLiteralError(name)
+    try:
+        return str(ast.literal_eval(name))
+    except:
+        pass
     return name+'="{'+name+'}"'
 
 _dbg_regex = re.compile(r'p?dbg\s*\((.+?)\)$')
