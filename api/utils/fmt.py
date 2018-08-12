@@ -5,6 +5,7 @@ format: here there be baby dragons!
 '''
 
 import re
+import ast
 import inspect
 from pprint import pprint, pformat
 
@@ -13,6 +14,11 @@ __all__ = [
     'fmt',
     'pfmt',
 ]
+
+class FmtError(Exception):
+    def __init__(self, keys):
+        msg = 'fmt error; key not found in keys: ' + ' '.join(keys)
+        super(FmtError, self).__init__(msg)
 
 def dbg(*args, **kwargs):
     frame = inspect.currentframe().f_back
@@ -25,6 +31,13 @@ def fmt(string, *args, **kwargs):
 def pfmt(string, *args, **kwargs):
     frame = inspect.currentframe().f_back
     return _fmt(string, args, kwargs, frame, do_print=True)
+
+def _is_literal(s):
+    try:
+        ast.literal_eval(s)
+        return True
+    except:
+        return False
 
 def _dbg(args, kwargs, frame, do_print=False):
     klass = frame.f_locals.get('self', None)
@@ -39,7 +52,7 @@ def _dbg(args, kwargs, frame, do_print=False):
     if match:
         params = [param.strip() for param in match.group(1).split(',')]
     names = params[:len(args)] + list(kwargs.keys())
-    string += ' '.join([name+'={'+name+'}' for name in names])
+    string += ' '.join([name+'={'+name+'}' for name in names if not _is_literal(name)])
     return _fmt(string, args, kwargs, frame, do_print=do_print)
 
 def _fmt_dict(obj):
