@@ -47,14 +47,16 @@ def _dbg(args, kwargs, frame, logger=None):
     if klass:
         string += klass.__class__.__name__ + '.'
     string += frame.f_code.co_name + ': '
-
-    context = inspect.getframeinfo(frame).code_context
-    callsite = ''.join([line.strip() for line in context])
-    match = _dbg_regex.search(callsite)
-    if match:
-        params = [param.strip() for param in match.group(1).split(',')]
-    names = params[:len(args)] + list(kwargs.keys())
-    string += ' '.join([_create_format(name) for name in names])
+    if args:
+        context = inspect.getframeinfo(frame).code_context
+        callsite = ''.join([line.strip() for line in context])
+        match = _dbg_regex.search(callsite)
+        if match:
+            params = [param.strip() for param in match.group(1).split(',')]
+        names = params[:len(args)] + list(kwargs.keys())
+        string += ' '.join([_create_format(name) for name in names])
+    else:
+        string += 'locals:\n{locals}'
     result = _fmt(string, args, kwargs, frame, do_print=logger is None)
     if logger:
         logger.debug(result)
