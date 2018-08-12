@@ -10,7 +10,7 @@ from ruamel import yaml
 from datetime import datetime, timedelta
 
 from utils.dictionary import merge, head, head_body
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from app import app
 from config import CFG
 from endpoint.base import EndpointBase
@@ -51,11 +51,11 @@ class QueryEndpoint(EndpointBase):
 
     def query_digicert(self, **kwargs):
         call = self.authorities.digicert._get_certificate_order_summary()
-        def orders(call): #FIXME: ugly hack to compile all orders from 'prev' linked list structure
+        def get_orders(call): #FIXME: ugly hack to compile all orders from 'prev' linked list structure
             if call:
-                return call.recv.json.orders + orders(call.get('prev', None))
+                return get_orders(call.get('prev', None)) + list(call.recv.json.orders)
             return []
-        results = [dict(order) for order in orders(call) if self.filter(order)]
+        results = [dict(order) for order in get_orders(call) if self.filter(order)]
         if self.args.result_detail == 'detailed':
             order_ids = [result['id'] for result in results]
             calls = self.authorities.digicert._get_certificate_order_detail(order_ids)
