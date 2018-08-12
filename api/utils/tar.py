@@ -7,7 +7,7 @@ import tarfile
 from io import BytesIO
 from ruamel import yaml
 
-from utils.fmt import fmt
+from utils.fmt import *
 from utils.yaml import yaml_format
 from utils.dictionary import merge
 from utils.exceptions import AutocertError

@@ -6,7 +6,7 @@ cli.arguments: default arguments with the ability to override them
 import re
 
 from datetime import timedelta
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.dictionary import merge
 from cli.config import CFG
 

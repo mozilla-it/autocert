@@ -6,7 +6,7 @@ authority.factory
 
 from app import app
 
-from utils.fmt import fmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 from authority.digicert import DigicertAuthority
 from authority.letsencrypt import LetsEncryptAuthority

@@ -8,7 +8,7 @@ import os
 import copy
 
 from utils import tar
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.isinstance import *
 
 from utils.yaml import yaml_format, yaml_print

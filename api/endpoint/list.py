@@ -9,7 +9,7 @@ from fnmatch import fnmatch
 from ruamel import yaml
 
 from utils.dictionary import merge, head, head_body
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from app import app
 from config import CFG
 from endpoint.base import EndpointBase

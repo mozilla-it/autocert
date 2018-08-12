@@ -7,7 +7,7 @@ authority.base
 from itertools import product
 from attrdict import AttrDict
 
-from utils.fmt import fmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 
 from app import app

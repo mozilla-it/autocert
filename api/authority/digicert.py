@@ -12,7 +12,7 @@ from tld import get_tld
 
 from authority.base import AuthorityBase
 from utils.dictionary import merge, body
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.newline import windows2unix
 from utils.exceptions import AutocertError
 

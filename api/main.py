@@ -12,7 +12,7 @@ from pprint import pformat
 
 from endpoint.factory import create_endpoint
 from utils.version import get_version as get_api_version
-from utils.fmt import fmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 
 from app import app

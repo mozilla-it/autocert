@@ -6,7 +6,7 @@ url
 import socket
 
 from urlpath import URL
-from utils.fmt import fmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 
 class UrlDnsError(AutocertError):

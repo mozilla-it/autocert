@@ -7,7 +7,7 @@ from config import CFG
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
 from utils.yaml import yaml_format
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 
 from asyncio import TimeoutError

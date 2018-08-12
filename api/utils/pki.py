@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 
 import tarfile
 
-from utils.fmt import fmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 
 from app import app

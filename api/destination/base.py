@@ -7,7 +7,7 @@ import itertools
 from pprint import pformat
 from attrdict import AttrDict
 
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.exceptions import AutocertError
 
 from app import app

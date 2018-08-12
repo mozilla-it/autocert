@@ -13,7 +13,7 @@ from datetime import datetime
 from urllib.parse import urlparse
 from fnmatch import fnmatch
 
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.newline import windows2unix
 from utils.dictionary import merge
 from utils.singleton import Singleton

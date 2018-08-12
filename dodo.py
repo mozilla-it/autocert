@@ -10,7 +10,7 @@ from ruamel import yaml
 
 from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.timestamp import utcnow, datetime2int
 
 DIR = os.path.dirname(os.path.abspath(__file__))

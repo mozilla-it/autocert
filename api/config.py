@@ -11,7 +11,7 @@ from attrdict import AttrDict
 from urlpath import URL
 from pathlib2 import Path
 
-from utils.fmt import fmt
+from utils.fmt import *
 
 try:
     from utils.dictionary import merge

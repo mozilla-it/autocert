@@ -9,7 +9,7 @@ from datetime import timedelta
 from utils import sift
 from utils import timestamp
 from utils.cert import Cert
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.dictionary import merge, body
 from utils.exceptions import AutocertError
 

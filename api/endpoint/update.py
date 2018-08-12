@@ -7,7 +7,7 @@ autocert.update
 from pprint import pformat
 from attrdict import AttrDict
 
-from utils.fmt import fmt, pfmt
+from utils.fmt import *
 from utils.yaml import yaml_format
 from utils.exceptions import AutocertError
 from utils import blacklist
