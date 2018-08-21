@@ -4,20 +4,20 @@ DigiCert info here: https://www.digicert.com/ssl-support/pem-ssl-creation.htm
 
 autocert
 
-The autocert application is a two part (cli|api) solution to managing SSL certs.
+The autocert application is a two part (cli|app) solution to managing SSL certs.
 The source code can be found here: https://github.com/mozilla-it/autocert
 
 cli
 
 The cli, or commandline of autocert is simply an argparse interface that calls
-the api via the aiohttp library.  The config file for autocert is located in
+the app via the aiohttp library.  The config file for autocert is located in
 ~/.config/autocert/config.yml
 
 
-api
+app
 
-The api, or application program interface, is a RESTful service hosted via flask
-and nginx inside of a docker container.  The cli communiates with the api vai
+The app, or application program interface, is a RESTful service hosted via flask
+and nginx inside of a docker container.  The cli communiates with the app via
 RESTful calls, which in turn handles talking to the CA (DigiCert) as well as the
 Zeus load balancers.
 

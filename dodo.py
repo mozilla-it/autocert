@@ -4,14 +4,10 @@
 import os
 import re
 import pwd
+import sys
 
 from doit import get_var
 from ruamel import yaml
-
-from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
-
-from utils.fmt import *
-from utils.timestamp import utcnow, datetime2int
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
@@ -19,6 +15,13 @@ GID = pwd.getpwuid(UID).pw_gid
 USER = pwd.getpwuid(UID).pw_name
 ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
 LOGDIR='oldlogs'
+
+sys.path.insert(0, os.path.join(DIR, 'repos'))
+sys.path.insert(0, os.path.join(DIR, 'autocert'))
+
+from app.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+from utils.timestamp import utcnow, datetime2int
+from utils.fmt import *
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -36,7 +39,7 @@ DOIT_CONFIG = {
 }
 
 ENVS = ' '.join([
-    'PYTHONPATH=.:api:$PYTHONPATH',
+    'PYTHONPATH=.:app:$PYTHONPATH',
 ])
 
 class UnknownPkgmgrError(Exception):
@@ -127,8 +130,8 @@ def task_dockercompose():
     '''
     assert docker-compose version ({0}) or higher
     '''
-    from utils.function import format_docstr
-    format_docstr(task_dockercompose, MINIMUM_DOCKER_COMPOSE_VERSION)
+    from utils.function import docstr
+    docstr(task_dockercompose, MINIMUM_DOCKER_COMPOSE_VERSION)
     def check_docker_compose():
         import re
         from subprocess import check_output
@@ -175,6 +178,8 @@ def task_test():
     '''
     setup venv and run pytest
     '''
+    APPDIR = 'autocert/app'
+    TESTDIR = APPDIR + '/tests'
     return {
         'task_dep': [
             'noroot',
@@ -183,9 +188,9 @@ def task_test():
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip3 install --upgrade pip',
-            'venv/bin/pip install -r api/requirements.txt',
-            'venv/bin/pip install -r tests/requirements.txt',
-            fmt('{ENVS} venv/bin/pytest -s -vv tests/'),
+            fmt('venv/bin/pip3 install -r {APPDIR}/requirements.txt'),
+            fmt('venv/bin/pip3 install -r {TESTDIR}/requirements.txt'),
+            fmt('{ENVS} venv/bin/python3 -m pytest -s -vv {TESTDIR}/'),
         ],
     }
 
@@ -195,7 +200,7 @@ def task_version():
     '''
     return {
         'actions': [
-            'git describe --abbrev=7 | xargs echo -n > api/VERSION',
+            'git describe --abbrev=7 | xargs echo -n > autocert/app/VERSION',
         ],
     }
 
@@ -317,7 +322,7 @@ def task_config():
     punch = fmt('''
     logging:
         loggers:
-            api:
+            app:
                 level: {log_level}
         handlers:
             console:
@@ -361,7 +366,7 @@ def task_tidy():
     TIDY_FILES = [
         '.doit.db/',
         'venv/',
-        'api/VERSION',
+        'autocert/app/VERSION',
     ]
     return {
         'actions': [
@@ -388,7 +393,7 @@ def task_setup():
     '''
     setup venv
     '''
-    from utils.version import get_version
+    from utils.version import version
     return {
         'actions': [
             'rm -rf auto_cert_cli.egg-info/ venv/ dist/ __pycache__/',
@@ -396,7 +401,7 @@ def task_setup():
             'venv/bin/pip3 install --upgrade pip',
             'venv/bin/pip3 install -r cli/requirements.txt',
             'venv/bin/python3 ./setup.py install',
-            'unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-{0}-py3.5.egg'.format(get_version()),
+            fmt('unzip -l venv/lib/python3.5/site-packages/auto_cert_cli-{version}-py3.5.egg'),
         ],
     }
 

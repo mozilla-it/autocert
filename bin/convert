@@ -9,8 +9,8 @@ import sys
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, REPO_DIR)
 
-from utils.timestamp import int2datetime
-from api.tardata import Tardata
+from autocert.utils.timestamp import int2datetime
+from autocert.app.tardata import Tardata
 from argparse import ArgumentParser
 
 def convert(tar_path, tmp_path, verbose=False):

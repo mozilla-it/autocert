@@ -1,0 +1,4 @@
+# this is an example config file for the autocert cli
+
+# url where the autocert api flask app is deployed
+app_url: http://0.0.0.0

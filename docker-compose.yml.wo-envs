@@ -1,9 +1,9 @@
 version: '2'
 services:
-    api:
+    app:
         network_mode: host
         restart: always
-        build: ./api
+        build: ./autocert/app
         expose:
           - "8000"
         volumes:
@@ -16,6 +16,6 @@ services:
         ports:
           - "80:80"
         volumes_from:
-          - api
+          - app
         depends_on:
-          - api
+          - app
