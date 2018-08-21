@@ -104,7 +104,7 @@ def config():
         request.method,
         request.path,
         args)
-    from config import _load_config
+    from app.config import _load_config
     cfg = _load_config(fixup=False)
     return jsonify({'config': cfg})
 
