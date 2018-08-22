@@ -91,10 +91,13 @@ def version_check(versions):
         raise VersionCheckFailedError(versions.cli, versions.app)
 
 def fetch_app_config(ns):
+    url = ns.app_url / 'autocert/config'
+    dbg(url)
     response = requests.get(ns.app_url / 'autocert/config')
     if response.status_code == 200:
         obj = response.json()
         return obj['config']
+    dbg(response)
     raise FetchAppConfigError(response)
 
 def add_subparsers(parser, app_config):

@@ -4,14 +4,14 @@
 from asyncio import TimeoutError
 from aiohttp import ClientConnectorError
 
-from app.destination.base import DestinationBase, DestinationConnectivityError
-from app.utils.dictionary import merge, head, body, head_body, keys_ending
-from app.utils.newline import windows2unix
-from app.utils.yaml import yaml_format
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-from app.config import CFG
-from app.app import app
+from destination.base import DestinationBase, DestinationConnectivityError
+from utils.dictionary import merge, head, body, head_body, keys_ending
+from utils.newline import windows2unix
+from utils.yaml import yaml_format
+from exceptions import AutocertError
+from utils.fmt import *
+from config import CFG
+from ac import app
 
 ZEUS_PATH = 'ssl/server_keys/'
 

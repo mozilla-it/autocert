@@ -8,9 +8,12 @@ import inspect
 from ruamel import yaml
 from subprocess import check_output
 
-from app.utils.json import jsonify
-from app.utils.version import version
-from app.main import app
+DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(DIR, '../')))
+
+from utils.json import jsonify
+from utils.version import version
+from main import app
 
 def test_version():
     '''

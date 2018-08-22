@@ -7,10 +7,9 @@ authority.base
 from itertools import product
 from attrdict import AttrDict
 
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-
-from app.app import app
+from utils.fmt import *
+from exceptions import AutocertError
+from ac import app
 
 class AuthorityConnectivityError(AutocertError):
     def __init__(self, call):

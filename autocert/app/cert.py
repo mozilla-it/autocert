@@ -10,13 +10,12 @@ import copy
 from pprint import pprint
 from datetime import datetime
 
-from . import tar
-from .utils.fmt import *
-from .utils.isinstance import *
-
-from .utils.yaml import yaml_format, yaml_print
-from .utils.dictionary import head, body, head_body, keys_ending
-from .exceptions import AutocertError
+from exceptions import AutocertError
+from utils.yaml import yaml_format, yaml_print
+from utils.dictionary import head, body, head_body, keys_ending
+from utils.isinstance import *
+from utils.fmt import *
+import tar
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
 

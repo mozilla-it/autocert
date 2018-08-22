@@ -13,16 +13,16 @@ from ruamel import yaml
 from json import dumps
 from flask import jsonify
 
-from app.tardata import Tardata
-from app.authority.factory import create_authority
-from app.destination.factory import create_destination
-from app.utils.asyncrequests import AsyncRequests
-from app.utils import timestamp
-from app.utils.fmt import *
-from app.utils.dictionary import merge, head, head_body
-from app import tar
-from app.config import CFG
-from app.app import app
+from tardata import Tardata
+from authority.factory import create_authority
+from destination.factory import create_destination
+from utils.asyncrequests import AsyncRequests
+from utils import timestamp
+from utils.fmt import *
+from utils.dictionary import merge, head, head_body
+from config import CFG
+from ac import app
+import tar
 
 class EndpointBase(object):
     _sorting_funcs = dict(

@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import pytest
 
 from subprocess import check_output
 
-from app.utils.fmt import *
-from app.cert import Cert
+DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(DIR, '../')))
 
-DIR = os.path.dirname(os.path.realpath(__file__))
+from utils.fmt import *
+from cert import Cert
+
 KEY = open(DIR+'/key').read()
 CSR = open(DIR+'/csr').read()
 CRT = open(DIR+'/crt').read()

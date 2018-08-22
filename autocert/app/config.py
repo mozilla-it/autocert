@@ -11,16 +11,9 @@ from attrdict import AttrDict
 from urlpath import URL
 from pathlib2 import Path
 
-from app.utils.fmt import *
-from app.utils.dictionary import merge
-from app.exceptions import AutocertError
-
-#try:
-#    from utils.dictionary import merge
-#    from utils.exceptions import AutocertError
-#except ImportError:
-#    from dictionary import merge
-#    from exceptions import AutocertError
+from utils.fmt import *
+from utils.dictionary import merge
+from exceptions import AutocertError
 
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)

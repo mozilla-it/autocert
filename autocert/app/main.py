@@ -6,14 +6,19 @@ import imp
 import pwd
 import sys
 
+print('sys.path =', sys.path)
+
 from flask import Flask, request, jsonify, make_response
 from pdb import set_trace as breakpoint
 from pprint import pformat
 
-from app.endpoint.factory import create_endpoint
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-from app.app import app
+print('os.getcwd() ', os.getcwd())
+from endpoint.factory import create_endpoint
+from utils.fmt import *
+from exceptions import AutocertError
+from ac import app
+print(type(app))
+print(dir(app))
 
 STATUS_CODES = {
     400: 'bad request',
@@ -66,7 +71,7 @@ class EmptyJsonError(AutocertError):
 @app.before_first_request
 def initialize():
     from logging.config import dictConfig
-    from app.config import CFG
+    from config import CFG
     if sys.argv[0] != 'venv/bin/pytest':
         dictConfig(CFG.logging)     #3
         PID = os.getpid()
@@ -79,7 +84,7 @@ def log_request(user, hostname, ip, method, path, json):
 
 @app.route('/autocert/version', methods=['GET'])
 def version():
-    from app.utils.version import version
+    from utils.version import version
     args = request.json
     args = args if args else {}
     cfg = args.get('cfg', None)
@@ -106,7 +111,8 @@ def config():
         args)
     from app.config import _load_config
     cfg = _load_config(fixup=False)
-    return jsonify({'config': cfg})
+    dbg(cfg)
+    return jsonify(dict(config='cfg'))
 
 @app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():

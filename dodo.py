@@ -17,9 +17,9 @@ ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
 LOGDIR='oldlogs'
 
 sys.path.insert(0, os.path.join(DIR, 'repos'))
-sys.path.insert(0, os.path.join(DIR, 'autocert'))
+sys.path.insert(0, os.path.join(DIR, 'autocert/app'))
 
-from app.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 from utils.timestamp import utcnow, datetime2int
 from utils.fmt import *
 
@@ -39,7 +39,7 @@ DOIT_CONFIG = {
 }
 
 ENVS = ' '.join([
-    'PYTHONPATH=.:app:$PYTHONPATH',
+    'PYTHONPATH=.:autocert/app:$PYTHONPATH',
 ])
 
 class UnknownPkgmgrError(Exception):

@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from app.endpoint.list import ListEndpoint
-from app.endpoint.query import QueryEndpoint
-from app.endpoint.create import CreateEndpoint
-from app.endpoint.update import UpdateEndpoint
-from app.endpoint.revoke import RevokeEndpoint
-
-from app.app import app
-from app.config import CFG
-from app.utils.fmt import *
+from endpoint.list import ListEndpoint
+from endpoint.query import QueryEndpoint
+from endpoint.create import CreateEndpoint
+from endpoint.update import UpdateEndpoint
+from endpoint.revoke import RevokeEndpoint
+from utils.fmt import *
+from config import CFG
+from ac import app
 
 method2endpoint = dict(
     GET=ListEndpoint,

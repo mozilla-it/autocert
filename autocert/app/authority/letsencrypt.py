@@ -7,10 +7,10 @@ from attrdict import AttrDict
 from pprint import pprint, pformat
 from fnmatch import fnmatch
 
-from app.authority.base import AuthorityBase
-from app.utils.dictionary import merge
-from app.config import CFG
-from app.app import app
+from authority.base import AuthorityBase
+from utils.dictionary import merge
+from config import CFG
+from ac import app
 
 def not_200(call):
     return call.recv.status != 200

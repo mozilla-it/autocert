@@ -3,9 +3,9 @@
 
 import os
 
-from app.utils import sift
-from app.utils.fmt import *
-from app.exceptions import AutocertError
+from exceptions import AutocertError
+from utils.fmt import *
+from utils import sift
 
 try:
     thisdir = os.path.dirname(os.path.abspath(__file__))

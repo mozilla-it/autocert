@@ -10,11 +10,11 @@ from pprint import pformat
 from attrdict import AttrDict
 from datetime import timedelta
 
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-from app.endpoint.base import EndpointBase
-from app import pki
-from app.app import app
+from utils.fmt import *
+from exceptions import AutocertError
+from endpoint.base import EndpointBase
+from ac import app
+import pki
 
 class UnknownCertificateAuthorityError(AutocertError):
     def __init__(self, authority):

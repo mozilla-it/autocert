@@ -12,10 +12,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes, serialization
 
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-from app.config import CFG
-from app.app import app
+from exceptions import AutocertError
+from utils.fmt import *
+from config import CFG
+from ac import app
 
 class KeyExistError(AutocertError):
     def __init__(self, keyfile):

@@ -13,13 +13,13 @@ from fnmatch import fnmatch
 from ruamel import yaml
 from datetime import datetime, timedelta
 
-from app.utils.dictionary import merge, head, head_body
-from app.utils.fmt import *
-from app.app import app
-from app.config import CFG
-from app.endpoint.base import EndpointBase
-from app.utils.yaml import yaml_format
-from app.utils import sift
+from utils.dictionary import merge, head, head_body
+from endpoint.base import EndpointBase
+from utils.yaml import yaml_format
+from utils.fmt import *
+from utils import sift
+from config import CFG
+from ac import app
 
 TIMEDELTA_ZERO = timedelta(0)
 

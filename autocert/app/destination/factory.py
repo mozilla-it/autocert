@@ -4,12 +4,12 @@
 destination.factory
 '''
 
-from app.config import CFG
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-from app.destination.aws import AwsDestination
-from app.destination.zeus import ZeusDestination
-from app.app import app
+from exceptions import AutocertError
+from destination.aws import AwsDestination
+from destination.zeus import ZeusDestination
+from utils.fmt import *
+from config import CFG
+from ac import app
 
 class DestinationFactoryError(AutocertError):
     def __init__(self, destination):

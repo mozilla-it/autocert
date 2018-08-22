@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from app.destination.base import DestinationBase
-from app.config import CFG
+from destination.base import DestinationBase
+from config import CFG
 
 class AwsDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity=0):

@@ -3,17 +3,21 @@
 
 import os
 import re
+import sys
 
 from attrdict import AttrDict
 from fnmatch import fnmatch
 from ruamel import yaml
 
-from app.utils.dictionary import merge, head, head_body
-from app.utils.fmt import *
-from app.app import app
-from app.config import CFG
-from app.endpoint.base import EndpointBase
-from app.utils.yaml import yaml_format
+print(sys.path)
+print('os.getcwd() =', os.getcwd())
+print(os.listdir('utils'))
+from utils.dictionary import merge, head, head_body
+from endpoint.base import EndpointBase
+from utils.yaml import yaml_format
+from utils.fmt import *
+from config import CFG
+from ac import app
 
 class ListEndpoint(EndpointBase):
     def __init__(self, cfg, args):

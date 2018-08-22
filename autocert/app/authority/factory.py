@@ -4,11 +4,11 @@
 authority.factory
 '''
 
-from app.utils.fmt import *
-from app.exceptions import AutocertError
-from app.authority.digicert import DigicertAuthority
-from app.authority.letsencrypt import LetsEncryptAuthority
-from app.app import app
+from utils.fmt import *
+from exceptions import AutocertError
+from authority.digicert import DigicertAuthority
+from authority.letsencrypt import LetsEncryptAuthority
+from ac import app
 
 class AuthorityFactoryError(AutocertError):
     def __init__(self, authority):

@@ -10,13 +10,12 @@ from datetime import timedelta #FIXME: do we import this here?
 from whois import whois
 from tld import get_tld
 
-from app.authority.base import AuthorityBase
-from app.utils.dictionary import merge, body
-from app.utils.fmt import *
-from app.utils.newline import windows2unix
-from app.exceptions import AutocertError
-
-from app import app
+from authority.base import AuthorityBase
+from utils.dictionary import merge, body
+from utils.fmt import *
+from utils.newline import windows2unix
+from exceptions import AutocertError
+from ac import app
 
 def not_200(call):
     return call.recv.status != 200

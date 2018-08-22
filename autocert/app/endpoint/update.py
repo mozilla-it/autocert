@@ -7,12 +7,12 @@ autocert.update
 from pprint import pformat
 from attrdict import AttrDict
 
-from app.utils.fmt import *
-from app.utils.yaml import yaml_format
-from app.exceptions import AutocertError
-from app.endpoint.base import EndpointBase
-from app.app import app
-from app import blacklist
+from endpoint.base import EndpointBase
+from exceptions import AutocertError
+from utils.yaml import yaml_format
+from utils.fmt import *
+from ac import app
+import blacklist
 
 
 class MissingUpdateArgumentsError(AutocertError):

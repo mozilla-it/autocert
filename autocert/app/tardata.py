@@ -6,12 +6,12 @@ import glob
 
 from datetime import timedelta
 
-from app.utils import sift
-from app.utils import timestamp
-from app.cert import Cert
-from app.utils.fmt import *
-from app.utils.dictionary import merge, body
-from app.exceptions import AutocertError
+from utils import sift
+from utils import timestamp
+from cert import Cert
+from utils.fmt import *
+from utils.dictionary import merge, body
+from exceptions import AutocertError
 
 TIMEDELTA_ZERO = timedelta(0)
 

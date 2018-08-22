@@ -3,10 +3,10 @@
 
 from pprint import pformat
 
-from app.endpoint.base import EndpointBase
-from app.exceptions import AutocertError
-from app import blacklist
-from app.app import app
+from endpoint.base import EndpointBase
+from exceptions import AutocertError
+from ac import app
+import blacklist
 
 class RevokeEndpoint(EndpointBase):
     def __init__(self, cfg, verbosity):
