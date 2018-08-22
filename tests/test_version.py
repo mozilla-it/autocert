@@ -8,11 +8,9 @@ import inspect
 from ruamel import yaml
 from subprocess import check_output
 
-from utils.docstr import docstr
+from utils.function import docstr
+from utils.version import version
 from utils.json import jsonify
-
-from utils.version import get_version
-
 from main import app
 
 def test_version():
@@ -20,7 +18,7 @@ def test_version():
     expect:
         version: git describe
     '''
-    expect = {'version': get_version()}
+    expect = dict(version=version)
     client = app.test_client()
     client.testing = True
     result = client.get('/autocert/version')

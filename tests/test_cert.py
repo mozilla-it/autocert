@@ -7,7 +7,7 @@ import pytest
 from subprocess import check_output
 
 from utils.fmt import *
-from utils.cert import Cert
+from cert import Cert
 
 DIR = os.path.dirname(os.path.realpath(__file__))
 KEY = open(DIR+'/key').read()

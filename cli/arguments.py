@@ -6,8 +6,9 @@ cli.arguments: default arguments with the ability to override them
 import re
 
 from datetime import timedelta
-from utils.fmt import *
-from utils.dictionary import merge
+
+from cli.utils.dictionary import merge
+from cli.utils.fmt import *
 from cli.config import CFG
 
 CALLS_STYLE = [
@@ -193,6 +194,11 @@ ARGS = {
     ('--whois-check',): dict(
         action='store_true',
         help='enable the whois check'
+    ),
+    ('--no-version-check',): dict(
+        dest='version_check',
+        action='store_false',
+        help='toggle version check off'
     ),
     ('--expired',): dict(
         action='store_true',

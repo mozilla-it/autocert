@@ -7,16 +7,15 @@ utils.cert
 import os
 import copy
 
-from utils import tar
-from utils.fmt import *
-from utils.isinstance import *
-
-from utils.yaml import yaml_format, yaml_print
-from utils.dictionary import head, body, head_body, keys_ending
-from utils.exceptions import AutocertError
-
 from pprint import pprint
 from datetime import datetime
+
+from exceptions import AutocertError
+from utils.dictionary import head, body, head_body, keys_ending
+from utils.yaml import yaml_format, yaml_print
+from utils.isinstance import *
+from utils.fmt import *
+import tar
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
 

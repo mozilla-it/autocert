@@ -7,9 +7,8 @@ import itertools
 from pprint import pformat
 from attrdict import AttrDict
 
+from exceptions import AutocertError
 from utils.fmt import *
-from utils.exceptions import AutocertError
-
 from app import app
 
 class DestinationConnectivityError(AutocertError):

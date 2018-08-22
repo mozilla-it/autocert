@@ -7,10 +7,10 @@ import tarfile
 from io import BytesIO
 from ruamel import yaml
 
-from utils.fmt import *
-from utils.yaml import yaml_format
+from exceptions import AutocertError
 from utils.dictionary import merge
-from utils.exceptions import AutocertError
+from utils.yaml import yaml_format
+from utils.fmt import *
 
 FILETYPE = {
     '-----BEGIN RSA PRIVATE KEY-----':          '.key',

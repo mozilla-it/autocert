@@ -5,7 +5,6 @@ import os
 import re
 
 from flask import make_response, jsonify
-
 from pprint import pprint, pformat
 from attrdict import AttrDict
 from fnmatch import fnmatch
@@ -13,18 +12,16 @@ from ruamel import yaml
 from json import dumps
 from flask import jsonify
 
-from tardata import Tardata
-from authority.factory import create_authority
 from destination.factory import create_destination
+from authority.factory import create_authority
 from utils.asyncrequests import AsyncRequests
-from utils import timestamp
-
-from utils import tar
-from utils.fmt import *
 from utils.dictionary import merge, head, head_body
-
-from app import app
+from utils import timestamp
+from utils.fmt import *
+from tardata import Tardata
 from config import CFG
+from app import app
+import tar
 
 class EndpointBase(object):
     _sorting_funcs = dict(
