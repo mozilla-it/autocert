@@ -9,23 +9,25 @@ import sys
 from doit import get_var
 from ruamel import yaml
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'api')))
-from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+REPOROOT = os.path.dirname(os.path.abspath(__file__))
+PROJDIR = REPOROOT
+APPDIR = PROJDIR + '/api'
+TESTDIR = PROJDIR + '/tests'
+UTILSDIR = REPOROOT + '/repos/utils'
+LOGDIR = REPOROOT + '/oldlogs'
 
-from utils.fmt import *
-from utils.shell import call
-from utils.timestamp import utcnow, datetime2int
-
-DIR = os.path.dirname(os.path.abspath(__file__))
 UID = os.getuid()
 GID = pwd.getpwuid(UID).pw_gid
 USER = pwd.getpwuid(UID).pw_name
 ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
-LOGDIR = DIR + '/oldlogs'
 
-PROJDIR = DIR
-APPDIR = PROJDIR + '/api'
-TESTDIR = PROJDIR + '/tests'
+sys.path.insert(0, APPDIR)
+from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+
+sys.path.insert(0, UTILSDIR)
+from utils.fmt import *
+from utils.shell import call
+from utils.timestamp import utcnow, datetime2int
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
