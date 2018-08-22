@@ -23,15 +23,14 @@ except ImportError as ie:
 
 from cli.utils.importer import import_modules
 from cli.utils.version import get_version as get_cli_version
-from utils.dictionary import dictify
-from utils.url import validate
+from cli.utils.dictionary import dictify
+from cli.utils.url import validate
 from cli.utils.yaml import yaml_print
-from cli.utils.fmt import fmt, pfmt
 from cli.namespace import jsonify
-from cli import requests
 from cli.arguments import add_argument
-
+from cli.utils.fmt import *
 from cli.config import CFG
+from cli import requests
 
 LOC = [
     'cli',
@@ -173,6 +172,7 @@ def main():
         help='default="%(default)s"; set the timeout used in connectivity check')
 
     add_argument(parser, '-n', '--nerf')
+    add_argument(parser, '--no-version-check')
 
     parser.set_defaults(**CFG)
     ns, rem = parser.parse_known_args()
@@ -183,7 +183,8 @@ def main():
     version = AttrDict(
         cli=get_cli_version().split('-')[0],
         api=fetch_api_version(ns))
-    version_check(version)
+    if ns.version_check:
+        version_check(version)
 
     if ns.version:
         output_print({'{version}-version'.format(**ns.__dict__): version[ns.version]}, ns.output)
