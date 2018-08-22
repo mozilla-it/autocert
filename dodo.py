@@ -4,13 +4,16 @@
 import os
 import re
 import pwd
+import sys
 
 from doit import get_var
 from ruamel import yaml
 
-from api.config import _update_config, CONFIG_YML, DOT_CONFIG_YML
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'api')))
+from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
 
 from utils.fmt import *
+from utils.shell import call
 from utils.timestamp import utcnow, datetime2int
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +21,11 @@ UID = os.getuid()
 GID = pwd.getpwuid(UID).pw_gid
 USER = pwd.getpwuid(UID).pw_name
 ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
-LOGDIR='oldlogs'
+LOGDIR = DIR + '/oldlogs'
+
+PROJDIR = DIR
+APPDIR = PROJDIR + '/api'
+TESTDIR = PROJDIR + '/tests'
 
 MINIMUM_DOCKER_COMPOSE_VERSION = '1.6'
 
@@ -127,14 +134,14 @@ def task_dockercompose():
     '''
     assert docker-compose version ({0}) or higher
     '''
-    from utils.function import format_docstr
-    format_docstr(task_dockercompose, MINIMUM_DOCKER_COMPOSE_VERSION)
+    from utils.function import docstr
+    docstr(MINIMUM_DOCKER_COMPOSE_VERSION)
     def check_docker_compose():
         import re
         from subprocess import check_output
         from packaging.version import parse as version_parse
         pattern = '(docker-compose version) ([0-9.]+(-rc[0-9])?)(, build [a-z0-9]+)'
-        output = check_output('docker-compose --version', shell=True).decode('utf-8').strip()
+        output = call('docker-compose --version')[1].strip()
         regex = re.compile(pattern)
         match = regex.search(output)
         version = match.groups()[1]
@@ -183,8 +190,8 @@ def task_test():
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip3 install --upgrade pip',
-            'venv/bin/pip install -r api/requirements.txt',
-            'venv/bin/pip install -r tests/requirements.txt',
+            fmt('venv/bin/pip3 install -r {PROJDIR}/requirements.txt'),
+            fmt('venv/bin/pip3 install -r {TESTDIR}/requirements.txt'),
             fmt('{ENVS} venv/bin/pytest -s -vv tests/'),
         ],
     }
@@ -195,7 +202,7 @@ def task_version():
     '''
     return {
         'actions': [
-            'git describe --abbrev=7 | xargs echo -n > api/VERSION',
+            fmt('git describe --abbrev=7 | xargs echo -n > {APPDIR}/VERSION'),
         ],
     }
 
@@ -212,7 +219,7 @@ def task_savelogs():
         ],
         'actions': [
             fmt('mkdir -p {LOGDIR}'),
-            fmt('docker-compose logs > {LOGDIR}/{timestamp}.log'),
+            fmt('cd {PROJDIR} && docker-compose logs > {LOGDIR}/{timestamp}.log'),
         ]
     }
 
@@ -221,9 +228,9 @@ def task_environment():
     set the env vars to be used inside of the container
     '''
     def add_env_vars():
-        print('docker-compose.yml.wo-envs -> docker-compose.yml')
+        pfmt('{PROJDIR}/docker-compose.yml.wo-envs -> {PROJDIR}/docker-compose.yml')
         print('adding env vars to docker-compose.yml file')
-        dcy = yaml.safe_load(open('docker-compose.yml.wo-envs'))
+        dcy = yaml.safe_load(open(fmt('{PROJDIR}/docker-compose.yml.wo-envs')))
         for svc in dcy['services'].keys():
             envs = dcy['services'][svc].get('environment', [])
             envs += get_user_uid_gid()
@@ -232,7 +239,7 @@ def task_environment():
             for env in envs:
                 pfmt('  - {env}')
             dcy['services'][svc]['environment'] = envs
-        with open('docker-compose.yml', 'w') as f:
+        with open(fmt('{PROJDIR}/docker-compose.yml'), 'w') as f:
             yaml.dump(dcy, f, default_flow_style=False)
 
     return {
@@ -260,8 +267,8 @@ def task_deploy():
             'savelogs',
         ],
         'actions': [
-            'docker-compose build',
-            fmt('docker-compose up --remove-orphans -d'),
+            fmt('cd {PROJDIR} docker-compose build'),
+            fmt('cd {PROJDIR} && docker-compose up --remove-orphans -d'),
         ],
     }
 
@@ -361,7 +368,7 @@ def task_tidy():
     TIDY_FILES = [
         '.doit.db/',
         'venv/',
-        'api/VERSION',
+        '{APPDIR}/VERSION',
     ]
     return {
         'actions': [

@@ -11,10 +11,8 @@ from pdb import set_trace as breakpoint
 from pprint import pformat
 
 from endpoint.factory import create_endpoint
-from utils.version import get_version as get_api_version
+from exceptions import AutocertError
 from utils.fmt import *
-from utils.exceptions import AutocertError
-
 from app import app
 
 STATUS_CODES = {
@@ -91,8 +89,8 @@ def version():
         request.method,
         request.path,
         args)
-    version = get_api_version()
-    return jsonify({'version': version})
+    from utils.version import version
+    return jsonify(dict(version=version))
 
 @app.route('/autocert/config', methods=['GET'])
 def config():

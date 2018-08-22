@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import os
+
+from exceptions import AutocertError
 from utils import sift
 from utils.fmt import *
-
-from utils.exceptions import AutocertError
 
 try:
     thisdir = os.path.dirname(os.path.abspath(__file__))

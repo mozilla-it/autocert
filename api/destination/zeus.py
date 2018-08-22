@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from destination.base import DestinationBase, DestinationConnectivityError
-from config import CFG
+from asyncio import TimeoutError
+from aiohttp import ClientConnectorError
 
+from destination.base import DestinationBase, DestinationConnectivityError
+from exceptions import AutocertError
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
 from utils.yaml import yaml_format
 from utils.fmt import *
-from utils.exceptions import AutocertError
-
-from asyncio import TimeoutError
-from aiohttp import ClientConnectorError
-
+from config import CFG
 from app import app
 
 ZEUS_PATH = 'ssl/server_keys/'

@@ -11,11 +11,10 @@ from whois import whois
 from tld import get_tld
 
 from authority.base import AuthorityBase
+from exceptions import AutocertError
 from utils.dictionary import merge, body
-from utils.fmt import *
 from utils.newline import windows2unix
-from utils.exceptions import AutocertError
-
+from utils.fmt import *
 from app import app
 
 def not_200(call):

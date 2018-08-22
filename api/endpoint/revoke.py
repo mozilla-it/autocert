@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pprint import pformat
-from utils import blacklist
-from utils.exceptions import AutocertError
-
-from app import app
-
 from endpoint.base import EndpointBase
+from exceptions import AutocertError
+from pprint import pformat
+from app import app
+import blacklist
 
 class RevokeEndpoint(EndpointBase):
     def __init__(self, cfg, verbosity):
