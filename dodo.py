@@ -173,12 +173,14 @@ def task_pull():
     test = '`git diff-index --quiet HEAD --`'
     pull = 'git pull --rebase'
     update = 'git submodule update --remote'
-    dirty = fmt('echo "refusing to \'{pull}\' because the tree is dirty"')
+    dirty = 'echo "refusing to \'{cmd}\' because the tree is dirty"'
+    dirty_pull = fmt(dirty, cmd=pull)
+    dirty_update = fmt(dirty, cmd=update)
 
     yield {
         'name': 'mozilla-it/autocert',
         'actions': [
-            fmt('if {test}; then {pull}; else {dirty}; exit 1; fi'),
+            fmt('if {test}; then {pull}; else {dirty_pull}; exit 1; fi'),
         ],
     }
 
@@ -186,7 +188,7 @@ def task_pull():
         yield {
             'name': submod,
             'actions': [
-                fmt('cd {submod} && if {test}; then {update}; else {dirty}; exit 1; fi'),
+                fmt('cd {submod} && if {test}; then {update}; else {dirty_update}; exit 1; fi'),
             ],
         }
 
