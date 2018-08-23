@@ -269,7 +269,7 @@ def task_deploy():
             'savelogs',
         ],
         'actions': [
-            fmt('cd {PROJDIR} docker-compose build'),
+            fmt('cd {PROJDIR} && docker-compose build'),
             fmt('cd {PROJDIR} && docker-compose up --remove-orphans -d'),
         ],
     }
@@ -362,6 +362,21 @@ def task_example():
             lambda: _update_config(CONFIG_YML+'.example', yaml.safe_load(punch)),
         ],
     }
+
+def task_rmcache():
+    '''
+    recursively delete python cache files
+    '''
+    return dict(
+        actions=[
+            'find cli/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
+            'find cli/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+            'find api/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
+            'find api/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+            'find tests/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
+            'find tests/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+        ]
+    )
 
 def task_tidy():
     '''

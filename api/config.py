@@ -17,7 +17,6 @@ from utils.fmt import *
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
 DOT_CONFIG_YML = '{0}/.config.yml'.format(CONFIG_DIR)
-
 IP_PATTERN = '[0-9]{1,3}(.[0-9]{1,3}){3}'
 
 class ConfigLoadError(AutocertError):
@@ -73,7 +72,7 @@ def _load_config(filename=DOT_CONFIG_YML, roundtrip=False, fixup=True):
             if fixup:
                 cfg = _fixup(cfg)
         except Exception as ex:
-            print('ex =', ex)
+            dbg(ex)
             raise ConfigLoadError(filename, errors=[ex])
     return AttrDict(cfg)
 
