@@ -315,7 +315,7 @@ def task_config():
     write config.yml -> .config.yml
     '''
     log_level = 'WARNING'
-    filename = '{0}/LOG_LEVEL'.format(os.path.dirname(__file__))
+    filename = REPOROOT + '/LOG_LEVEL'
     if os.path.isfile(filename):
         log_level = open(filename).read().strip()
     log_level = get_var('LOG_LEVEL', log_level)
