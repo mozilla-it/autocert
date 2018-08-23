@@ -1,4 +1,4 @@
 [submodule "api/utils"]
 	path = api/utils
-	url = ssh://git@github.com/scottidler/utils
+	url = https://github.com/scottidler/utils
 	branch = master
