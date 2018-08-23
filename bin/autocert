@@ -5,11 +5,23 @@
 """Convenience wrapper for running cli directly from source tree."""
 
 import os
+import re
 import sys
+sys.dont_write_bytecode = True
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+SCRIPT_FILE = os.path.abspath(__file__)
+SCRIPT_NAME = os.path.basename(SCRIPT_FILE)
+SCRIPT_PATH = os.path.dirname(SCRIPT_FILE)
+PROJ_PATH = os.path.join(SCRIPT_PATH, '../autocert')
+if os.path.islink(__file__):
+    REAL_FILE = os.path.abspath(os.readlink(__file__))
+    REAL_NAME = os.path.basename(REAL_FILE)
+    REAL_PATH = os.path.dirname(REAL_FILE)
+    PROJ_PATH = os.path.join(REAL_PATH, '../autocert')
+
+sys.path.insert(0, PROJ_PATH)
 
 from cli.cli import main
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

@@ -10,9 +10,10 @@ from doit import get_var
 from ruamel import yaml
 
 REPOROOT = os.path.dirname(os.path.abspath(__file__))
-PROJDIR = REPOROOT
+PROJDIR = REPOROOT + '/autocert'
 APPDIR = PROJDIR + '/api'
-TESTDIR = PROJDIR + '/tests'
+CLIDIR = PROJDIR + '/cli'
+TESTDIR = REPOROOT + '/tests' #FIXME: PROJDIR?
 UTILSDIR = REPOROOT + '/repos/utils'
 LOGDIR = REPOROOT + '/oldlogs'
 
@@ -43,7 +44,7 @@ DOIT_CONFIG = {
 }
 
 ENVS = ' '.join([
-    'PYTHONPATH=.:api:$PYTHONPATH',
+    'PYTHONPATH=.:autocert:autocert/api:$PYTHONPATH',
 ])
 
 class UnknownPkgmgrError(Exception):
@@ -204,9 +205,9 @@ def task_test():
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip3 install --upgrade pip',
-            fmt('venv/bin/pip3 install -r {PROJDIR}/requirements.txt'),
+            fmt('venv/bin/pip3 install -r {REPOROOT}/requirements.txt'),
             fmt('venv/bin/pip3 install -r {TESTDIR}/requirements.txt'),
-            fmt('{ENVS} venv/bin/pytest -s -vv tests/'),
+            fmt('{ENVS} venv/bin/python3 -m pytest -s -vv tests/api'),
         ],
     }
 
@@ -320,7 +321,7 @@ def task_logs():
     '''
     return {
         'actions': [
-            'docker-compose logs',
+            fmt('cd {PROJDIR} && docker-compose logs'),
         ],
     }
 
@@ -329,7 +330,7 @@ def task_config():
     write config.yml -> .config.yml
     '''
     log_level = 'WARNING'
-    filename = REPOROOT + '/LOG_LEVEL'
+    filename = PROJDIR + '/LOG_LEVEL'
     if os.path.isfile(filename):
         log_level = open(filename).read().strip()
     log_level = get_var('LOG_LEVEL', log_level)

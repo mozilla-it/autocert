@@ -201,6 +201,9 @@ class DigicertAuthority(AuthorityBase):
                 return True
             elif get_fld('http://'+domain) in active_domains:
                 return True
+            else: #FIXME: this should be removed
+                tld = get_tld('http://'+domain)
+                dbg(domain, 'nor', tld, 'not in', active_domains)
             return False
         def _whois_email(domain):
             app.logger.debug(fmt('_whois_email:\n{locals}'))

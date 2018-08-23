@@ -58,6 +58,15 @@ STATUS_CODES = {
     511: 'network authentication required',
 }
 
+LOGGING_LEVELS = {
+    0: 'NOTSET',
+    10: 'DEBUG',
+    20: 'INFO',
+    30: 'WARN',
+    40: 'ERROR',
+    50: 'FATAL',
+}
+
 class EmptyJsonError(AutocertError):
     def __init__(self, json):
         message = fmt('empty json error ={0}', json)
@@ -65,14 +74,16 @@ class EmptyJsonError(AutocertError):
 
 @app.before_first_request
 def initialize():
+    from logging import getLogger
     from logging.config import dictConfig
     from config import CFG
     if sys.argv[0] != 'venv/bin/pytest':
         dictConfig(CFG.logging)     #3
+        LEVEL = LOGGING_LEVELS[getLogger('api').getEffectiveLevel()]
         PID = os.getpid()
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
-        app.logger.info(fmt('starting api with pid={PID}, ppid={PPID} by user={USER}'))
+        pfmt('starting api with log level={LEVEL}, pid={PID}, ppid={PPID} by user={USER}')
 
 def log_request(user, hostname, ip, method, path, json):
     app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with json=\n"{json}"'))

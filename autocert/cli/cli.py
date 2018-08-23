@@ -131,7 +131,7 @@ def do_request(ns):
         return -1
     return status
 
-def main():
+def main(args):
     parser = ArgumentParser(
         add_help=False)
     parser.add_argument(
@@ -175,7 +175,7 @@ def main():
     add_argument(parser, '--no-version-check')
 
     parser.set_defaults(**CFG)
-    ns, rem = parser.parse_known_args()
+    ns, rem = parser.parse_known_args(args)
 
     config = AttrDict(
         cli=dict(CFG),
@@ -201,7 +201,7 @@ def main():
     add_subparsers(parser, config.api)
     parser.set_defaults(**CFG)
 
-    ns = parser.parse_args()
+    ns = parser.parse_args(rem)
     if ns.nerf:
         output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)

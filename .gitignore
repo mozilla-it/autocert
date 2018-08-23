@@ -92,20 +92,20 @@ ENV/
 .doit.db
 
 # prevent version file from being checked in
-api/VERSION
+autocert/api/VERSION
 
 # prevent blacklist file from being checked in
-api/BLACKLIST
+autocert/api/BLACKLIST
 
 # prevent default default LOG_LEVEL file from being checked in
 LOG_LEVEL
 
 # prevent secrets config.yml file from being checked in
-api/config.yml
-api/.config.yml
+autocert/api/config.yml
+autocert/api/.config.yml
 
 # prevent apikey files from being checked in
-api/*apikey.yml
+autocert/api/*apikey.yml
 
 # skip .bak files
 *.bak
