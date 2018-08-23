@@ -169,14 +169,26 @@ def task_pull():
     '''
     do a safe git pull
     '''
+    submods = call("git submodule status | awk '{print $2}'")[1].split()
     test = '`git diff-index --quiet HEAD --`'
     pull = 'git pull --rebase'
+    update = 'git submodule update --remote'
     dirty = fmt('echo "refusing to \'{pull}\' because the tree is dirty"')
-    return {
+
+    yield {
+        'name': 'mozilla-it/autocert',
         'actions': [
             fmt('if {test}; then {pull}; else {dirty}; exit 1; fi'),
         ],
     }
+
+    for submod in submods:
+        yield {
+            'name': submod,
+            'actions': [
+                fmt('cd {submod} && if {test}; then {update}; else {dirty}; exit 1; fi'),
+            ],
+        }
 
 def task_test():
     '''
