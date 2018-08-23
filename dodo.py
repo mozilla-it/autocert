@@ -23,8 +23,6 @@ ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
 
 sys.path.insert(0, APPDIR)
 from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
-
-sys.path.insert(0, UTILSDIR)
 from utils.fmt import *
 from utils.shell import call
 from utils.timestamp import utcnow, datetime2int
