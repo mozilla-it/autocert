@@ -8,7 +8,7 @@ from pprint import pprint, pformat
 from fnmatch import fnmatch
 from datetime import timedelta #FIXME: do we import this here?
 from whois import whois
-from tld import get_tld
+from tld import get_fld
 
 from authority.base import AuthorityBase
 from exceptions import AutocertError
@@ -67,7 +67,7 @@ class DigicertError(AutocertError):
         super(DigicertError, self).__init__(message)
 
 def domain_to_check(domain):
-    return domain if domain.startswith('*.') else get_tld('http://'+domain)
+    return domain if domain.startswith('*.') else get_fld('http://'+domain)
 
 def expiryify(call):
     from utils.timestamp import string2datetime
@@ -199,7 +199,7 @@ class DigicertAuthority(AuthorityBase):
             app.logger.debug(fmt('_is_validated:\n{locals}'))
             if domain in active_domains:
                 return True
-            elif get_tld('http://'+domain) in active_domains:
+            elif get_fld('http://'+domain) in active_domains:
                 return True
             return False
         def _whois_email(domain):
