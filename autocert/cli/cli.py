@@ -8,7 +8,8 @@ import os
 import imp
 import sys
 import logging
-from json import JSONDecodeError, dumps
+from json import dumps
+from simplejson.errors import JSONDecodeError
 from subprocess import check_output
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 
