@@ -17,10 +17,13 @@ TESTDIR = REPOROOT + '/tests' #FIXME: PROJDIR?
 UTILSDIR = REPOROOT + '/repos/utils'
 LOGDIR = REPOROOT + '/oldlogs'
 
-UID = os.getuid()
-GID = pwd.getpwuid(UID).pw_gid
-USER = pwd.getpwuid(UID).pw_name
-ENV=dict(AC_UID=UID, AC_GID=GID, AC_USER=USER)
+AC_UID = os.getuid()
+AC_GID = pwd.getpwuid(AC_UID).pw_gid
+AC_USER = pwd.getpwuid(AC_UID).pw_name
+AC_APP_PORT=os.environ.get('AC_APP_PORT', 8000)
+AC_APP_TIMEOUT=os.environ.get('AC_APP_TIMEOUT', 120)
+AC_APP_WORKERS=os.environ.get('AC_APP_WORKERS', 2)
+AC_APP_MODULE=os.environ.get('AC_APP_MODULE', 'main:app')
 
 sys.path.insert(0, APPDIR)
 from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
@@ -43,19 +46,19 @@ DOIT_CONFIG = {
     'verbosity': 2,
 }
 
-ENVS = ' '.join([
-    'PYTHONPATH=.:autocert:autocert/api:$PYTHONPATH',
-])
-
 class UnknownPkgmgrError(Exception):
     def __init__(self):
         super(UnknownPkgmgrError, self).__init__('unknown pkgmgr!')
 
-def get_user_uid_gid():
+def get_ac_envs():
     return [
-        fmt('AC_USER={USER}'),
-        fmt('AC_UID={UID}'),
-        fmt('AC_GID={GID}'),
+        fmt('AC_UID={AC_UID}'),
+        fmt('AC_GID={AC_GID}'),
+        fmt('AC_USER={AC_USER}'),
+        fmt('AC_APP_PORT={AC_APP_PORT}'),
+        fmt('AC_APP_TIMEOUT={AC_APP_TIMEOUT}'),
+        fmt('AC_APP_WORKERS={AC_APP_WORKERS}'),
+        fmt('AC_APP_MODULE={AC_APP_MODULE}'),
     ]
 
 def get_env_vars(regex=None):
@@ -197,6 +200,7 @@ def task_test():
     '''
     setup venv and run pytest
     '''
+    PYTHONPATH = 'PYTHONPATH=.:autocert:autocert/api:$PYTHONPATH'
     return {
         'task_dep': [
             'noroot',
@@ -207,7 +211,7 @@ def task_test():
             'venv/bin/pip3 install --upgrade pip',
             fmt('venv/bin/pip3 install -r {REPOROOT}/requirements.txt'),
             fmt('venv/bin/pip3 install -r {TESTDIR}/requirements.txt'),
-            fmt('{ENVS} venv/bin/python3 -m pytest -s -vv tests/api'),
+            fmt('{PYTHONPATH} venv/bin/python3 -m pytest -s -vv tests/api'),
         ],
     }
 
@@ -248,7 +252,7 @@ def task_environment():
         dcy = yaml.safe_load(open(fmt('{PROJDIR}/docker-compose.yml.wo-envs')))
         for svc in dcy['services'].keys():
             envs = dcy['services'][svc].get('environment', [])
-            envs += get_user_uid_gid()
+            envs += get_ac_envs()
             envs += get_env_vars(re.compile('(no|http|https)_proxy', re.IGNORECASE))
             pfmt('{svc}:')
             for env in envs:
