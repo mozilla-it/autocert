@@ -1,19 +1,21 @@
 version: '2'
 services:
-    nginx:
-        build: ./nginx
+    api:
+        network_mode: host
         restart: always
+        build: ./api
+        expose:
+          - "8000"
+        volumes:
+          - /data/autocert:/data/autocert
+        entrypoint: /usr/src/app/entrypoint.sh
+    nginx:
+        network_mode: host
+        restart: always
+        build: ./nginx
         ports:
           - "80:80"
         volumes_from:
           - api
-        links:
+        depends_on:
           - api
-    api:
-        build: ./api
-        restart: always
-        ports:
-          - "8000:8000"
-        volumes:
-          - /data/autocert:/data/autocert
-        entrypoint: /usr/src/app/entrypoint.sh
