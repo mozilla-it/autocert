@@ -197,13 +197,13 @@ class DigicertAuthority(AuthorityBase):
         active_domains = [ad.name for ad in active_domains]
         def _is_validated(domain):
             app.logger.debug(fmt('_is_validated:\n{locals}'))
+            fld = get_fld('http://'+domain)
             if domain in active_domains:
                 return True
-            elif get_fld('http://'+domain) in active_domains:
+            elif fld in active_domains:
                 return True
             else: #FIXME: this should be removed
-                tld = get_tld('http://'+domain)
-                dbg(domain, 'nor', tld, 'not in', active_domains)
+                dbg(domain, 'nor', fld, 'in', active_domains)
             return False
         def _whois_email(domain):
             app.logger.debug(fmt('_whois_email:\n{locals}'))
