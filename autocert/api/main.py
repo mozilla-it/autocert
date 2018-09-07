@@ -13,6 +13,7 @@ from pprint import pformat
 from endpoint.factory import create_endpoint
 from exceptions import AutocertError
 from utils.fmt import *
+from config import CFG
 from app import app
 
 STATUS_CODES = {
@@ -74,12 +75,9 @@ class EmptyJsonError(AutocertError):
 
 @app.before_first_request
 def initialize():
-    from logging import getLogger
-    from logging.config import dictConfig
-    from config import CFG
     if sys.argv[0] != 'venv/bin/pytest':
-        dictConfig(CFG.logging)     #3
-        LEVEL = LOGGING_LEVELS[getLogger('api').getEffectiveLevel()]
+        #LEVEL = LOGGING_LEVELS[app.logger.getEffectiveLevel()]
+        LEVEL = CFG.logging.loggers.api.level
         PID = os.getpid()
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
