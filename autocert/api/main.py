@@ -133,9 +133,11 @@ def route():
         endpoint = create_endpoint(request.method, cfg, args)
         json, status = endpoint.execute()
     except AutocertError as ae:
+        dbg(ae)
         status = 500
         json = dict(errors={ae.name: ae.message})
     except Exception as ex:
+        dbg(ex)
         status = 500
         json = dict(errors={ex.__class__.__name__: sys.exc_info()[0]})
     if not json:
