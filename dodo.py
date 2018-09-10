@@ -10,7 +10,8 @@ from doit import get_var
 from ruamel import yaml
 
 REPOROOT = os.path.dirname(os.path.abspath(__file__))
-PROJDIR = REPOROOT + '/autocert'
+PROJNAME = 'autocert'
+PROJDIR = REPOROOT + '/' + PROJNAME
 APPDIR = PROJDIR + '/api'
 CLIDIR = PROJDIR + '/cli'
 TESTDIR = REPOROOT + '/tests' #FIXME: PROJDIR?
@@ -462,6 +463,23 @@ def task_zeus():
             'actions': [fmt('docker run -d --name {container} {image}')],
             'uptodate': [fmt('[ -n "`docker ps -q -f name={container}`" ] && exit 0 || exit 1')]
         }
+
+def task_stop():
+    '''
+    stop running autocert containers
+    '''
+    def check_docker_ps():
+        cmd = 'docker ps --format "{{.Names}}" | grep ' + PROJNAME + ' | { grep -v grep || true; }'
+        out = call(cmd, throw=True)[1]
+        return out.split('\n') if out else []
+    return {
+        'actions': [
+            fmt('docker rm -f {containers}', containers=' '.join(check_docker_ps())),
+        ],
+        'uptodate': [
+            lambda: len(check_docker_ps()) == 0,
+        ],
+    }
 
 if __name__ == '__main__':
     print('should be run with doit installed')
