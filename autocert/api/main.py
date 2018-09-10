@@ -76,7 +76,6 @@ class EmptyJsonError(AutocertError):
 @app.before_first_request
 def initialize():
     if sys.argv[0] != 'venv/bin/pytest':
-        #LEVEL = LOGGING_LEVELS[app.logger.getEffectiveLevel()]
         LEVEL = CFG.logging.loggers.api.level
         PID = os.getpid()
         PPID = os.getppid()
