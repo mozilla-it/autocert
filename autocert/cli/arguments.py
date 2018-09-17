@@ -230,6 +230,10 @@ ARGS = {
         nargs='+',
         help='default="%(default)s"; <domain-name>; glob expressions also accepted'
     ),
+    ('bundle_name',): dict(
+        metavar='bundle-name',
+        help='name of the tar bundle in format <domain>@<hash>.tar.gz'
+    ),
     ('-c', '--bundle-host'): dict(
         metavar='bundle-host',
         help='default="%(default)s"; set the host where the tar bundles are stored'
@@ -238,11 +242,7 @@ ARGS = {
         dest='from_to',
         metavar=('from', 'to'),
         nargs=2,
-        help='provide the from and to to be used with gpg signing'
-    ),
-    ('bundle_name',): dict(
-        metavar='bundle-name',
-        help='name of the tar bundle in format <domain>@<hash>.tar.gz'
+        help='provide the from and to to be used with gpg signing; note: will delete local bundle'
     ),
 }
 
