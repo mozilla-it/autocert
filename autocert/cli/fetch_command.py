@@ -28,6 +28,6 @@ def do_fetch(ns):
 def add_parser(subparsers, api_config):
     parser = subparsers.add_parser('fetch')
     add_argument(parser, '-c', '--bundle-host', default=urlparse(CFG.api_url).hostname)
-    add_argument(parser, '-s', '--encrypt')
+    add_argument(parser, '-e', '--encrypt')
     add_argument(parser, 'bundle_name')
     parser.set_defaults(func=do_fetch)

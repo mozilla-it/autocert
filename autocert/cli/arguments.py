@@ -258,7 +258,7 @@ ARGS = {
         metavar='bundle-host',
         help='default="%(default)s"; set the host where the tar bundles are stored'
     ),
-    ('-s', '--encrypt'): dict(
+    ('-e', '--encrypt'): dict(
         dest='from_to',
         metavar=('from', 'to'),
         action=EncryptAction,
