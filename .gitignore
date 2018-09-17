@@ -113,6 +113,9 @@ autocert/api/*apikey.yml
 # skip .swp files
 *.swp
 
+#skip .gpg files
+*.gpg
+
 digitool.py
 
 #prevent checking in old logs that are generated on each deploy

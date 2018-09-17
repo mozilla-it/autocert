@@ -36,16 +36,21 @@ STATUS_TYPES = [
 ]
 
 class WrongBugFormatError(Exception):
-    def __init__(self, bug):
-        msg = fmt('WrongBugFormatError: bug should be 7-8 digits long but was, {bug}')
+    def __init__(self, string):
+        msg = fmt('WrongBugFormatError: bug should be 7-8 digits long but was, {string}')
         super(WrongBugFormatError, self).__init__(msg)
 
-def bug_type(bug):
+class WrongPgpFingerprintFormatError(Exception):
+    def __init__(self, string):
+        msg = fmt('WrongPgpFingerprintFormatError: pgp fingerprint should be 40 hex characters long; {string} does not match')
+        super(WrongPgpFingerprintFormatError, self).__init__(msg)
+
+def bug_type(string):
     pattern = '\d{7,8}'
     regex = re.compile(pattern)
-    if regex.match(bug):
-        return bug
-    raise WrongBugFormatError(bug)
+    if regex.match(string):
+        return string
+    raise WrongBugFormatError(string)
 
 def organization_type(string):
     if string == 'f':
@@ -54,7 +59,22 @@ def organization_type(string):
         return 'Mozilla Corporation'
     return string
 
+def pgp_fingerprint(string):
+    pattern = '[A-Fa-f0-9]{40}'
+    regex = re.compile(pattern)
+    if regex.match(string):
+        return string
+    raise WrongPgpFingerprintFormatError(string)
+
 from argparse import Action
+
+class EncryptAction(Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        sign_from = pgp_fingerprint(values[0])
+        sign_to = pgp_fingerprint(values[1])
+        setattr(namespace, 'sign_from', sign_from)
+        setattr(namespace, 'sign_to', sign_to)
+        setattr(namespace, 'encrypt', True)
 
 class SansAction(Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -238,11 +258,12 @@ ARGS = {
         metavar='bundle-host',
         help='default="%(default)s"; set the host where the tar bundles are stored'
     ),
-    ('-s', '--sign'): dict(
+    ('-s', '--encrypt'): dict(
         dest='from_to',
         metavar=('from', 'to'),
+        action=EncryptAction,
         nargs=2,
-        help='provide the from and to to be used with gpg signing; note: will delete local bundle'
+        help='provide the pgp fingerprint long id <from> and <to> to be used with gpg encrypt and signing; note: will result in encrypted bundle only'
     ),
 }
 
