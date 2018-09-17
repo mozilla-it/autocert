@@ -12,7 +12,7 @@ from cli.utils.shell import call
 from cli.utils.fmt import *
 from cli.config import CFG
 
-def fetch(ns):
+def do_fetch(ns):
     bundle_path = '/data/autocert/certs'
     src = fmt('{bundle_host}:{bundle_path}/{bundle_name}', **ns.__dict__)
     dst = os.getcwd()
@@ -30,4 +30,4 @@ def add_parser(subparsers, api_config):
     add_argument(parser, '-c', '--bundle-host', default=urlparse(CFG.api_url).hostname)
     add_argument(parser, '-s', '--encrypt')
     add_argument(parser, 'bundle_name')
-    parser.set_defaults(func=fetch)
+    parser.set_defaults(func=do_fetch)

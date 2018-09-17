@@ -199,6 +199,7 @@ def main(args):
         description=__doc__,
         formatter_class=RawDescriptionHelpFormatter)
 
+    parser.set_defaults(func=do_request)
     add_subparsers(parser, config.api)
     parser.set_defaults(**CFG)
 
@@ -207,10 +208,7 @@ def main(args):
         output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)
 
-    if ns.func:
-        status = ns.func(ns)
-    else:
-        status = do_request(ns)
+    status = ns.func(ns)
 
     if status not in (200, 201, 202, 203, 204, 205):
         return status
