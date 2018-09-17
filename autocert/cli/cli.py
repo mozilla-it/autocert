@@ -207,7 +207,10 @@ def main(args):
         output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)
 
-    status = do_request(ns)
+    if ns.func:
+        status = ns.func(ns)
+    else:
+        status = do_request(ns)
 
     if status not in (200, 201, 202, 203, 204, 205):
         return status

@@ -229,7 +229,21 @@ ARGS = {
         metavar='domain-name',
         nargs='+',
         help='default="%(default)s"; <domain-name>; glob expressions also accepted'
-    )
+    ),
+    ('-c', '--bundle-host'): dict(
+        metavar='bundle-host',
+        help='default="%(default)s"; set the host where the tar bundles are stored'
+    ),
+    ('-s', '--sign'): dict(
+        dest='from_to',
+        metavar=('from', 'to'),
+        nargs=2,
+        help='provide the from and to to be used with gpg signing'
+    ),
+    ('bundle_name',): dict(
+        metavar='bundle-name',
+        help='name of the tar bundle in format <domain>@<hash>.tar.gz'
+    ),
 }
 
 # they can be overridden by supplying kwargs to this function
