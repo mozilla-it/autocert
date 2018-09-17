@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 '''
-cli.ls
+cli.query
 '''
 
 from cli.arguments import add_argument, get_authorities, get_destinations
