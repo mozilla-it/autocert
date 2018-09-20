@@ -7,14 +7,22 @@ import requests
 import getpass
 import platform
 
+from urllib.parse import urlparse
+
+from cli.utils.fmt import *
+
 USER = getpass.getuser()
 HOSTNAME = platform.node()
 
 def request(method, url, json=None, **kwargs):
+    hostname = urlparse(str(url)).hostname
+    verify = hostname not in ('0.0.0.0', 'localhost')
     json = json if json else {}
     json['user'] = USER
     json['hostname'] = HOSTNAME
-    return requests.request(method, url, json=json, **kwargs)
+    if not verify:
+        requests.packages.urllib3.disable_warnings()
+    return requests.request(method, url, json=json, verify=verify, **kwargs)
 
 def get(url, **kwargs):
     return request('GET', url, **kwargs)

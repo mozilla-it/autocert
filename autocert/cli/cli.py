@@ -65,7 +65,7 @@ class VersionCheckFailedError(Exception):
 
 class FetchApiConfigError(Exception):
     def __init__(self, response):
-        message = fmt('response = {response}')
+        message = fmt('response = {text}', text=response.text)
         super(FetchApiConfigError, self).__init__(message)
 
 def default_output():
