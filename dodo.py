@@ -270,6 +270,33 @@ def task_environment():
         ]
     }
 
+def task_tls():
+    '''
+    create server key, csr and crt files
+    '''
+    name = 'server'
+    tls = '/data/autocert/tls'
+    env = 'PASS=TEST'
+    envp = 'env:PASS'
+    targets = [
+        fmt('{tls}/{name}.key'),
+        fmt('{tls}/{name}.crt'),
+    ]
+    subject = '/C=US/ST=Oregon/L=Portland/O=Autocert Server/OU=Server/CN=autocert-server.com'
+    def uptodate():
+        return all([os.path.isfile(t) for t in targets])
+    return {
+        'actions': [
+            fmt('mkdir -p {tls}'),
+            fmt('{env} openssl genrsa -aes256 -passout {envp} -out {tls}/{name}.key 2048'),
+            fmt('{env} openssl req -new -passin {envp} -subj "{subject}" -key {tls}/{name}.key -out {tls}/{name}.csr'),
+            fmt('{env} openssl x509 -req -days 365 -in {tls}/{name}.csr -signkey {tls}/{name}.key -passin {envp} -out {tls}/{name}.crt'),
+            fmt('{env} openssl rsa -passin {envp} -in {tls}/{name}.key -out {tls}/{name}.key'),
+        ],
+        'targets': targets,
+        'uptodate': [uptodate],
+    }
+
 def task_deploy():
     '''
     deloy flask app via docker-compose
