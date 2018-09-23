@@ -282,7 +282,7 @@ def task_tls():
         fmt('{tls}/{name}.key'),
         fmt('{tls}/{name}.crt'),
     ]
-    subject = '/C=US/ST=Oregon/L=Portland/O=Autocert Server/OU=Server/CN=autocert-server.com'
+    subject = '/C=US/ST=Oregon/L=Portland/O=Autocert Server/OU=Server/CN=0.0.0.0'
     def uptodate():
         return all([os.path.isfile(t) for t in targets])
     return {
