@@ -65,7 +65,7 @@ class VersionCheckFailedError(Exception):
 
 class FetchApiConfigError(Exception):
     def __init__(self, response):
-        message = fmt('response = {response}')
+        message = fmt('response = {text}', text=response.text)
         super(FetchApiConfigError, self).__init__(message)
 
 def default_output():
@@ -79,7 +79,7 @@ def output_print(json, output):
 
 def fetch_api_version(ns):
     api_version = 'unknown'
-    response = requests.get(ns.api_url / 'autocert/version')
+    response = requests.get(ns.api_url / 'autocert/version', verify=ns.ssl_verify)
     if response.status_code == 200:
         obj = response.json()
         api_version = obj['version']
@@ -92,7 +92,7 @@ def version_check(version):
         raise VersionCheckFailedError(version.cli, version.api)
 
 def fetch_api_config(ns):
-    response = requests.get(ns.api_url / 'autocert/config')
+    response = requests.get(ns.api_url / 'autocert/config', verify=ns.ssl_verify)
     if response.status_code == 200:
         obj = response.json()
         return obj['config']
@@ -118,7 +118,7 @@ def do_request(ns):
     destinations = dictify(ns.destinations) if hasattr(ns, 'destinations') else None
     json = jsonify(ns, destinations=destinations if destinations else None)
     validate(ns.api_url, throw=True)
-    response = requests.request(method, ns.api_url / 'autocert', json=json)
+    response = requests.request(method, ns.api_url / 'autocert', json=json, verify=ns.ssl_verify)
     status = response.status_code
     try:
         json = response.json()
