@@ -182,7 +182,7 @@ def main(args):
         cli=dict(CFG),
         api=fetch_api_config(ns))
     version = AttrDict(
-        cli=get_cli_version().split('-')[0],
+        cli=get_cli_version(),
         api=fetch_api_version(ns))
     if ns.version_check:
         version_check(version)
