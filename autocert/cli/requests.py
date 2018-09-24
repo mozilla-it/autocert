@@ -7,10 +7,16 @@ import requests
 import getpass
 import platform
 
+from urllib.parse import urlparse
+
+from cli.utils.fmt import *
+
 USER = getpass.getuser()
 HOSTNAME = platform.node()
 
-def request(method, url, json=None, verify=True, **kwargs):
+def request(method, url, json=None, **kwargs):
+    hostname = urlparse(str(url)).hostname
+    verify = hostname not in ('0.0.0.0', 'localhost')
     json = json if json else {}
     json['user'] = USER
     json['hostname'] = HOSTNAME

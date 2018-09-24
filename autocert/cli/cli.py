@@ -79,7 +79,7 @@ def output_print(json, output):
 
 def fetch_api_version(ns):
     api_version = 'unknown'
-    response = requests.get(ns.api_url / 'autocert/version', verify=ns.ssl_verify)
+    response = requests.get(ns.api_url / 'autocert/version')
     if response.status_code == 200:
         obj = response.json()
         api_version = obj['version']
@@ -92,7 +92,7 @@ def version_check(version):
         raise VersionCheckFailedError(version.cli, version.api)
 
 def fetch_api_config(ns):
-    response = requests.get(ns.api_url / 'autocert/config', verify=ns.ssl_verify)
+    response = requests.get(ns.api_url / 'autocert/config')
     if response.status_code == 200:
         obj = response.json()
         return obj['config']
@@ -118,7 +118,7 @@ def do_request(ns):
     destinations = dictify(ns.destinations) if hasattr(ns, 'destinations') else None
     json = jsonify(ns, destinations=destinations if destinations else None)
     validate(ns.api_url, throw=True)
-    response = requests.request(method, ns.api_url / 'autocert', json=json, verify=ns.ssl_verify)
+    response = requests.request(method, ns.api_url / 'autocert', json=json)
     status = response.status_code
     try:
         json = response.json()
