@@ -25,6 +25,6 @@ if [[ "$@" == *"-h" ]] || [[ "$@" == *"--help" ]]; then
     exit -1
 fi
 
-[ -n "$1" ] && OPT="--within $1"
-POS="${2}"
-autocert query digicert "${OPT}" "${POS}" | jq '.results | .[] | select( .is_renewed == false ) | (.certificate.valid_till + " " + .certificate.common_name)' | xargs -I% echo % | sort
+[ -n "$1" ] && DAYS="--within $1"
+DN="${2}"
+autocert query digicert ${DAYS} ${DN} | jq '.results | .[] | select( .is_renewed == false ) | (.certificate.valid_till + " " + .certificate.common_name)' | xargs -I% echo % | sort
