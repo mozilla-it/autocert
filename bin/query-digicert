@@ -1,0 +1,27 @@
+#!/bin/bash
+
+usage() {
+cat <<EOF
+usage: $0 [-h|--help] [DAYS] [DOMAIN-NAME]
+
+positional arguments:
+  DAYS                  default="None"; within number of days from expiring
+
+  DOMAIN-NAME           default="*"; <domain-name>; glob expressions also
+                        accepted
+
+optional arguments:
+  -h, --help            show this help message and exit
+EOF
+}
+
+args=("$@")
+
+if [ "${args[-1]}" == "-h" ] || [ "${args[-1]}" == "--help" ]; then
+    usage
+    exit -1
+fi
+
+[ -n "$1" ] && OPT="--within $1"
+POS="${2}"
+autocert query digicert "${OPT}" "${POS}" | jq '.results | .[] | select( .is_renewed == false ) | (.certificate.valid_till + " " + .certificate.common_name)' | xargs -I% echo % | sort
