@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ -n "$DEBUG" ]; then
+    PS4=':${LINENO}+'
+    set -x
+fi
+
 usage() {
 cat <<EOF
 usage: $0 [-h|--help] [DAYS] [DOMAIN-NAME]
@@ -15,9 +20,7 @@ optional arguments:
 EOF
 }
 
-args=("$@")
-
-if [ "${args[-1]}" == "-h" ] || [ "${args[-1]}" == "--help" ]; then
+if [[ "$@" == *"-h" ]] || [[ "$@" == *"--help" ]]; then
     usage
     exit -1
 fi
