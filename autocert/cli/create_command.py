@@ -20,6 +20,8 @@ def add_parser(subparsers, api_config):
         choices=destinations)
     add_argument(parser, '-s', '--sans')
     add_argument(parser, '-S', '--sans-file')
+    add_argument(parser, '-K', '--key')
+    add_argument(parser, '-C', '--csr')
     add_argument(parser, '-y', '--validity-years')
     add_argument(parser, '--repeat-delta')
     add_argument(parser, '--whois-check')
