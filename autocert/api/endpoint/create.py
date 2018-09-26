@@ -27,7 +27,12 @@ class CreateEndpoint(EndpointBase):
 
     def execute(self):
         status = 201
-        modhash, key, csr = pki.create_modhash_key_and_csr(self.args.common_name, self.args.sans)
+        modhash, key, csr = pki.create_modhash_key_and_csr(
+            self.args.common_name,
+            key=self.args.key,
+            csr=self.args.csr,
+            oids=self.cfg.csr.oids,
+            sans=self.args.sans)
         crt, expiry, authority = self.authority.create_certificate(
             self.args.organization_name,
             self.args.common_name,
@@ -48,7 +53,7 @@ class CreateEndpoint(EndpointBase):
             expiry,
             authority)
         if self.args.destinations:
-            note = 'bug {bug}'.format(**self.args)
+            note = 'bug ' + bug
             for name, dests in self.args.destinations.items():
                 cert = self.destinations[name].install_certificates(note, [cert], *dests)[0]
         json = self.transform([cert])

@@ -87,58 +87,57 @@ def log_request(user, hostname, ip, method, path, json):
 
 @app.route('/autocert/version', methods=['GET'])
 def version():
-    args = request.json
-    args = args if args else {}
-    cfg = args.get('cfg', None)
+    json = request.json if request.json else {}
+    cfg = json.get('cfg', None)
     log_request(
-        args.get('user', 'unknown'),
-        args.get('hostname', 'unknown'),
+        json.get('user', 'unknown'),
+        json.get('hostname', 'unknown'),
         request.remote_addr,
         request.method,
         request.path,
-        args)
+        json)
     from utils.version import version
     return jsonify(dict(version=version))
 
 @app.route('/autocert/config', methods=['GET'])
 def config():
-    args = request.json
-    args = args if args else {}
-    cfg = args.get('cfg', None)
+    json = request.json if request.json else {}
+    cfg = json.get('cfg', None)
     log_request(
-        args.get('user', 'unknown'),
-        args.get('hostname', 'unknown'),
+        json.get('user', 'unknown'),
+        json.get('hostname', 'unknown'),
         request.remote_addr,
         request.method,
         request.path,
-        args)
+        json)
     from config import _load_config
     cfg = _load_config(fixup=False)
     return jsonify({'config': cfg})
 
 @app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():
-    args = request.json
-    args = args if args else {}
-    cfg = args.get('cfg', None)
+    json = request.json if request.json else {}
+    cfg = json.get('cfg', None)
     log_request(
-        args.get('user', 'unknown'),
-        args.get('hostname', 'unknown'),
+        json.get('user', 'unknown'),
+        json.get('hostname', 'unknown'),
         request.remote_addr,
         request.method,
         request.path,
-        args)
+        json)
     try:
-        endpoint = create_endpoint(request.method, cfg, args)
+        endpoint = create_endpoint(request.method, cfg, json)
         json, status = endpoint.execute()
     except AutocertError as ae:
-        dbg(ae)
+        app.logger.error(ae)
         status = 500
         json = dict(errors={ae.name: ae.message})
     except Exception as ex:
-        dbg(ex)
+        import traceback
+        tb = traceback.format_exc()
+        app.logger.error(tb)
         status = 500
-        json = dict(errors={ex.__class__.__name__: sys.exc_info()[0]})
+        json = dict(errors={ex.__class__.__name__: tb})
     if not json:
         raise EmptyJsonError(json)
     return make_response(jsonify(json), status)

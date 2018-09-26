@@ -136,19 +136,19 @@ def main(args):
     parser = ArgumentParser(
         add_help=False)
     parser.add_argument(
-        '-C', '--config',
+        '--config',
         choices=LOC,
         const=LOC[0],
         nargs='?',
         help='default="%(const)s"; show the config')
     parser.add_argument(
-        '-V', '--version',
+        '--version',
         choices=LOC,
         const=LOC[0],
         nargs='?',
         help='default="%(const)s"; show the version')
     parser.add_argument(
-        '-U', '--api-url',
+        '--api-url',
         metavar='URL',
         default='http://0.0.0.0',
         type=URL,
@@ -161,13 +161,13 @@ def main(args):
         choices=SORTING,
         help='default="%(default)s"; set the sorting method; choices=[%(choices)s]')
     parser.add_argument(
-        '-O', '--output',
+        '--output',
         metavar='OUPUT',
         default=default_output(),
         choices=OUTPUT,
         help='default="%(default)s"; set the output type; choices=[%(choices)s]')
     parser.add_argument(
-        '-T', '--timeout',
+        '--timeout',
         metavar='INT',
         default=2,
         help='default="%(default)s"; set the timeout used in connectivity check')

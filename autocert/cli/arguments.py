@@ -52,6 +52,9 @@ def bug_type(string):
         return string
     raise WrongBugFormatError(string)
 
+def x509_file(path):
+    return open(path).read()
+
 def organization_type(string):
     if string == 'f':
         return 'Mozilla Foundation'
@@ -234,6 +237,14 @@ ARGS = {
         choices=STATUS_TYPES,
         nargs='+',
         help='default=%(default)s; choose which status type(s) to return; choices=[%(choices)s]'
+    ),
+    ('-K','--key'): dict(
+        type=x509_file,
+        help='optionally provide key to be used in generating csr and crt; key will be stored in bundle'
+    ),
+    ('-C','--csr'): dict(
+        type=x509_file,
+        help='optionally provide csr to be used in generating crt; key will not, but csr will be stored in bundle'
     ),
     ('common_name',): dict(
         metavar='common-name',
