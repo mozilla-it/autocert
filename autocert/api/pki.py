@@ -122,6 +122,6 @@ def create_modhash_key_and_csr(common_name, key=None, csr=None, oids=None, sans=
             encoding=ENCODING[CFG.key.encoding],
             format=serialization.PrivateFormat.TraditionalOpenSSL,
             encryption_algorithm=serialization.NoEncryption()).decode('utf-8')
-    if isinstance(csr, _CertificateSigningRequest_):
+    if isinstance(csr, _CertificateSigningRequest):
         csr = csr.public_bytes(ENCODING[CFG.csr.encoding]).decode('utf-8')
     return (modhash, key, csr)
