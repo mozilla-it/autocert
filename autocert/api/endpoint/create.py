@@ -31,7 +31,7 @@ class CreateEndpoint(EndpointBase):
             self.args.common_name,
             key=self.args.key,
             csr=self.args.csr,
-            oids=self.args.oids,
+            oids=self.cfg.csr.oids,
             sans=self.args.sans)
         crt, expiry, authority = self.authority.create_certificate(
             self.args.organization_name,
