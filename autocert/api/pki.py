@@ -31,7 +31,7 @@ class CsrExistError(AutocertError):
 
 class CertNameDecomposeError(AutocertError):
     def __init__(self, pattern, cert_name):
-        msg = fmt('"{cert_name}" could not be decomposed with pattern "{pattern}"'.)
+        msg = fmt('"{cert_name}" could not be decomposed with pattern "{pattern}"')
         super(CertNameDecomposeError, self).__init__(msg)
 
 class CreateModhashRequiresKeyOrCsr(AutocertError):
