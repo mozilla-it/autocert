@@ -109,7 +109,7 @@ def _create_modhash(obj):
 
 def create_modhash_key_and_csr(common_name, key=None, csr=None, oids=None, sans=None):
     if csr:
-        csr = x509.load_pem_x509_csr(csr, default_backend())
+        csr = x509.load_pem_x509_csr(str.encode(csr), default_backend())
     elif key:
         key = serialization.load_pem_private_key(key, password=None, backend=default_backend())
         csr = _create_csr(common_name, key, oids, sans)

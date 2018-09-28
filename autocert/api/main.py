@@ -129,13 +129,15 @@ def route():
         endpoint = create_endpoint(request.method, cfg, json)
         json, status = endpoint.execute()
     except AutocertError as ae:
-        dbg(ae)
+        app.logger.error(ae)
         status = 500
         json = dict(errors={ae.name: ae.message})
     except Exception as ex:
-        dbg(ex)
+        import traceback
+        tb = traceback.format_exc()
+        app.logger.error(tb)
         status = 500
-        json = dict(errors={ex.__class__.__name__: sys.exc_info()[0]})
+        json = dict(errors={ex.__class__.__name__: tb})
     if not json:
         raise EmptyJsonError(json)
     return make_response(jsonify(json), status)
