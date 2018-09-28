@@ -111,7 +111,7 @@ def create_modhash_key_and_csr(common_name, key=None, csr=None, oids=None, sans=
     if csr:
         csr = x509.load_pem_x509_csr(str.encode(csr), default_backend())
     elif key:
-        key = serialization.load_pem_private_key(key, password=None, backend=default_backend())
+        key = serialization.load_pem_private_key(str.encode(key), password=None, backend=default_backend())
         csr = _create_csr(common_name, key, oids, sans)
     else:
         key = _create_key(common_name)
