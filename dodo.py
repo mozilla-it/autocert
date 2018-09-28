@@ -483,11 +483,12 @@ def task_zeus():
     launch zeus containers
     '''
     image = 'zeus17.3'
-    for container in [ fmt('{image}_test{num}') for num in (1, 2)]:
+    for num in (1, 2):
+        container = fmt('{image}_test{num}')
         yield {
             'task_dep': ['prune'],
             'name': container,
-            'actions': [fmt('docker run -d --name {container} {image}')],
+            'actions': [fmt('docker run -d -p 909{num}:9090 --name {container} {image}')],
             'uptodate': [fmt('[ -n "`docker ps -q -f name={container}`" ] && exit 0 || exit 1')]
         }
 
