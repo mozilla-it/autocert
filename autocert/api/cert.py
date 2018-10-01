@@ -37,6 +37,22 @@ class VisitError(AutocertError):
         message = fmt('unknown type obj = {obj}')
         super(VisitError, self).__init__(message)
 
+def webcrt(hostname, timeout=None):
+    import ssl
+    import socket
+    try:
+        r = requests.get('https://'+hostname) #FIXME: I wish I didn't do this
+        if r.status_code in (200, 301, 302, 303, 304):
+            with socket.create_connection((hostname, 443), timeout=timeout) as sock:
+                ctx = ssl.create_default_context()
+                with ctx.wrap_socket(sock, server_hostname=hostname) as sslsock:
+                    der = sslsock.getpeercert(True)
+                    pem = ssl.DER_cert_to_PEM_cert(der)
+                    return pem
+    except Exception as ex:
+        print(ex)
+    return None
+
 def printit(obj):
     print(obj)
     return obj
@@ -211,6 +227,13 @@ class Cert(object):
         return pki.get_sha2(self.crt)
 
     @property
+    def verified(self):
+        crt = webcrt(self.common_name, timeout=0.01)
+        if crt:
+            return pki.get_sha1(crt) == self.sha1
+        return False
+
+    @property
     def files(self):
         files = {}
         for content in (self.key, self.csr, self.crt):
@@ -254,6 +277,7 @@ class Cert(object):
                 'serial': self.serial,
                 'sha1': self.sha1,
                 'sha2': self.sha2,
+                'verified': self.verified,
                 'bug': self.bug,
                 'expiry': self.expiry,
                 'authority': self.authority,

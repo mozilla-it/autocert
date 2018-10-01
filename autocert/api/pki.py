@@ -109,7 +109,7 @@ def _create_modhash(obj):
 
 def get_serial(crt):
     crt = x509.load_pem_x509_certificate(str.encode(crt), default_backend())
-    return crt.serial
+    return crt.serial_number
 
 def get_sha1(crt):
     crt = x509.load_pem_x509_certificate(str.encode(crt), default_backend())
