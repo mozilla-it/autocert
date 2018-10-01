@@ -53,7 +53,7 @@ class CreateEndpoint(EndpointBase):
             expiry,
             authority)
         if self.args.destinations:
-            note = 'bug {bug}'.format(**self.args)
+            note = 'bug ' + bug
             for name, dests in self.args.destinations.items():
                 cert = self.destinations[name].install_certificates(note, [cert], *dests)[0]
         json = self.transform([cert])
