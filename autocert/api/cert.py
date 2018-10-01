@@ -15,6 +15,7 @@ from utils.dictionary import head, body, head_body, keys_ending
 from utils.yaml import yaml_format, yaml_print
 from utils.isinstance import *
 from utils.fmt import *
+import pki
 import tar
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
@@ -198,6 +199,18 @@ class Cert(object):
         return self.cert_name + '.tar.gz'
 
     @property
+    def serial(self):
+        return pki.get_serial(self.crt)
+
+    @property
+    def sha1(self):
+        return pki.get_sha1(self.crt)
+
+    @property
+    def sha2(self):
+        return pki.get_sha2(self.crt)
+
+    @property
     def files(self):
         files = {}
         for content in (self.key, self.csr, self.crt):
@@ -238,6 +251,9 @@ class Cert(object):
                 'common_name': self.common_name,
                 'timestamp': self.timestamp,
                 'modhash': self.modhash,
+                'serial': self.serial,
+                'sha1': self.sha1,
+                'sha2': self.sha2,
                 'bug': self.bug,
                 'expiry': self.expiry,
                 'authority': self.authority,

@@ -107,6 +107,18 @@ def _create_modhash(obj):
     md5.update(modulus_bytes)
     return md5.hexdigest()
 
+def get_serial(crt):
+    crt = x509.load_pem_x509_certificate(str.encode(crt), default_backend())
+    return crt.serial
+
+def get_sha1(crt):
+    crt = x509.load_pem_x509_certificate(str.encode(crt), default_backend())
+    return crt.fingerprint(hashes.SHA1()).hex()
+
+def get_sha2(crt):
+    crt = x509.load_pem_x509_certificate(str.encode(crt), default_backend())
+    return crt.fingerprint(hashes.SHA256()).hex()
+
 def create_modhash_key_and_csr(common_name, key=None, csr=None, oids=None, sans=None):
     if csr:
         csr = x509.load_pem_x509_csr(str.encode(csr), default_backend())
