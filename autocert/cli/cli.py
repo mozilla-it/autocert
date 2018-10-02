@@ -141,8 +141,11 @@ def display(ns, json):
             common_name = body['common_name']
             crt_sha1 = body['sha1']
             web = web_crt(common_name)
-            web_sha1 = pki.get_sha1(web)
-            cert[head]['verified'] = web_sha1 == crt_sha1
+            verified = False
+            if web:
+                web_sha1 = pki.get_sha1(web)
+                verified = web_sha1 == crt_sha1
+            cert[head]['verified'] = verified
             certs += [cert]
         json['certs'] = certs
     output_print(json, ns.output)
