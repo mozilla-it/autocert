@@ -40,6 +40,7 @@ class VisitError(AutocertError):
 def webcrt(hostname, timeout=None):
     import ssl
     import socket
+    import requests
     try:
         r = requests.get('https://'+hostname) #FIXME: I wish I didn't do this
         if r.status_code in (200, 301, 302, 303, 304):
