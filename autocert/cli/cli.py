@@ -24,12 +24,13 @@ except ImportError as ie:
 
 from cli.utils.importer import import_modules
 from cli.utils.version import get_version as get_cli_version
-from cli.utils.dictionary import dictify
+from cli.utils.dictionary import dictify, head_body
 from cli.utils.url import validate
 from cli.utils.yaml import yaml_print
 from cli.namespace import jsonify
 from cli.arguments import add_argument
 from cli.utils.fmt import *
+from cli.utils import pki
 from cli.config import CFG
 from cli import requests
 
@@ -113,6 +114,39 @@ def add_subparsers(parser, api_config):
     subparsers.required = True
     return subparsers
 
+def web_crt(hostname, timeout=0.2):
+    import ssl
+    import socket
+    import requests
+    try:
+        r = requests.get('https://'+hostname) #FIXME: I wish I didn't do this
+        if r.status_code in (200, 301, 302, 303, 304):
+            with socket.create_connection((hostname, 443), timeout=timeout) as sock:
+                ctx = ssl.create_default_context()
+                with ctx.wrap_socket(sock, server_hostname=hostname) as sslsock:
+                    der = sslsock.getpeercert(True)
+                    pem = ssl.DER_cert_to_PEM_cert(der)
+                    return pem
+    except Exception as ex:
+        print(ex)
+    return None
+
+def display(ns, json):
+    if not hasattr(ns, 'count') or not ns.count:
+        json.pop('count', None)
+    if ns.verbosity >= 2:
+        certs = []
+        for cert in json['certs']:
+            head, body = head_body(cert)
+            common_name = body['common_name']
+            crt_sha1 = body['sha1']
+            web = web_crt(common_name)
+            web_sha1 = pki.get_sha1(web)
+            cert[head]['verified'] = web_sha1 == crt_sha1
+            certs += [cert]
+        json['certs'] = certs
+    output_print(json, ns.output)
+
 def do_request(ns):
     method = METHODS[ns.command]
     destinations = dictify(ns.destinations) if hasattr(ns, 'destinations') else None
@@ -120,17 +154,23 @@ def do_request(ns):
     validate(ns.api_url, throw=True)
     response = requests.request(method, ns.api_url / 'autocert', json=json)
     status = response.status_code
-    try:
-        json = response.json()
-        if not hasattr(ns, 'count') or not ns.count:
-            json.pop('count', None)
-        output_print(json, ns.output)
-    except JSONDecodeError as jde:
+    if status in (200, 201, 202, 203, 204):
+        try:
+            json = response.json()
+            display(ns, json)
+        except JSONDecodeError as jde:
+            print(jde)
+            return -1
+    else:
         print('status =', status)
-        print('JSONDecodeError =', jde)
-        print('text =', response.text)
+        try:
+            output_print(response.json(), ns.output)
+            print('YEP')
+        except:
+            print('NOPE')
+            print('response.text =', response.text)
         return -1
-    return status
+    return 0
 
 def main(args):
     parser = ArgumentParser(
@@ -208,7 +248,4 @@ def main(args):
         output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)
 
-    status = ns.func(ns)
-
-    if status not in (200, 201, 202, 203, 204, 205):
-        return status
+    return ns.func(ns)
