@@ -12,9 +12,10 @@ from datetime import timedelta
 
 from endpoint.base import EndpointBase
 from exceptions import AutocertError
+from config import CFG
 from utils.fmt import *
+from utils import pki
 from app import app
-import pki
 
 class UnknownCertificateAuthorityError(AutocertError):
     def __init__(self, authority):
@@ -29,6 +30,8 @@ class CreateEndpoint(EndpointBase):
         status = 201
         modhash, key, csr = pki.create_modhash_key_and_csr(
             self.args.common_name,
+            public_exponent=CFG.key.public_exponent,
+            key_size=CFG.key.key_size,
             key=self.args.key,
             csr=self.args.csr,
             oids=self.cfg.csr.oids,

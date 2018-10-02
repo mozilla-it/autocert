@@ -15,7 +15,7 @@ from utils.dictionary import head, body, head_body, keys_ending
 from utils.yaml import yaml_format, yaml_print
 from utils.isinstance import *
 from utils.fmt import *
-import pki
+from utils import pki
 import tar
 
 DIRPATH = os.path.dirname(os.path.abspath(__file__))
