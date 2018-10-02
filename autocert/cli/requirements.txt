@@ -5,3 +5,4 @@ attrdict>=2.0.0
 requests>=2.11.1
 simplejson>=3.16.0
 ruamel.yaml>=0.12.15
+cryptography>=1.8.1
