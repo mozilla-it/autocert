@@ -230,7 +230,10 @@ class Cert(object):
     def verified(self):
         crt = webcrt(self.common_name, timeout=0.01)
         if crt:
-            return pki.get_sha1(crt) == self.sha1
+            web_sha1 = pki.get_sha1(crt)
+            if web_sha1 != self.sha1:
+                return web_sha1 + ' != ' + self.sha1
+            return True
         return False
 
     @property
