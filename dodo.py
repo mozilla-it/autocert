@@ -105,11 +105,11 @@ def task_count():
 
 def task_checkpath():
     '''
-    check for required path /data/autocert/certs
+    check for required path /data/autocert/bundles
     '''
     return {
         'actions': [
-            'test -d /data/autocert/certs',
+            'test -d /data/autocert/bundles',
         ],
     }
 

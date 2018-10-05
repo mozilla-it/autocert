@@ -14,6 +14,8 @@ from utils.fmt import *
 from app import app
 import blacklist
 
+from bundle import Bundle
+
 class MissingUpdateArgumentsError(AutocertError):
     def __init__(self, args):
         message = fmt('missing arguments to update; args = {args}')
@@ -30,39 +32,39 @@ class UpdateEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         status = 201
-        cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
-        certs = self.tardata.load_certs(*cert_name_pns)
-        blacklist.check(certs, self.args.blacklist_overrides)
+        bundle_name_pns = [self.sanitize(bundle_name_pn) for bundle_name_pn in self.args.bundle_name_pns]
+        bundles = Bundle.bundles(bundle_name_pns)
+        blacklist.check(bundles, self.args.blacklist_overrides)
         authority = self.args.get('authority', None)
         destinations = self.args.get('destinations', None)
         if authority == None and destinations == None:
             raise MissingUpdateArgumentsError(self.args)
         if self.args.get('authority', None):
-            certs = self.renew(certs, **kwargs)
+            bundles = self.renew(bundles, **kwargs)
         if self.args.get('destinations', None):
-            certs = self.deploy(certs, **kwargs)
-        json = self.transform(certs)
+            bundles = self.deploy(bundles, **kwargs)
+        json = self.transform(bundles)
         return json, status
 
-    def renew(self, certs, **kwargs):
+    def renew(self, bundles, **kwargs):
         crts, expiries, authorities = self.authority.renew_certificates(
-            certs,
+            bundles,
             self.args.organization_name,
             self.args.validity_years,
             self.args.bug,
             self.args.sans,
             self.args.repeat_delta,
             self.args.whois_check)
-        for cert, crt, expiry, authority in zip(certs, crts, expiries, authorities):
-            cert.crt = crt
-            cert.expiry = expiry
-            cert.authority = authority
-            self.tardata.update_cert(cert)
-        return certs
+        for bundle, crt, expiry, authority in zip(bundles, crts, expiries, authorities):
+            bundle.crt = crt
+            bundle.expiry = expiry
+            bundle.authority = authority
+            bundle.to_disk()
+        return bundles
 
-    def deploy(self, certs, **kwargs):
-        installed_certs = []
+    def deploy(self, bundles, **kwargs):
+        installed_bundles = []
         note = 'bug {bug}'.format(**self.args)
         for name, dests in self.args.destinations.items():
-            installed_certs += self.destinations[name].install_certificates(note, certs, *dests)
-        return installed_certs
+            installed_bundles += self.destinations[name].install_certificates(note, bundles, dests)
+        return installed_bundles

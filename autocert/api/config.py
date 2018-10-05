@@ -72,7 +72,6 @@ def _load_config(filename=DOT_CONFIG_YML, roundtrip=False, fixup=True):
             if fixup:
                 cfg = _fixup(cfg)
         except Exception as ex:
-            dbg(ex)
             raise ConfigLoadError(filename, errors=[ex])
     return AttrDict(cfg)
 

@@ -25,6 +25,6 @@ def create_destination(destination, ar, cfg, timeout, verbosity):
     else:
         raise DestinationFactoryError(destination)
     dests = list(CFG.destinations.zeus.keys())
-    if d.has_connectivity(timeout, *dests):
+    if d.has_connectivity(timeout, dests):
         return d
 

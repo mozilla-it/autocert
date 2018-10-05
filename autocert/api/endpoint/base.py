@@ -18,16 +18,16 @@ from utils.asyncrequests import AsyncRequests
 from utils.dictionary import merge, head, head_body
 from utils import timestamp
 from utils.fmt import *
-from tardata import Tardata
 from config import CFG
 from app import app
-import tar
+
+from bundle import Bundle
 
 class EndpointBase(object):
     _sorting_funcs = dict(
-        default=lambda cert: cert.common_name,
-        timestamp=lambda cert: cert.timestamp,
-        expiry=lambda cert: cert.expiry)
+        default=lambda bundle: bundle.common_name,
+        timestamp=lambda bundle: bundle.timestamp,
+        expiry=lambda bundle: bundle.expiry)
 
     def __init__(self, cfg, args):
         self.ar = AsyncRequests()
@@ -42,7 +42,6 @@ class EndpointBase(object):
         self.destinations = AttrDict({
             d: create_destination(d, self.ar, destinations[d], self.args.timeout, self.verbosity) for d in destinations
         })
-        self.tardata = Tardata(self.cfg.tar.dirpath, self.verbosity)
 
     @property
     def authority(self):
@@ -50,7 +49,7 @@ class EndpointBase(object):
 
     @property
     def timestamp(self):
-        return self.tardata.timestamp
+        raise NotImplementedError('IS TIMESTAMP PROPERTY CALLED???')
 
     @property
     def calls(self):
@@ -63,11 +62,11 @@ class EndpointBase(object):
     def execute(self, **kwargs):
         raise NotImplementedError
 
-    def transform(self, certs):
-        certs = [cert.transform(self.verbosity) for cert in sorted(certs, key=self.sorting_func)]
+    def transform(self, bundles):
+        bundles = [bundle.transform(self.verbosity) for bundle in sorted(bundles, key=self.sorting_func)]
         json = dict(
-            count=len(certs),
-            certs=certs,
+            count=len(bundles),
+            bundles=bundles,
         )
         if self.args.call_detail:
             calls = [self.transform_call(call) for call in self.ar.calls]
@@ -80,18 +79,18 @@ class EndpointBase(object):
             return name
         return {name: dict(send=call.send, recv=call.recv)}
 
-    def sanitize(self, cert_name_pn, ext='.tar.gz'):
-        if cert_name_pn.endswith(ext):
-            cert_name_pn = cert_name_pn[0:-len(ext)]
-        cert_name_pn = os.path.basename(cert_name_pn)
+    def sanitize(self, bundle_name_pn, ext='.tar.gz'):
+        if bundle_name_pn.endswith(ext):
+            bundle_name_pn = bundle_name_pn[0:-len(ext)]
+        bundle_name_pn = os.path.basename(bundle_name_pn)
         regex = re.compile('([A-Za-z0-9\.\-_]+)(@([A-Fa-f0-9]{8}))?')
-        match = regex.search(cert_name_pn)
+        match = regex.search(bundle_name_pn)
         if match:
             common_name, _, modhash = match.groups()
             if modhash:
-                return cert_name_pn
+                return bundle_name_pn
             if common_name.endswith('*'):
                 return common_name
             return common_name + '*'
-        return cert_name_pn
+        return bundle_name_pn
 

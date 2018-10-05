@@ -225,11 +225,11 @@ ARGS = {
     ),
     ('--expired',): dict(
         action='store_true',
-        help='show expired certs'
+        help='show expired bundles'
     ),
     ('--count',): dict(
         action='store_true',
-        help='add count to certs|result json|yaml returned from api calls'
+        help='add count to bundles|result json|yaml returned from api calls'
     ),
     ('-s', '--status',): dict(
         metavar='STATUS',
@@ -250,8 +250,8 @@ ARGS = {
         metavar='common-name',
         help='the commmon-name to be used for the certificate'
     ),
-    ('cert_name_pns',): dict(
-        metavar='cert-name',
+    ('bundle_name_pns',): dict(
+        metavar='bundle-name',
         nargs='+',
         help='default="%(default)s"; <common-name>@<modhash>; glob expressions '
             'also accepted; if only a common-name is given, "*" will be appended'

@@ -33,6 +33,7 @@ from cli.utils.fmt import *
 from cli.utils import pki
 from cli.config import CFG
 from cli import requests
+from requests.exceptions import ConnectionError
 
 LOC = [
     'cli',
@@ -119,7 +120,7 @@ def web_crt(hostname, timeout=0.2):
     import socket
     import requests
     try:
-        r = requests.get('https://'+hostname) #FIXME: I wish I didn't do this
+        r = requests.get('https://'+hostname, timeout=0.1) #FIXME: I wish I didn't do this
         if r.status_code in (200, 301, 302, 303, 304):
             with socket.create_connection((hostname, 443), timeout=timeout) as sock:
                 ctx = ssl.create_default_context()
@@ -127,17 +128,20 @@ def web_crt(hostname, timeout=0.2):
                     der = sslsock.getpeercert(True)
                     pem = ssl.DER_cert_to_PEM_cert(der)
                     return pem
+    except ConnectionError as ce:
+        pass
     except Exception as ex:
-        print(ex)
+        import traceback
+        traceback.print_exc()
     return None
 
 def display(ns, json):
     if not hasattr(ns, 'count') or not ns.count:
         json.pop('count', None)
     if ns.verbosity >= 2:
-        certs = []
-        for cert in json['certs']:
-            head, body = head_body(cert)
+        bundles = []
+        for bundle in json['bundles']:
+            head, body = head_body(bundle)
             common_name = body['common_name']
             crt_sha1 = body['sha1']
             web = web_crt(common_name)
@@ -145,9 +149,9 @@ def display(ns, json):
             if web:
                 web_sha1 = pki.get_sha1(web)
                 verified = web_sha1 == crt_sha1
-            cert[head]['verified'] = verified
-            certs += [cert]
-        json['certs'] = certs
+            bundle[head]['verified'] = verified
+            bundles += [bundle]
+        json['bundles'] = bundles
     output_print(json, ns.output)
 
 def do_request(ns):
@@ -168,9 +172,7 @@ def do_request(ns):
         print('status =', status)
         try:
             output_print(response.json(), ns.output)
-            print('YEP')
         except:
-            print('NOPE')
             print('response.text =', response.text)
         return -1
     return 0

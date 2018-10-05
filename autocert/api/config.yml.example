@@ -1,6 +1,6 @@
 csr:
     # location where .key files are stored
-    dirpath: /data/autocert/certs
+    path: /data/autocert/bundles
     validity: 1
     server_type: 2
     encoding: PEM
@@ -18,14 +18,14 @@ csr:
 
 key:
     # location where .key files are stored
-    dirpath: /data/autocert/certs
+    path: /data/autocert/bundles
     key_size: 2048
     public_exponent: 65537
     encoding: PEM
 
 tar:
-    # location where the <cert_name>.tar.gz files are stored on the api server
-    dirpath: /data/autocert/certs
+    # location where the <bundle_name>.tar.gz files are stored on the api server
+    path: /data/autocert/bundles
 
 # list of available authorities from which we get our .crt files
 authorities:

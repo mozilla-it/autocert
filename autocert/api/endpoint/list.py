@@ -15,26 +15,28 @@ from config import CFG
 from endpoint.base import EndpointBase
 from utils.yaml import yaml_format
 
+from bundle import Bundle
+
 class ListEndpoint(EndpointBase):
     def __init__(self, cfg, args):
         super(ListEndpoint, self).__init__(cfg, args)
 
     def execute(self, **kwargs):
         status = 200
-        cert_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.cert_name_pns]
-        certs = self.tardata.load_certs(
-            *cert_name_pns,
+        bundle_name_pns = [self.sanitize(bundle_name_pn) for bundle_name_pn in self.args.bundle_name_pns]
+        bundles = Bundle.bundles(
+            bundle_name_pns,
             within=self.args.within,
             expired=self.args.expired)
-        certs2 = []
+        bundles2 = []
         if self.verbosity > 1:
             #FIXME: this should be driven by the yml in the cert tarball
-            certs1 = self.authorities.digicert.display_certificates(certs)
+            bundles1 = self.authorities.digicert.display_certificates(bundles)
             for name, dests in self.args.destinations.items():
                 pfmt('name={name} dests={dests}')
-                certs2.extend(self.destinations[name].fetch_certificates(certs1, *dests))
+                bundles2.extend(self.destinations[name].fetch_certificates(bundles1, dests))
         else:
-            certs2 = certs
-        json = self.transform(certs2)
+            bundles2 = bundles
+        json = self.transform(bundles2)
         return json, status
 
