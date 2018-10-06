@@ -17,6 +17,8 @@ from utils.fmt import *
 from utils import pki
 from app import app
 
+from bundle import Bundle
+
 class UnknownCertificateAuthorityError(AutocertError):
     def __init__(self, authority):
         message = fmt('unknown certificate authority: {authority}')
@@ -45,19 +47,20 @@ class CreateEndpoint(EndpointBase):
             list(self.args.sans),
             self.args.repeat_delta,
             self.args.whois_check)
-        cert = self.tardata.create_cert(
+        bundle = Bundle(
             self.args.common_name,
             modhash,
             key,
             csr,
             crt,
             self.args.bug,
-            list(self.args.sans),
+            sorted(list(self.args.sans)),
             expiry,
             authority)
+        bundle.to_disk()
         if self.args.destinations:
             note = 'bug ' + bug
             for name, dests in self.args.destinations.items():
-                cert = self.destinations[name].install_certificates(note, [cert], *dests)[0]
-        json = self.transform([cert])
+                bundle = self.destinations[name].install_certificates(note, [bundle], *dests)[0]
+        json = self.transform([bundle])
         return json, status

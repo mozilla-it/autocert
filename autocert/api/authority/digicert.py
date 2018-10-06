@@ -119,18 +119,18 @@ class DigicertAuthority(AuthorityBase):
             raise AuthorityConnectivityError(call)
         return True
 
-    def display_certificates(self, certs, repeat_delta=None):
+    def display_certificates(self, bundles, repeat_delta=None):
         app.logger.info(fmt('display_certificates:\n{locals}'))
-        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
+        order_ids = [bundle.authority['digicert']['order_id'] for bundle in bundles]
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         crts = self._download_certificates(certificate_ids, repeat_delta=repeat_delta)
         expiries = [expiryify(call) for call in calls]
         csrs = [windows2unix(call.recv.json.certificate.csr) for call in calls]
-        for expiry, csr, crt, cert in zip(expiries, csrs, crts, certs):
-            matched = csr.strip() == cert.csr.strip() and crt.strip() == cert.crt.strip()
-            cert.authority['digicert']['matched'] = matched
-        return certs
+        for expiry, csr, crt, bundle in zip(expiries, csrs, crts, bundles):
+            matched = csr.strip() == bundle.csr.strip() and crt.strip() == bundle.crt.strip()
+            bundle.authority['digicert']['matched'] = matched
+        return bundles
 
     def create_certificate(self, organization_name, common_name, validity_years, csr, bug, sans=None, repeat_delta=None, whois_check=False):
         app.logger.info(fmt('create_certificate:\n{locals}'))
@@ -150,13 +150,13 @@ class DigicertAuthority(AuthorityBase):
         authority = dict(digicert=dict(order_id=order_ids[0]))
         return crts[0], expiries[0], authority
 
-    def renew_certificates(self, certs, organization_name, validity_years, bug, sans=None, repeat_delta=None, whois_check=False):
+    def renew_certificates(self, bundles, organization_name, validity_years, bug, sans=None, repeat_delta=None, whois_check=False):
         app.logger.info(fmt('renew_certificates:\n{locals}'))
         if not sans:
             sans = []
         organization_id, container_id = self._get_organization_container_ids(organization_name)
         paths, jsons = self._prepare_paths_jsons_for_renewals(
-            certs,
+            bundles,
             organization_id,
             container_id,
             bug,
@@ -167,11 +167,11 @@ class DigicertAuthority(AuthorityBase):
         authorities = [dict(digicert=dict(order_id=order_id)) for order_id in order_ids]
         return crts, expiries, authorities
 
-    def revoke_certificates(self, certs, bug):
+    def revoke_certificates(self, bundles, bug):
         app.logger.info(fmt('revoke_certificates:\n{locals}'))
-        paths, jsons = self._prepare_paths_jsons_for_revocations(certs, bug)
+        paths, jsons = self._prepare_paths_jsons_for_revocations(bundles, bug)
         self._revoke_certificates(paths, jsons, bug)
-        return certs
+        return bundles
 
     def _get_organization_container_ids(self, organization_name):
         app.logger.debug(fmt('_get_organization_container_ids:\n{locals}'))
@@ -253,31 +253,31 @@ class DigicertAuthority(AuthorityBase):
                 renewal_of_order_id=renewal_of_order_id))
         return path, json
 
-    def _prepare_paths_jsons_for_renewals(self, certs, organization_id, container_id, bug, validity_years, sans_to_add, whois_check=False):
+    def _prepare_paths_jsons_for_renewals(self, bundles, organization_id, container_id, bug, validity_years, sans_to_add, whois_check=False):
         app.logger.debug(fmt('_prepare_paths_jsons_for_renewals:\n{locals}'))
-        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
+        order_ids = [bundle.authority['digicert']['order_id'] for bundle in bundles]
         calls = self._get_certificate_order_detail(order_ids)
         paths = []
         jsons = []
-        for cert, call in zip(certs, calls):
-            cert.sans=combine_sans(cert.sans, sans_to_add)
+        for bundle, call in zip(bundles, calls):
+            bundles.sans=combine_sans(bundles.sans, sans_to_add)
             path, json = self._prepare_path_json(
                 organization_id,
                 container_id,
-                cert.common_name,
+                bundles.common_name,
                 validity_years,
-                cert.csr,
+                bundles.csr,
                 bug,
-                sans=cert.sans,
+                sans=bundles.sans,
                 whois_check=whois_check,
-                renewal_of_order_id=cert.authority['digicert']['order_id'])
+                renewal_of_order_id=bundles.authority['digicert']['order_id'])
             paths += [path]
             jsons += [json]
         return paths, jsons
 
-    def _prepare_paths_jsons_for_revocations(self, certs, bug):
+    def _prepare_paths_jsons_for_revocations(self, bundles, bug):
         app.logger.debug(fmt('_prepare_paths_jsons_for_revocations:\n{locals}'))
-        order_ids = [cert.authority['digicert']['order_id'] for cert in certs]
+        order_ids = [bundles.authority['digicert']['order_id'] for bundles in bundles]
         calls = self._get_certificate_order_detail(order_ids)
         certificate_ids = [call.recv.json.certificate.id for call in calls]
         paths = [fmt('certificate/{certificate_id}/revoke') for certificate_id in certificate_ids]

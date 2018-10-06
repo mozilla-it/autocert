@@ -135,8 +135,8 @@ def display(ns, json):
     if not hasattr(ns, 'count') or not ns.count:
         json.pop('count', None)
     if ns.verbosity >= 2:
-        certs = []
-        for cert in json['certs']:
+        bundles = []
+        for cert in json['bundles']:
             head, body = head_body(cert)
             common_name = body['common_name']
             crt_sha1 = body['sha1']
@@ -146,8 +146,8 @@ def display(ns, json):
                 web_sha1 = pki.get_sha1(web)
                 verified = web_sha1 == crt_sha1
             cert[head]['verified'] = verified
-            certs += [cert]
-        json['certs'] = certs
+            bundles += [cert]
+        json['bundles'] = bundles
     output_print(json, ns.output)
 
 def do_request(ns):

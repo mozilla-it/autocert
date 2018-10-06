@@ -127,14 +127,14 @@ class DestinationBase(object):
             cert['destinations'][dest] = items
         return cert
 
-    def fetch_certificates(self, certs, *dests):
+    def fetch_certificates(self, bundles, *dests):
         raise NotImplementedError
 
-    def install_certificates(self, note, certs, *dests):
+    def install_certificates(self, note, bundles, *dests):
         raise NotImplementedError
 
-    def update_certificates(self, certs, *dests):
+    def update_certificates(self, bundles, *dests):
         raise NotImplementedError
 
-    def remove_certificates(self, certs, *dests):
+    def remove_certificates(self, bundles, *dests):
         raise NotImplementedError

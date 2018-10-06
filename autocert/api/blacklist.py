@@ -18,14 +18,14 @@ except Exception as ex:
 
 class BlacklistError(AutocertError):
     def __init__(self, names):
-        msg = fmt('these certs caused a blacklist error: {names}')
+        msg = fmt('these bundles caused a blacklist error: {names}')
         super(BlacklistError, self).__init__(msg)
 
-def check(certs, overrides):
+def check(bundles, overrides):
     print('blacklist.check: overrides =', overrides)
     blacklist_names = []
-    for cert in certs:
-        domains = [cert.common_name] + (cert.sans if cert.sans else [])
+    for bundle in bundles:
+        domains = [bundle.common_name] + (bundle.sans if bundle.sans else [])
         print('domains =', domains)
         blacklist_names += sift.fnmatches(domains, BLACKLIST, overrides)
     if blacklist_names:

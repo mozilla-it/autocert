@@ -20,11 +20,6 @@ from utils import pki
 from utils.fmt import *
 from config import CFG
 
-TIMESTAMP = timestamp.utcnow()
-BUNDLE_PATH = str(CFG.bundle.path)
-DIRPATH = os.path.dirname(os.path.abspath(__file__))
-README = open(DIRPATH + '/README.tarfile').read()
-
 FILETYPE = {
     '-----BEGIN RSA PRIVATE KEY-----':          '.key',
     '-----BEGIN CERTIFICATE REQUEST-----':      '.csr',
@@ -118,19 +113,23 @@ class BundleProperties(type):
     properties on classmethods https://stackoverflow.com/a/47334224
     '''
 
-    timestamp = timestamp.utcnow()
+    ZERO = timedelta(0)
 
-    bundle_path = CFG.bundle.path
+    TIMESTAMP = timestamp.utcnow()
+
+    BUNDLE_PATH = str(CFG.bundle.path)
+
+    README = open(os.path.dirname(os.path.abspath(__file__)) + '/README.tarfile').read()
 
     @property
     def files(cls):
-        return glob.glob(BUNDLE_PATH + '/*.tar.gz')
+        return glob.glob(cls.BUNDLE_PATH + '/*.tar.gz')
 
     @property
     def names(cls):
         def get_bundle_name(bundle_file):
             ext = '.tar.gz'
-            if bundle_file.startswith(BUNDLE_PATH) and bundle_file.endswith(ext):
+            if bundle_file.startswith(cls.BUNDLE_PATH) and bundle_file.endswith(ext):
                 return os.path.basename(bundle_file)[0:-len(ext)]
         return [get_bundle_name(bundle_file) for bundle_file in cls.files]
 
@@ -140,18 +139,18 @@ class BundleProperties(type):
         if isint(within):
             within = timedelta(within)
         for bundle_name in sorted(sift.fnmatches(cls.names, bundle_name_pns)):
-            bundle = Bundle.from_disk(bundle_name, bundle_path=BUNDLE_PATH)
+            bundle = Bundle.from_disk(bundle_name, bundle_path=cls.bundle_path)
             if bundle.sans:
                 bundle.sans = sorted(bundle.sans)
             if within:
-                delta = bundle.expiry - TIMESTAMP
-                if timedelta(0) < delta and delta < within:
+                delta = bundle.expiry - cls.TIMESTAMP
+                if cls.ZERO < delta and delta < within:
                     bundles += [bundle]
                 elif expired:
-                    if bundle.expiry < TIMESTAMP:
+                    if bundle.expiry < cls.TIMESTAMP:
                         bundle += [bundle]
                 else:
-                    if bundle.expiry > TIMESTAMP:
+                    if bundle.expiry > cls.TIMESTAMP:
                         bundle += [bundle]
         return bundles
 
@@ -253,7 +252,9 @@ class Bundle(object, metaclass=BundleProperties):
             obj[self.bundle_name]['sans'] = self.sans
         return obj
 
-    def to_disk(self, bundle_path=BUNDLE_PATH):
+    def to_disk(self, bundle_path=None):
+        if bundle_path == None:
+            bundle_path = Bundle.BUNDLE_PATH
         authority = copy.deepcopy(self.authority)
         authority.pop('key', None)
         authority.pop('csr', None)
@@ -271,14 +272,14 @@ class Bundle(object, metaclass=BundleProperties):
         if self.sans:
             obj[self.bundle_name]['sans'] = self.sans
         yml = yaml_format(obj)
-        os.makedirs(str(bundle_path), exist_ok=True)
-        bundle_file = fmt('{bundle_path}/{0}.tar.gz', self.bundle_name)
+        os.makedirs(Bundle.BUNDLE_PATH, exist_ok=True)
+        bundle_file = fmt('{bundle_path}/{1}.tar.gz', self.bundle_name)
         with tarfile.open(bundle_path, 'w:gz') as tar:
-            tar.addfile(tarinfo('README', readme), BytesIO(readme.encode('utf-8')))
+            tar.addfile(tarinfo('README', Bundle.README), BytesIO(Bundle.README.encode('utf-8')))
             for content in (key, csr, crt, yml):
                 if content:
                     tar.addfile(tarinfo(bundle_name, content), BytesIO(content.encode('utf-8')))
-        return bundle_path
+        return bundle_file
 
     @staticmethod
     def from_obj(obj):
@@ -304,8 +305,10 @@ class Bundle(object, metaclass=BundleProperties):
             raise BundleFromJsonError(ex)
         return common_name, timestamp, modhash, key, csr, crt, bug, sans, expiry, authority, destinations
 
-    @staticmethod
-    def from_disk(bundle_name, bundle_path=BUNDLE_PATH):
+    @classmethod
+    def from_disk(cls, bundle_name, bundle_path=None):
+        if bundle_path == None:
+            bundle_path = Bundle.BUNDLE_PATH
         bundle_file = fmt('{bundle_path}/{bundle_name}.tar.gz')
         key, csr, crt, obj, readme = [None] * 5
         with tarfile.open(bundle_file, 'r:gz') as tar:

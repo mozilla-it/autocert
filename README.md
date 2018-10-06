@@ -36,7 +36,7 @@ The modhash can be generated from any SSL file with one of the commands below:
 
 tarfile
 
-The tarfile is a .tar.gz file located at /data/autocert/certs.  It is comprised
+The tarfile is a .tar.gz file located at /data/autocert/bundles.  It is comprised
 of five files: .key, .csr, .crt, .yml and this README.
 
 

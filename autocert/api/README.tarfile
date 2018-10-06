@@ -2,7 +2,7 @@ more info here: https://github.com/mozilla-it/autocert/blob/master/README.md
 
 tarfile
 
-The tarfile is a .tar.gz file located at /data/autocert/certs.  It is comprised
+The tarfile is a .tar.gz file located at /data/autocert/bundles.  It is comprised
 of five files: .key, .csr, .crt, .yml and this README.
 
 

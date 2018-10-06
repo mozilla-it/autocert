@@ -13,7 +13,7 @@ from cli.utils.fmt import *
 from cli.config import CFG
 
 def do_fetch(ns):
-    bundle_path = '/data/autocert/certs'
+    bundle_path = '/data/autocert/bundles'
     src = fmt('{bundle_host}:{bundle_path}/{bundle_name}', **ns.__dict__)
     dst = os.getcwd()
     exitcode, out, err = call(fmt('rsync -avP --rsync-path="sudo rsync" "{src}" "{dst}"'), throw=True)

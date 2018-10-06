@@ -18,10 +18,10 @@ from utils.asyncrequests import AsyncRequests
 from utils.dictionary import merge, head, head_body
 from utils import timestamp
 from utils.fmt import *
-from tardata import Tardata
 from config import CFG
 from app import app
-import tar
+
+from bundle import Bundle
 
 class EndpointBase(object):
     _sorting_funcs = dict(
@@ -42,7 +42,6 @@ class EndpointBase(object):
         self.destinations = AttrDict({
             d: create_destination(d, self.ar, destinations[d], self.args.timeout, self.verbosity) for d in destinations
         })
-        self.tardata = Tardata(self.cfg.tar.dirpath, self.verbosity)
 
     @property
     def authority(self):
@@ -50,7 +49,7 @@ class EndpointBase(object):
 
     @property
     def timestamp(self):
-        return self.tardata.timestamp
+        raise NotImplementedError('IS TIMESTAMP PROPERTY CALLED???')
 
     @property
     def calls(self):
@@ -63,11 +62,11 @@ class EndpointBase(object):
     def execute(self, **kwargs):
         raise NotImplementedError
 
-    def transform(self, certs):
-        certs = [cert.transform(self.verbosity) for cert in sorted(certs, key=self.sorting_func)]
+    def transform(self, bundles):
+        bundles = [cert.transform(self.verbosity) for cert in sorted(bundles, key=self.sorting_func)]
         json = dict(
-            count=len(certs),
-            certs=certs,
+            count=len(bundles),
+            bundles=bundles,
         )
         if self.args.call_detail:
             calls = [self.transform_call(call) for call in self.ar.calls]
