@@ -243,7 +243,7 @@ class Bundle(object, metaclass=BundleProperties):
                 'authority': self.authority,
                 'destinations': self.destinations,
                 'tardata': {
-                    self.bundle_name: self.files
+                    self.bundle_tar: self.files
                 },
             }
         }
