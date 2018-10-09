@@ -14,13 +14,13 @@ class RevokeEndpoint(EndpointBase):
     def execute(self, **kwargs):
         status = 202
         bundle_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.bundle_name_pns]
-        bundles = Bundle.load_bundles(bundle_name_pns)
+        bundles = Bundle.bundles(bundle_name_pns)
         blacklist.check(bundles, self.args.blacklist_overrides)
         bundles = self.authority.revoke_certificates(
             bundles,
             self.args.bug)
         for bundle in bundles:
-            bundle.expiry = Bundle.TIMESTAMP
+            bundle.expiry = Bundle.timestamp
             bundle.to_disk()
         json = self.transform(bundles)
         return json, status

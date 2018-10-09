@@ -33,7 +33,7 @@ class UpdateEndpoint(EndpointBase):
     def execute(self, **kwargs):
         status = 201
         bundle_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.bundle_name_pns]
-        bundles = Bundle.load_bundles(bundle_name_pns)
+        bundles = Bundle.bundles(bundle_name_pns)
         blacklist.check(bundles, self.args.blacklist_overrides)
         authority = self.args.get('authority', None)
         destinations = self.args.get('destinations', None)

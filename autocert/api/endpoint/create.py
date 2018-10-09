@@ -44,9 +44,9 @@ class CreateEndpoint(EndpointBase):
             self.args.validity_years,
             csr,
             self.args.bug,
-            list(self.args.sans),
-            self.args.repeat_delta,
-            self.args.whois_check)
+            sans=sorted(list(self.args.sans)),
+            repeat_delta=self.args.repeat_delta,
+            whois_check=self.args.whois_check)
         bundle = Bundle(
             self.args.common_name,
             modhash,
@@ -54,9 +54,9 @@ class CreateEndpoint(EndpointBase):
             csr,
             crt,
             self.args.bug,
-            sorted(list(self.args.sans)),
-            expiry,
-            authority)
+            sans=sorted(list(self.args.sans)),
+            expiry=expiry,
+            authority=authority)
         bundle.to_disk()
         if self.args.destinations:
             note = 'bug ' + bug

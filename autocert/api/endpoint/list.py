@@ -24,7 +24,7 @@ class ListEndpoint(EndpointBase):
     def execute(self, **kwargs):
         status = 200
         bundle_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.bundle_name_pns]
-        bundles = Bundle.load_bundles(
+        bundles = Bundle.bundles(
             bundle_name_pns,
             within=self.args.within,
             expired=self.args.expired)
@@ -34,9 +34,9 @@ class ListEndpoint(EndpointBase):
             bundles1 = self.authorities.digicert.display_certificates(bundles)
             for name, dests in self.args.destinations.items():
                 pfmt('name={name} dests={dests}')
-                bundles2.extend(self.destinations[names].fetch_certificates(bundles1, dests))
+                bundles2.extend(self.destinations[name].fetch_certificates(bundles1, dests))
         else:
-            bundles2 = bundles2
+            bundles2 = bundles
         json = self.transform(bundles2)
         return json, status
 

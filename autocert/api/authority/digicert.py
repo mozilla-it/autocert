@@ -189,7 +189,6 @@ class DigicertAuthority(AuthorityBase):
         call = self.get(fmt('domain?container_id={container_id}'))
         if call.recv.status != 200:
             raise DigicertError(call)
-        dbg(json=dict(call.recv.json))
         return [domain for domain in call.recv.json.domains if domain.is_active and domain.organization.id == organization_id]
 
     def _validate_domains(self, organization_id, container_id, domains, whois_check=False):
@@ -203,8 +202,6 @@ class DigicertAuthority(AuthorityBase):
                 return True
             elif fld in active_domains:
                 return True
-            else: #FIXME: this should be removed
-                dbg(domain, 'nor', fld, 'in', active_domains)
             return False
         def _whois_email(domain):
             app.logger.debug(fmt('_whois_email:\n{locals}'))

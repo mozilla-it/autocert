@@ -33,6 +33,7 @@ from cli.utils.fmt import *
 from cli.utils import pki
 from cli.config import CFG
 from cli import requests
+from requests.exceptions import ConnectionError
 
 LOC = [
     'cli',
@@ -119,7 +120,7 @@ def web_crt(hostname, timeout=0.2):
     import socket
     import requests
     try:
-        r = requests.get('https://'+hostname) #FIXME: I wish I didn't do this
+        r = requests.get('https://'+hostname, timeout=0.1) #FIXME: I wish I didn't do this
         if r.status_code in (200, 301, 302, 303, 304):
             with socket.create_connection((hostname, 443), timeout=timeout) as sock:
                 ctx = ssl.create_default_context()
@@ -127,8 +128,11 @@ def web_crt(hostname, timeout=0.2):
                     der = sslsock.getpeercert(True)
                     pem = ssl.DER_cert_to_PEM_cert(der)
                     return pem
+    except ConnectionError as ce:
+        pass
     except Exception as ex:
-        print(ex)
+        import traceback
+        traceback.print_exc()
     return None
 
 def display(ns, json):
@@ -168,9 +172,7 @@ def do_request(ns):
         print('status =', status)
         try:
             output_print(response.json(), ns.output)
-            print('YEP')
         except:
-            print('NOPE')
             print('response.text =', response.text)
         return -1
     return 0

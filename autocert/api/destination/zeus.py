@@ -50,7 +50,7 @@ class ZeusDestination(DestinationBase):
             raise ex
         return True
 
-    def fetch_certificates(self, bundles, *dests):
+    def fetch_certificates(self, bundles, dests):
         app.logger.info(fmt('fetch_certificates:\n{locals}'))
         details = self._get_installed_certificates_details(bundles, *dests)
         if details:

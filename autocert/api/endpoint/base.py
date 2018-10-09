@@ -25,9 +25,9 @@ from bundle import Bundle
 
 class EndpointBase(object):
     _sorting_funcs = dict(
-        default=lambda cert: cert.common_name,
-        timestamp=lambda cert: cert.timestamp,
-        expiry=lambda cert: cert.expiry)
+        default=lambda bundle: bundle.common_name,
+        timestamp=lambda bundle: bundle.timestamp,
+        expiry=lambda bundle: bundle.expiry)
 
     def __init__(self, cfg, args):
         self.ar = AsyncRequests()
@@ -63,7 +63,7 @@ class EndpointBase(object):
         raise NotImplementedError
 
     def transform(self, bundles):
-        bundles = [cert.transform(self.verbosity) for cert in sorted(bundles, key=self.sorting_func)]
+        bundles = [bundle.transform(self.verbosity) for bundle in sorted(bundles, key=self.sorting_func)]
         json = dict(
             count=len(bundles),
             bundles=bundles,
