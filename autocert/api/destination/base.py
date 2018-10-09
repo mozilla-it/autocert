@@ -115,10 +115,10 @@ class DestinationBase(object):
     def deletes(self, paths=None, dests=None, jsons=None, **kw):
         return self.requests('DELETE', paths=paths, dests=dests, jsons=jsons, **kw)
 
-    def has_connectivity(self, timeout, *dests):
+    def has_connectivity(self, timeout, dests):
         raise NotImplementedError
 
-    def add_destinations(self, cert, *dests, **items):
+    def add_destinations(self, cert, dests, **items):
         '''
         does this belong here?
         '''
@@ -127,14 +127,14 @@ class DestinationBase(object):
             cert['destinations'][dest] = items
         return cert
 
-    def fetch_certificates(self, bundles, *dests):
+    def fetch_certificates(self, bundles, dests):
         raise NotImplementedError
 
-    def install_certificates(self, note, bundles, *dests):
+    def install_certificates(self, note, bundles, dests):
         raise NotImplementedError
 
-    def update_certificates(self, bundles, *dests):
+    def update_certificates(self, bundles, dests):
         raise NotImplementedError
 
-    def remove_certificates(self, bundles, *dests):
+    def remove_certificates(self, bundles, dests):
         raise NotImplementedError

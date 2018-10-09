@@ -61,6 +61,6 @@ class CreateEndpoint(EndpointBase):
         if self.args.destinations:
             note = 'bug ' + bug
             for name, dests in self.args.destinations.items():
-                bundle = self.destinations[name].install_certificates(note, [bundle], *dests)[0]
+                bundle = self.destinations[name].install_certificates(note, [bundle], dests)[0]
         json = self.transform([bundle])
         return json, status

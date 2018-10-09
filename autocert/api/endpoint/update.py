@@ -66,5 +66,5 @@ class UpdateEndpoint(EndpointBase):
         installed_bundles = []
         note = 'bug {bug}'.format(**self.args)
         for name, dests in self.args.destinations.items():
-            installed_bundles += self.destinations[name].install_certificates(note, bundles, *dests)
+            installed_bundles += self.destinations[name].install_certificates(note, bundles, dests)
         return installed_bundles

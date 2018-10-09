@@ -31,7 +31,7 @@ class ZeusDestination(DestinationBase):
     def __init__(self, ar, cfg, verbosity):
         super(ZeusDestination, self).__init__(ar, cfg, verbosity)
 
-    def has_connectivity(self, timeout, *dests):
+    def has_connectivity(self, timeout, dests):
         app.logger.info(fmt('has_connectivity:\n{locals}'))
         try:
             calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=timeout)
@@ -52,7 +52,7 @@ class ZeusDestination(DestinationBase):
 
     def fetch_certificates(self, bundles, dests):
         app.logger.info(fmt('fetch_certificates:\n{locals}'))
-        details = self._get_installed_certificates_details(bundles, *dests)
+        details = self._get_installed_certificates_details(bundles, dests)
         if details:
             for bundle in bundles:
                 detail_key = (bundle.friendly_common_name, bundle.crt[:40])
@@ -67,21 +67,21 @@ class ZeusDestination(DestinationBase):
                         bundle.destinations['zeus'] = zeus_detail
         return bundles
 
-    def install_certificates(self, note, bundles, *dests):
+    def install_certificates(self, note, bundles, dests):
         paths, jsons = zip(*[(ZEUS_PATH+bundle.friendly_common_name, compose_json(bundle.key, bundle.csr, bundle.crt, note)) for bundle in bundles])
 
         app.logger.info(fmt('install_certificates:\n{locals}'))
         calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
-        bundles = self.fetch_certificates(bundles, *dests)
+        bundles = self.fetch_certificates(bundles, dests)
         return bundles
 
-    def update_certificates(self, bundles, *dests):
+    def update_certificates(self, bundles, dests):
         raise NotImplementedError
 
-    def remove_certificates(self, bundles, *dests):
+    def remove_certificates(self, bundles, dests):
         raise NotImplementedError
 
-    def _get_installed_summary(self, bundles, *dests):
+    def _get_installed_summary(self, bundles, dests):
         app.logger.debug(fmt('_get_installed_summary:\n{locals}'))
         friendly_common_names = [bundle.friendly_common_name for bundle in bundles]
         calls = self.gets(paths=[ZEUS_PATH], dests=dests, timeout=10, verify_ssl=False)
@@ -95,9 +95,9 @@ class ZeusDestination(DestinationBase):
                     summary += [(child.name, ZEUS_PATH+child.name, dest)]
         return summary
 
-    def _get_installed_certificates_details(self, bundles, *dests):
+    def _get_installed_certificates_details(self, bundles, dests):
         app.logger.debug(fmt('_get_installed_certificates_details:\n{locals}'))
-        summary = self._get_installed_summary(bundles, *dests)
+        summary = self._get_installed_summary(bundles, dests)
         details = {}
         if summary:
             common_names, paths, dests = zip(*summary)
