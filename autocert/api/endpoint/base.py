@@ -79,18 +79,18 @@ class EndpointBase(object):
             return name
         return {name: dict(send=call.send, recv=call.recv)}
 
-    def sanitize(self, cert_name_pn, ext='.tar.gz'):
-        if cert_name_pn.endswith(ext):
-            cert_name_pn = cert_name_pn[0:-len(ext)]
-        cert_name_pn = os.path.basename(cert_name_pn)
+    def sanitize(self, bundle_name_pn, ext='.tar.gz'):
+        if bundle_name_pn.endswith(ext):
+            bundle_name_pn = bundle_name_pn[0:-len(ext)]
+        bundle_name_pn = os.path.basename(bundle_name_pn)
         regex = re.compile('([A-Za-z0-9\.\-_]+)(@([A-Fa-f0-9]{8}))?')
-        match = regex.search(cert_name_pn)
+        match = regex.search(bundle_name_pn)
         if match:
             common_name, _, modhash = match.groups()
             if modhash:
-                return cert_name_pn
+                return bundle_name_pn
             if common_name.endswith('*'):
                 return common_name
             return common_name + '*'
-        return cert_name_pn
+        return bundle_name_pn
 

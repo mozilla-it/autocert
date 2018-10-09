@@ -21,11 +21,11 @@ class LetsEncryptAuthority(AuthorityBase):
     def __init__(self, ar, cfg, verbosity):
         super(LetsEncryptAuthority, self).__init__(ar, cfg, verbosity)
 
-    def display(self, cert_name):
+    def display(self, bundle_name):
         raise NotImplementedError
 
-    def renew_certificate(self, cert_name):
+    def renew_certificate(self, bundle_name):
         raise NotImplementedError
 
-    def revoke_certificate(self, cert_name):
+    def revoke_certificate(self, bundle_name):
         raise NotImplementedError

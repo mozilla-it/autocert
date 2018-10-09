@@ -179,7 +179,6 @@ class Bundle(object, metaclass=BundleProperties):
     def __eq__(self, bundle):
         return (
             self.common_name    == bundle.common_name and
-            self.timestamp      == bundle.timestamp and
             self.modhash        == bundle.modhash and
             self.key            == bundle.key and
             self.csr            == bundle.csr and
@@ -188,7 +187,8 @@ class Bundle(object, metaclass=BundleProperties):
             self.sans           == bundle.sans and
             self.expiry         == bundle.expiry and
             self.authority      == bundle.authority and
-            self.destinations   == bundle.destinations)
+            self.destinations   == bundle.destinations and
+            self.timestamp      == bundle.timestamp)
 
     @property
     def modhash_abbrev(self):

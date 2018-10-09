@@ -140,8 +140,8 @@ def display(ns, json):
         json.pop('count', None)
     if ns.verbosity >= 2:
         bundles = []
-        for cert in json['bundles']:
-            head, body = head_body(cert)
+        for bundle in json['bundles']:
+            head, body = head_body(bundle)
             common_name = body['common_name']
             crt_sha1 = body['sha1']
             web = web_crt(common_name)
@@ -149,8 +149,8 @@ def display(ns, json):
             if web:
                 web_sha1 = pki.get_sha1(web)
                 verified = web_sha1 == crt_sha1
-            cert[head]['verified'] = verified
-            bundles += [cert]
+            bundle[head]['verified'] = verified
+            bundles += [bundle]
         json['bundles'] = bundles
     output_print(json, ns.output)
 

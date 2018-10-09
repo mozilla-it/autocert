@@ -32,7 +32,7 @@ class UpdateEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         status = 201
-        bundle_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.bundle_name_pns]
+        bundle_name_pns = [self.sanitize(bundle_name_pn) for bundle_name_pn in self.args.bundle_name_pns]
         bundles = Bundle.bundles(bundle_name_pns)
         blacklist.check(bundles, self.args.blacklist_overrides)
         authority = self.args.get('authority', None)
@@ -55,11 +55,11 @@ class UpdateEndpoint(EndpointBase):
             self.args.sans,
             self.args.repeat_delta,
             self.args.whois_check)
-        for cert, crt, expiry, authority in zip(bundles, crts, expiries, authorities):
-            cert.crt = crt
-            cert.expiry = expiry
-            cert.authority = authority
-            self.tardata.update_cert(cert)
+        for bundle, crt, expiry, authority in zip(bundles, crts, expiries, authorities):
+            bundle.crt = crt
+            bundle.expiry = expiry
+            bundle.authority = authority
+            bundle.to_disk()
         return bundles
 
     def deploy(self, bundles, **kwargs):

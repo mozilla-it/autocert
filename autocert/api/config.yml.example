@@ -24,7 +24,7 @@ key:
     encoding: PEM
 
 tar:
-    # location where the <cert_name>.tar.gz files are stored on the api server
+    # location where the <bundle_name>.tar.gz files are stored on the api server
     path: /data/autocert/bundles
 
 # list of available authorities from which we get our .crt files

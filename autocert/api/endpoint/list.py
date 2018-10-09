@@ -23,7 +23,7 @@ class ListEndpoint(EndpointBase):
 
     def execute(self, **kwargs):
         status = 200
-        bundle_name_pns = [self.sanitize(cert_name_pn) for cert_name_pn in self.args.bundle_name_pns]
+        bundle_name_pns = [self.sanitize(bundle_name_pn) for bundle_name_pn in self.args.bundle_name_pns]
         bundles = Bundle.bundles(
             bundle_name_pns,
             within=self.args.within,
