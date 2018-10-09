@@ -7,6 +7,8 @@ from pprint import pformat
 from app import app
 import blacklist
 
+from bundle import Bundle
+
 class RevokeEndpoint(EndpointBase):
     def __init__(self, cfg, verbosity):
         super(RevokeEndpoint, self).__init__(cfg, verbosity)
