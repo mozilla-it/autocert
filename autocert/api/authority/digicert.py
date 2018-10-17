@@ -257,17 +257,17 @@ class DigicertAuthority(AuthorityBase):
         paths = []
         jsons = []
         for bundle, call in zip(bundles, calls):
-            bundles.sans=combine_sans(bundles.sans, sans_to_add)
+            bundle.sans=combine_sans(bundle.sans, sans_to_add)
             path, json = self._prepare_path_json(
                 organization_id,
                 container_id,
-                bundles.common_name,
+                bundle.common_name,
                 validity_years,
-                bundles.csr,
+                bundle.csr,
                 bug,
-                sans=bundles.sans,
+                sans=bundle.sans,
                 whois_check=whois_check,
-                renewal_of_order_id=bundles.authority['digicert']['order_id'])
+                renewal_of_order_id=bundle.authority['digicert']['order_id'])
             paths += [path]
             jsons += [json]
         return paths, jsons
