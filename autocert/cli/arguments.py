@@ -270,9 +270,9 @@ ARGS = {
         help='default="%(default)s"; set the host where the tar bundles are stored'
     ),
     ('-e', '--encrypt'): dict(
-        dest='from_to',
         metavar=('from', 'to'),
         action=EncryptAction,
+        default=False,
         nargs=2,
         help='provide the pgp fingerprint long id <from> and <to> to be used with gpg encrypt and signing; note: will result in encrypted bundle only'
     ),
