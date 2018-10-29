@@ -6,3 +6,4 @@ requests>=2.11.1
 simplejson>=3.16.0
 ruamel.yaml>=0.12.15
 cryptography>=1.8.1
+pyopenssl>=18.0.0
