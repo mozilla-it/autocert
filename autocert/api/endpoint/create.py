@@ -59,7 +59,7 @@ class CreateEndpoint(EndpointBase):
             authority=authority)
         bundle.to_disk()
         if self.args.destinations:
-            note = 'bug ' + bug
+            note = 'bug ' + self.args.bug
             for name, dests in self.args.destinations.items():
                 bundle = self.destinations[name].install_certificates(note, [bundle], dests)[0]
         json = self.transform([bundle])
