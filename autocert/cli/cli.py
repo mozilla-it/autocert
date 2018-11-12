@@ -33,7 +33,7 @@ from cli.utils.fmt import *
 from cli.utils import pki
 from cli.config import CFG
 from cli import requests
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, ReadTimeout
 
 LOC = [
     'cli',
@@ -128,8 +128,8 @@ def web_crt(hostname, timeout=0.2):
                     der = sslsock.getpeercert(True)
                     pem = ssl.DER_cert_to_PEM_cert(der)
                     return pem
-    except ConnectionError as ce:
-        pass
+    except ConnectionError as ce: pass
+    except ReadTimeout as rt: pass
     except Exception as ex:
         import traceback
         traceback.print_exc()
