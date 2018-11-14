@@ -138,7 +138,7 @@ def web_crt(hostname, timeout=0.2):
 def display(ns, json):
     if not hasattr(ns, 'count') or not ns.count:
         json.pop('count', None)
-    if ns.verbosity >= 2:
+    if ns.verbosity >= 2 and 'bundles' in json:
         bundles = []
         for bundle in json['bundles']:
             head, body = head_body(bundle)
