@@ -117,7 +117,9 @@ def config():
 @app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():
     json = request.json if request.json else {}
-    print(dict(headers=request.headers))
+    from pprint import pprint
+    print(dict(headers=dict(request.headers)))
+    print(dict(content_type=request.content_type))
     cfg = json.get('cfg', None)
     log_request(
         json.get('user', 'unknown'),
