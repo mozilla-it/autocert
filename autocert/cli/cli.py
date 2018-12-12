@@ -160,6 +160,7 @@ def do_request(ns):
     json = jsonify(ns, destinations=destinations if destinations else None)
     validate(ns.api_url, throw=True)
     headers = {
+        'Accept': 'text/plain',
         'Content-Type': 'application/json',
     }
     if not json:
