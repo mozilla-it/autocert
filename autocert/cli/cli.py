@@ -159,7 +159,12 @@ def do_request(ns):
     destinations = dictify(ns.destinations) if hasattr(ns, 'destinations') else None
     json = jsonify(ns, destinations=destinations if destinations else None)
     validate(ns.api_url, throw=True)
-    response = requests.request(method, ns.api_url / 'autocert', json=json)
+    headers = {
+        'Content-Type': 'application/json',
+    }
+    if not json:
+        raise Exception(fmt('json should not be None or {}; json={json}'))
+    response = requests.request(method, ns.api_url / 'autocert', headers=headers, json=json)
     status = response.status_code
     if status in (200, 201, 202, 203, 204):
         try:
@@ -253,4 +258,6 @@ def main(args):
         output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)
 
+    from pprint import pprint
+    pprint(dict(ns=ns.__dict__))
     return ns.func(ns)
