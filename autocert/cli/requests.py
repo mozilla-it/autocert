@@ -7,6 +7,8 @@ import requests
 import getpass
 import platform
 
+from requests import Session, Request
+
 from urllib.parse import urlparse
 
 from cli.utils.fmt import *
