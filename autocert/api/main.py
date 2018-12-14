@@ -68,6 +68,11 @@ LOGGING_LEVELS = {
     50: 'FATAL',
 }
 
+class MissingJsonError(AutocertError):
+    def __init__(self, json):
+        message = fmt('empty json error ={0}', json)
+        super(MissingJsonError, self).__init__(message)
+
 class EmptyJsonError(AutocertError):
     def __init__(self, json):
         message = fmt('empty json error ={0}', json)
@@ -116,10 +121,9 @@ def config():
 
 @app.route('/autocert', methods=['GET', 'PUT', 'POST', 'DELETE'])
 def route():
-    json = request.json if request.json else {}
-    from pprint import pprint
-    print(dict(headers=dict(request.headers)))
-    print(dict(content_type=request.content_type))
+    json = request.json
+    if not json:
+        raise MissingJsonError(json)
     cfg = json.get('cfg', None)
     log_request(
         json.get('user', 'unknown'),

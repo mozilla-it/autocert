@@ -165,27 +165,7 @@ def do_request(ns):
     }
     if not json:
         raise Exception(fmt('json should not be None or {}; json={json}'))
-    #response = requests.request(method, ns.api_url / 'autocert', headers=headers, json=json)
-    def pretty_print(prepared):
-        """
-        At this point it is completely built and ready
-        to be fired; it is "prepared".
-
-        However pay attention at the formatting used in
-        this function because it is programmed to be pretty
-        printed and may differ from the actual request.
-        """
-        print('{}\n{}\n{}\n\n{}'.format(
-            '-----------START-----------',
-            prepared.method + ' ' + prepared.url,
-            '\n'.join('{}: {}'.format(k, v) for k, v in prepared.headers.items()),
-            prepared.body,
-        ))
-    request = requests.Request(method, ns.api_url / 'autocert', headers=headers, json=json)
-    prepared = request.prepare()
-    pretty_print(prepared)
-    session = requests.Session()
-    response = session.send(prepared, verify=False)
+    response = requests.request(method, ns.api_url / 'autocert', headers=headers, json=json)
     status = response.status_code
     if status in (200, 201, 202, 203, 204):
         try:
@@ -279,6 +259,4 @@ def main(args):
         output_print(dict(ns=ns.__dict__), ns.output)
         sys.exit(0)
 
-    from pprint import pprint
-    pprint(dict(ns=ns.__dict__))
     return ns.func(ns)
