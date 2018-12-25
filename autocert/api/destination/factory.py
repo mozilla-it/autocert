@@ -7,13 +7,12 @@ destination.factory
 from destination.zeus import ZeusDestination
 from destination.aws import AwsDestination
 from exceptions import AutocertError
-from utils.fmt import *
 from config import CFG
 from app import app
 
 class DestinationFactoryError(AutocertError):
     def __init__(self, destination):
-        msg = fmt('destination factory error with {destination}')
+        msg = f'destination factory error with {destination}'
         super(DestinationFactoryError, self).__init__(msg)
 
 def create_destination(destination, ar, cfg, timeout, verbosity):

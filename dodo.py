@@ -28,7 +28,6 @@ AC_APP_MODULE=os.environ.get('AC_APP_MODULE', 'main:app')
 
 sys.path.insert(0, APPDIR)
 from config import _update_config, CONFIG_YML, DOT_CONFIG_YML
-from utils.fmt import *
 from utils.shell import call
 from utils.timestamp import utcnow, datetime2int
 
@@ -53,13 +52,13 @@ class UnknownPkgmgrError(Exception):
 
 def get_ac_envs():
     return [
-        fmt('AC_UID={AC_UID}'),
-        fmt('AC_GID={AC_GID}'),
-        fmt('AC_USER={AC_USER}'),
-        fmt('AC_APP_PORT={AC_APP_PORT}'),
-        fmt('AC_APP_TIMEOUT={AC_APP_TIMEOUT}'),
-        fmt('AC_APP_WORKERS={AC_APP_WORKERS}'),
-        fmt('AC_APP_MODULE={AC_APP_MODULE}'),
+        f'AC_UID={AC_UID}',
+        f'AC_GID={AC_GID}',
+        f'AC_USER={AC_USER}',
+        f'AC_APP_PORT={AC_APP_PORT}',
+        f'AC_APP_TIMEOUT={AC_APP_TIMEOUT}',
+        f'AC_APP_WORKERS={AC_APP_WORKERS}',
+        f'AC_APP_MODULE={AC_APP_MODULE}',
     ]
 
 def get_env_vars(regex=None):
@@ -68,7 +67,7 @@ def get_env_vars(regex=None):
 def check_hash(program):
     from subprocess import check_call, CalledProcessError, PIPE
     try:
-        check_call(fmt('hash {program}'), shell=True, stdout=PIPE, stderr=PIPE)
+        check_call(f'hash {program}', shell=True, stdout=PIPE, stderr=PIPE)
         return True
     except CalledProcessError:
         return False
@@ -96,7 +95,7 @@ def task_count():
     scandir = os.path.dirname(__file__)
     return {
         'actions': [
-            fmt('cloc {excludes} {scandir}'),
+            f'cloc {excludes} {scandir}',
         ],
         'uptodate': [
             lambda: not check_hash('cloc'),
@@ -179,13 +178,15 @@ def task_pull():
     pull = 'git pull --rebase'
     update = 'git submodule update --remote'
     dirty = 'echo "refusing to \'{cmd}\' because the tree is dirty"'
-    dirty_pull = fmt(dirty, cmd=pull)
-    dirty_update = fmt(dirty, cmd=update)
+    dirty_pull = dirty.format(cmd=pull)
+    dirty_update = dirty.format(cmd=update)
+
+
 
     yield {
         'name': 'mozilla-it/autocert',
         'actions': [
-            fmt('if {test}; then {pull}; else {dirty_pull}; exit 1; fi'),
+            f'if {test}; then {pull}; else {dirty_pull}; exit 1; fi',
         ],
     }
 
@@ -193,7 +194,7 @@ def task_pull():
         yield {
             'name': submod,
             'actions': [
-                fmt('cd {submod} && if {test}; then {update}; else {dirty_update}; exit 1; fi'),
+                f'cd {submod} && if {test}; then {update}; else {dirty_update}; exit 1; fi',
             ],
         }
 
@@ -210,9 +211,9 @@ def task_test():
         'actions': [
             'virtualenv --python=$(which python3) venv',
             'venv/bin/pip3 install --upgrade pip',
-            fmt('venv/bin/pip3 install -r {REPOROOT}/requirements.txt'),
-            fmt('venv/bin/pip3 install -r {TESTDIR}/requirements.txt'),
-            fmt('{PYTHONPATH} venv/bin/python3 -m pytest -s -vv tests/api'),
+            f'venv/bin/pip3 install -r {REPOROOT}/requirements.txt',
+            f'venv/bin/pip3 install -r {TESTDIR}/requirements.txt',
+            f'{PYTHONPATH} venv/bin/python3 -m pytest -s -vv tests/api',
         ],
     }
 
@@ -222,7 +223,7 @@ def task_version():
     '''
     return {
         'actions': [
-            fmt('git describe --abbrev=7 | xargs echo -n > {APPDIR}/VERSION'),
+            f'git describe --abbrev=7 | xargs echo -n > {APPDIR}/VERSION',
         ],
     }
 
@@ -238,8 +239,8 @@ def task_savelogs():
             'dockercompose'
         ],
         'actions': [
-            fmt('mkdir -p {LOGDIR}'),
-            fmt('cd {PROJDIR} && docker-compose logs > {LOGDIR}/{timestamp}.log'),
+            f'mkdir -p {LOGDIR}',
+            f'cd {PROJDIR} && docker-compose logs > {LOGDIR}/{timestamp}.log',
         ]
     }
 
@@ -248,18 +249,18 @@ def task_environment():
     set the env vars to be used inside of the container
     '''
     def add_env_vars():
-        pfmt('{PROJDIR}/docker-compose.yml.wo-envs -> {PROJDIR}/docker-compose.yml')
+        print(f'{PROJDIR}/docker-compose.yml.wo-envs -> {PROJDIR}/docker-compose.yml')
         print('adding env vars to docker-compose.yml file')
-        dcy = yaml.safe_load(open(fmt('{PROJDIR}/docker-compose.yml.wo-envs')))
+        dcy = yaml.safe_load(open(f'{PROJDIR}/docker-compose.yml.wo-envs'))
         for svc in dcy['services'].keys():
             envs = dcy['services'][svc].get('environment', [])
             envs += get_ac_envs()
             envs += get_env_vars(re.compile('(no|http|https)_proxy', re.IGNORECASE))
-            pfmt('{svc}:')
+            print(f'{svc}:')
             for env in envs:
-                pfmt('  - {env}')
+                print(f'  - {env}')
             dcy['services'][svc]['environment'] = envs
-        with open(fmt('{PROJDIR}/docker-compose.yml'), 'w') as f:
+        with open(f'{PROJDIR}/docker-compose.yml', 'w') as f:
             yaml.dump(dcy, f, default_flow_style=False)
 
     return {
@@ -279,19 +280,19 @@ def task_tls():
     env = 'PASS=TEST'
     envp = 'env:PASS'
     targets = [
-        fmt('{tls}/{name}.key'),
-        fmt('{tls}/{name}.crt'),
+        f'{tls}/{name}.key',
+        f'{tls}/{name}.crt',
     ]
     subject = '/C=US/ST=Oregon/L=Portland/O=Autocert Server/OU=Server/CN=0.0.0.0'
     def uptodate():
         return all([os.path.isfile(t) for t in targets])
     return {
         'actions': [
-            fmt('mkdir -p {tls}'),
-            fmt('{env} openssl genrsa -aes256 -passout {envp} -out {tls}/{name}.key 2048'),
-            fmt('{env} openssl req -new -passin {envp} -subj "{subject}" -key {tls}/{name}.key -out {tls}/{name}.csr'),
-            fmt('{env} openssl x509 -req -days 365 -in {tls}/{name}.csr -signkey {tls}/{name}.key -passin {envp} -out {tls}/{name}.crt'),
-            fmt('{env} openssl rsa -passin {envp} -in {tls}/{name}.key -out {tls}/{name}.key'),
+            f'mkdir -p {tls}',
+            f'{env} openssl genrsa -aes256 -passout {envp} -out {tls}/{name}.key 2048',
+            f'{env} openssl req -new -passin {envp} -subj "{subject}" -key {tls}/{name}.key -out {tls}/{name}.csr',
+            f'{env} openssl x509 -req -days 365 -in {tls}/{name}.csr -signkey {tls}/{name}.key -passin {envp} -out {tls}/{name}.crt',
+            f'{env} openssl rsa -passin {envp} -in {tls}/{name}.key -out {tls}/{name}.key',
         ],
         'targets': targets,
         'uptodate': [uptodate],
@@ -314,8 +315,8 @@ def task_deploy():
             'savelogs',
         ],
         'actions': [
-            fmt('cd {PROJDIR} && docker-compose build'),
-            fmt('cd {PROJDIR} && docker-compose up --remove-orphans -d'),
+            f'cd {PROJDIR} && docker-compose build',
+            f'cd {PROJDIR} && docker-compose up --remove-orphans -d',
         ],
     }
 
@@ -326,10 +327,10 @@ def task_rmimages():
     query = '`docker images -q -f dangling=true`'
     return {
         'actions': [
-            fmt('docker rmi {query}'),
+            f'docker rmi {query}',
         ],
         'uptodate': [
-            fmt('[ -z "{query}" ] && exit 0 || exit 1'),
+            f'[ -z "{query}" ] && exit 0 || exit 1',
         ],
     }
 
@@ -340,10 +341,10 @@ def task_rmvolumes():
     query = '`docker volume ls -q -f dangling=true`'
     return {
         'actions': [
-            fmt('docker volume rm {query}'),
+            f'docker volume rm {query}',
         ],
         'uptodate': [
-            fmt('[ -z "{query}" ] && exit 0 || exit 1'),
+            f'[ -z "{query}" ] && exit 0 || exit 1',
         ],
     }
 
@@ -353,7 +354,7 @@ def task_logs():
     '''
     return {
         'actions': [
-            fmt('cd {PROJDIR} && docker-compose logs'),
+            f'cd {PROJDIR} && docker-compose logs',
         ],
     }
 
@@ -368,7 +369,7 @@ def task_config():
     log_level = get_var('LOG_LEVEL', log_level)
     if log_level not in LOG_LEVELS:
         raise UnknownLogLevelError(log_level)
-    punch = fmt('''
+    punch = f'''
     logging:
         loggers:
             api:
@@ -376,12 +377,12 @@ def task_config():
         handlers:
             console:
                 level: {log_level}
-    ''')
+    '''
     return {
         'actions': [
-            fmt('echo "cp {CONFIG_YML}\n-> {DOT_CONFIG_YML}"'),
-            fmt('echo "setting LOG_LEVEL={log_level}"'),
-            fmt('cp {CONFIG_YML} {DOT_CONFIG_YML}'),
+            f'echo "cp {CONFIG_YML}\n-> {DOT_CONFIG_YML}"',
+            f'echo "setting LOG_LEVEL={log_level}"',
+            f'cp {CONFIG_YML} {DOT_CONFIG_YML}',
             lambda: _update_config(DOT_CONFIG_YML, yaml.safe_load(punch)),
         ]
     }
@@ -392,18 +393,18 @@ def task_example():
     cp|strip config.yml -> config.yml.example
     '''
     apikey = '82_CHAR_APIKEY'
-    punch = fmt('''
+    punch = f'''
     authorities:
         digicert:
             apikey: {apikey}
     destinations:
         zeus:
             apikey: {apikey}
-    ''')
+    '''
     return {
         'actions': [
-            fmt('cp {CONFIG_YML}.example {CONFIG_YML}.bak'),
-            fmt('cp {CONFIG_YML} {CONFIG_YML}.example'),
+            f'cp {CONFIG_YML}.example {CONFIG_YML}.bak',
+            f'cp {CONFIG_YML} {CONFIG_YML}.example',
             lambda: _update_config(CONFIG_YML+'.example', yaml.safe_load(punch)),
         ],
     }
@@ -484,12 +485,12 @@ def task_zeus():
     '''
     image = 'zeus17.3'
     for num in (1, 2):
-        container = fmt('{image}_test{num}')
+        container = f'{image}_test{num}'
         yield {
             'task_dep': ['prune'],
             'name': container,
-            'actions': [fmt('docker run -d -p 909{num}:9090 --name {container} {image}')],
-            'uptodate': [fmt('[ -n "`docker ps -q -f name={container}`" ] && exit 0 || exit 1')]
+            'actions': [f'docker run -d -p 909{num}:9090 --name {container} {image}'],
+            'uptodate': [f'[ -n "`docker ps -q -f name={container}`" ] && exit 0 || exit 1']
         }
 
 def task_stop():
@@ -500,9 +501,10 @@ def task_stop():
         cmd = 'docker ps --format "{{.Names}}" | grep ' + PROJNAME + ' | { grep -v grep || true; }'
         out = call(cmd, throw=True)[1]
         return out.split('\n') if out else []
+    containers = ' '.join(check_docker_ps())
     return {
         'actions': [
-            fmt('docker rm -f {containers}', containers=' '.join(check_docker_ps())),
+            f'docker rm -f {containers}',
         ],
         'uptodate': [
             lambda: len(check_docker_ps()) == 0,

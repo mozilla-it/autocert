@@ -1,0 +1,8 @@
+# This is an example file that tells the autocert client scripts where the
+# remote server is.  Note: because autocert passes json on GET requests an https
+# address is required because the Nginx reverse proxy will not pass through on
+# 80 -> 443
+
+api_url: https://autocert.remote.server.url ## for production
+
+## api_url: https://0.0.0.0 ## for local development

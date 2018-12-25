@@ -10,7 +10,6 @@ from attrdict import AttrDict
 from endpoint.base import EndpointBase
 from exceptions import AutocertError
 from utils.yaml import yaml_format
-from utils.fmt import *
 from app import app
 import blacklist
 
@@ -18,7 +17,7 @@ from bundle import Bundle
 
 class MissingUpdateArgumentsError(AutocertError):
     def __init__(self, args):
-        message = fmt('missing arguments to update; args = {args}')
+        message = f'missing arguments to update; args = {args}'
         super(MissingUpdateArgumentsError, self).__init__(message)
 
 class DeployError(AutocertError):

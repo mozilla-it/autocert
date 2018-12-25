@@ -11,8 +11,6 @@ from requests import Session, Request
 
 from urllib.parse import urlparse
 
-from cli.utils.fmt import *
-
 USER = getpass.getuser()
 HOSTNAME = platform.node()
 

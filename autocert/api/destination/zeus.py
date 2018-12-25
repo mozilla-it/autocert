@@ -9,7 +9,6 @@ from exceptions import AutocertError
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.newline import windows2unix
 from utils.yaml import yaml_format
-from utils.fmt import *
 from config import CFG
 from app import app
 
@@ -24,7 +23,7 @@ def compose_json(key, csr, crt, note):
 
 class ZeusSSLServerKeysError(AutocertError):
     def __init__(self, call):
-        message = fmt('zeus ssl/server_keys error call={0}', call)
+        message = f'zeus ssl/server_keys error call={call}'
         super(ZeusSSLServerKeysError, self).__init__(message)
 
 class ZeusDestination(DestinationBase):
@@ -32,7 +31,7 @@ class ZeusDestination(DestinationBase):
         super(ZeusDestination, self).__init__(ar, cfg, verbosity)
 
     def has_connectivity(self, timeout, dests):
-        app.logger.info(fmt('has_connectivity:\n{locals}'))
+        app.logger.info(f'has_connectivity: locals={locals} dests={dests}')
         try:
             calls = self.gets(paths=[''], dests=dests, verify_ssl=False, timeout=timeout)
         except (TimeoutError, ClientConnectorError) as ex:
@@ -51,7 +50,7 @@ class ZeusDestination(DestinationBase):
         return True
 
     def fetch_certificates(self, bundles, dests):
-        app.logger.info(fmt('fetch_certificates:\n{locals}'))
+        app.logger.info(f'fetch_certificates: bundles={bundles} dests={dests}')
         details = self._get_installed_certificates_details(bundles, dests)
         if details:
             for bundle in bundles:
@@ -70,7 +69,7 @@ class ZeusDestination(DestinationBase):
     def install_certificates(self, note, bundles, dests):
         paths, jsons = zip(*[(ZEUS_PATH+bundle.friendly_common_name, compose_json(bundle.key, bundle.csr, bundle.crt, note)) for bundle in bundles])
 
-        app.logger.info(fmt('install_certificates:\n{locals}'))
+        app.logger.info(f'install_certificates:\n{locals}')
         calls = self.puts(paths=paths, dests=dests, jsons=jsons, verify_ssl=False)
         bundles = self.fetch_certificates(bundles, dests)
         return bundles
@@ -82,7 +81,7 @@ class ZeusDestination(DestinationBase):
         raise NotImplementedError
 
     def _get_installed_summary(self, bundles, dests):
-        app.logger.debug(fmt('_get_installed_summary:\n{locals}'))
+        app.logger.debug(f'_get_installed_summary:\n{locals}')
         friendly_common_names = [bundle.friendly_common_name for bundle in bundles]
         calls = self.gets(paths=[ZEUS_PATH], dests=dests, timeout=10, verify_ssl=False)
         assert len(dests) == len(calls)
@@ -96,7 +95,7 @@ class ZeusDestination(DestinationBase):
         return summary
 
     def _get_installed_certificates_details(self, bundles, dests):
-        app.logger.debug(fmt('_get_installed_certificates_details:\n{locals}'))
+        app.logger.debug(f'_get_installed_certificates_details:\n{locals}')
         summary = self._get_installed_summary(bundles, dests)
         details = {}
         if summary:
@@ -109,8 +108,8 @@ class ZeusDestination(DestinationBase):
                     key = windows2unix(call.recv.json.properties.basic.get('private', 'missing'))
                     note = call.recv.json.properties.basic.get('note', '')
                 except Exception as ex:
-                    app.logger.debug(fmt('call.send.url={0}', call.send.url))
-                    app.logger.debug(fmt('call.recv.json=\n{0}', call.recv.json))
+                    app.logger.debug(f'call.send.url={call.send.url}')
+                    app.logger.debug(f'call.recv.json=\n{call.recv.json}')
                     raise ex
                 details[(common_name, crt[:40])] = details.get((common_name, crt[:40]), {})
                 details[(common_name, crt[:40])][dest] = (

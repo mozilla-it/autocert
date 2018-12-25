@@ -7,12 +7,11 @@ authority.factory
 from authority.letsencrypt import LetsEncryptAuthority
 from authority.digicert import DigicertAuthority
 from exceptions import AutocertError
-from utils.fmt import *
 from app import app
 
 class AuthorityFactoryError(AutocertError):
     def __init__(self, authority):
-        msg = fmt('authority factory error with {authority}')
+        msg = f'authority factory error with {authority}'
         super(AuthorityFactoryError, self).__init__(msg)
 
 def create_authority(authority, ar, cfg, verbosity):

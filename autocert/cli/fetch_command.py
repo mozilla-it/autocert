@@ -9,16 +9,15 @@ from urllib.parse import urlparse
 
 from cli.arguments import add_argument
 from cli.utils.shell import call
-from cli.utils.fmt import *
 from cli.config import CFG
 
 def do_fetch(ns):
     bundle_path = '/data/autocert/bundles'
-    src = fmt('{bundle_host}:{bundle_path}/{bundle_name}', **ns.__dict__)
+    src = f'{ns.bundle_host}:{ns.bundle_path}/{ns.bundle_name}'
     dst = os.getcwd()
-    exitcode, out, err = call(fmt('rsync -avP --rsync-path="sudo rsync" "{src}" "{dst}"'), throw=True)
+    exitcode, out, err = call(f'rsync -avP --rsync-path="sudo rsync" "{src}" "{dst}"', throw=True)
     if ns.encrypt:
-        call(fmt('gpg -u "{sign_from}" -r "{sign_to}" --sign --encrypt "{bundle_name}"', **ns.__dict__), throw=True)
+        call(f'gpg -u "{ns.sign_from}" -r "{ns.sign_to}" --sign --encrypt "{ns.bundle_name}"', throw=True)
         tar_bundle = os.path.join(dst, ns.bundle_name)
         gpg_file = tar_bundle + '.gpg'
         if os.path.isfile(gpg_file):

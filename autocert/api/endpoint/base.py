@@ -17,7 +17,6 @@ from authority.factory import create_authority
 from utils.asyncrequests import AsyncRequests
 from utils.dictionary import merge, head, head_body
 from utils import timestamp
-from utils.fmt import *
 from config import CFG
 from app import app
 

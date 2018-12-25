@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from utils.fmt import *
-
 from config import CFG
 
 from app import app
@@ -31,7 +29,7 @@ def create_endpoint(method, cfg, args):
     if cfg is None:
         cfg = CFG
     endpoint = command2endpoint[args['command']]
-    app.logger.debug(fmt('create_endpoint: endpoint={0} args={1}', endpoint, args))
+    app.logger.debug(f'create_endpoint: endpoint={endpoint} args={args}')
     return endpoint(cfg, args)
 
 

@@ -18,7 +18,6 @@ from utils.isinstance import *
 from utils import timestamp
 from utils import sift
 from utils import pki
-from utils.fmt import *
 from config import CFG
 
 FILETYPE = {
@@ -30,7 +29,7 @@ FILETYPE = {
 
 class UnknownFileExtError(AutocertError):
     def __init__(self, content):
-        message = fmt('unknown filetype for this content: {content}')
+        message = f'unknown filetype for this content: {content}'
         super(UnknownFileExtError, self).__init__(message)
 
 class BundleFromObjError(AutocertError):
@@ -41,13 +40,13 @@ class BundleFromObjError(AutocertError):
 
 class BundleLoadError(AutocertError):
     def __init__(self, bundle_path, bundle_name, ex):
-        message = fmt('error loading {bundle_name}.tar.gz from {bundle_path}')
+        message = f'error loading {bundle_name}.tar.gz from {bundle_path}'
         super(BundleLoadError, self).__init__(message)
         self.errors = [ex]
 
 class VisitError(AutocertError):
     def __init__(self, obj):
-        message = fmt('unknown type obj = {obj}')
+        message = f'unknown type obj = {obj}'
         super(VisitError, self).__init__(message)
 
 def printit(obj):
@@ -272,7 +271,7 @@ class Bundle(object, metaclass=BundleProperties):
             obj[self.bundle_name]['sans'] = self.sans
         yml = yaml_format(obj)
         os.makedirs(bundle_path, exist_ok=True)
-        bundle_file = fmt('{bundle_path}/{bundle_name}.tar.gz', bundle_name=self.bundle_name)
+        bundle_file = f'{bundle_path}/{self.bundle_name}.tar.gz'
         with tarfile.open(bundle_file, 'w:gz') as tar:
             tar.addfile(tarinfo('README', Bundle.readme), BytesIO(Bundle.readme.encode('utf-8')))
             for content in (self.key, self.csr, self.crt, yml):
@@ -309,7 +308,7 @@ class Bundle(object, metaclass=BundleProperties):
     def from_disk(cls, bundle_name, bundle_path=None):
         if bundle_path == None:
             bundle_path = Bundle.bundle_path
-        bundle_file = fmt('{bundle_path}/{bundle_name}.tar.gz')
+        bundle_file = f'{bundle_path}/{bundle_name}.tar.gz'
         key, csr, crt, obj, readme = [None] * 5
         with tarfile.open(bundle_file, 'r:gz') as tar:
             for info in tar.getmembers():

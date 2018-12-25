@@ -12,7 +12,6 @@ from pprint import pformat
 
 from endpoint.factory import create_endpoint
 from exceptions import AutocertError
-from utils.fmt import *
 from config import CFG
 from app import app
 
@@ -70,12 +69,12 @@ LOGGING_LEVELS = {
 
 class MissingJsonError(AutocertError):
     def __init__(self, json):
-        message = fmt('empty json error ={0}', json)
+        message = f'empty json error ={json}'
         super(MissingJsonError, self).__init__(message)
 
 class EmptyJsonError(AutocertError):
     def __init__(self, json):
-        message = fmt('empty json error ={0}', json)
+        message = f'empty json error ={json}'
         super(EmptyJsonError, self).__init__(message)
 
 @app.before_first_request
@@ -85,10 +84,10 @@ def initialize():
         PID = os.getpid()
         PPID = os.getppid()
         USER = pwd.getpwuid(os.getuid())[0]
-        pfmt('starting api with log level={LEVEL}, pid={PID}, ppid={PPID} by user={USER}')
+        print(f'starting api with log level={LEVEL}, pid={PID}, ppid={PPID} by user={USER}')
 
 def log_request(user, hostname, ip, method, path, json):
-    app.logger.info(fmt('{user}@{hostname} from {ip} ran {method} {path} with json=\n"{json}"'))
+    app.logger.info(f'{user}@{hostname} from {ip} ran {method} {path} with json=\n"{json}"')
 
 @app.route('/autocert/version', methods=['GET'])
 def version():

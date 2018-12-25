@@ -8,7 +8,6 @@ from pprint import pformat
 from attrdict import AttrDict
 
 from exceptions import AutocertError
-from utils.fmt import *
 from app import app
 
 class DestinationConnectivityError(AutocertError):
@@ -16,31 +15,31 @@ class DestinationConnectivityError(AutocertError):
         msg = ''
         for dest, ex in dest_ex_pairs:
             error = repr(ex)
-            msg += fmt('{error} when attempting destination {dest}')
+            msg += f'{error} when attempting destination {dest}'
         super(DestinationConnectivityError, self).__init__(msg)
 
 class DestinationPathError(AutocertError):
     def __init__(self, path_or_paths):
-        message = fmt('error with DestinationBase param path(s) = {path_or_paths}')
+        message = f'error with DestinationBase param path(s) = {path_or_paths}'
         super(DestinationPathError, self).__init__(message)
 
 class DestinationDestError(AutocertError):
     def __init__(self, dest_or_dests):
-        message = fmt('error with DestinationBase param dest(s) = {dest_or_dests}')
+        message = f'error with DestinationBase param dest(s) = {dest_or_dests}'
         super(DestinationDestError, self).__init__(message)
 
 class JsonsDontMatchPathsError(AutocertError):
     def __init__(self, jsons, paths):
         len_jsons = len(jsons) if isinstance(jsons, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None
-        message = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
+        message = f'len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}'
         super(JsonsDontMatchPathsError, self).__init__(message)
 
 class DestsDontMatchPathsError(AutocertError):
     def __init__(self, dests, paths):
         len_dests = len(dests) if isinstance(dests, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None
-        message = fmt('len(dests) -> {len_dests} != len(paths) -> {len_paths}; dests={dests}, paths={paths}')
+        message = f'len(dests) -> {len_dests} != len(paths) -> {len_paths}; dests={dests}, paths={paths}'
         super(DestsDontMatchPathsError, self).__init__(message)
 
 class DestinationBase(object):

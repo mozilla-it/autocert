@@ -13,7 +13,6 @@ from datetime import timedelta
 from endpoint.base import EndpointBase
 from exceptions import AutocertError
 from config import CFG
-from utils.fmt import *
 from utils import pki
 from app import app
 
@@ -21,7 +20,7 @@ from bundle import Bundle
 
 class UnknownCertificateAuthorityError(AutocertError):
     def __init__(self, authority):
-        message = fmt('unknown certificate authority: {authority}')
+        message = f'unknown certificate authority: {authority}'
         super(UnknownCertificateAuthorityError, self).__init__(message)
 
 class CreateEndpoint(EndpointBase):

@@ -8,29 +8,28 @@ from itertools import product
 from attrdict import AttrDict
 
 from exceptions import AutocertError
-from utils.fmt import *
 from app import app
 
 class AuthorityConnectivityError(AutocertError):
     def __init__(self, call):
-        msg = fmt('authority connectivity error {call}')
+        msg = f'authority connectivity error {call}'
         super(ConnectivityError, self).__init__(msg)
 
 class AuthorityFactoryError(AutocertError):
     def __init__(self, authority):
-        message = fmt('authority factory error {authority}')
+        message = f'authority factory error {authority}'
         super(AuthorityFactoryError, self).__init__(message)
 
 class AuthorityPathError(AutocertError):
     def __init__(self, path_or_paths):
-        message = fmt('error with AuthorityBase param path(s) = {path_or_paths}')
+        message = f'error with AuthorityBase param path(s) = {path_or_paths}'
         super(AuthorityPathError, self).__init__(message)
 
 class JsonsDontMatchPathsError(AutocertError):
     def __init__(self, jsons, paths):
         len_jsons = len(jsons) if isinstance(jsons, list) else None
         len_paths = len(paths) if isinstance(paths, list) else None
-        message = fmt('len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}')
+        message = f'len(jsons) -> {len_jsons} != len(paths) -> {len_paths}; jsons={jsons}, paths={paths}'
         super(JsonsDontMatchPathsError, self).__init__(message)
 
 class AuthorityBase(object):

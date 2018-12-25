@@ -29,7 +29,6 @@ from cli.utils.url import validate
 from cli.utils.yaml import yaml_print
 from cli.namespace import jsonify
 from cli.arguments import add_argument
-from cli.utils.fmt import *
 from cli.utils import pki
 from cli.config import CFG
 from cli import requests
@@ -62,12 +61,12 @@ OUTPUT = [
 
 class VersionCheckFailedError(Exception):
     def __init__(self, required, version):
-        message = fmt('autocert/api {version} is not at least {required}')
+        message = f'autocert/api {version} is not at least {required}'
         super(VersionCheckFailedError, self).__init__(message)
 
 class FetchApiConfigError(Exception):
     def __init__(self, response):
-        message = fmt('response = {text}', text=response.text)
+        message = f'response = {response.text}'
         super(FetchApiConfigError, self).__init__(message)
 
 def default_output():
@@ -164,7 +163,8 @@ def do_request(ns):
         'Content-Type': 'application/json',
     }
     if not json:
-        raise Exception(fmt('json should not be None or {}; json={json}'))
+        empty = '{}'
+        raise Exception(f'json should not be None or {empty}; json={json}')
     response = requests.request(method, ns.api_url / 'autocert', headers=headers, json=json)
     status = response.status_code
     if status in (200, 201, 202, 203, 204):

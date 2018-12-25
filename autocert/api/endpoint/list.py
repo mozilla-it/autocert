@@ -9,7 +9,6 @@ from fnmatch import fnmatch
 from ruamel import yaml
 
 from utils.dictionary import merge, head, head_body
-from utils.fmt import *
 from app import app
 from config import CFG
 from endpoint.base import EndpointBase
@@ -33,7 +32,7 @@ class ListEndpoint(EndpointBase):
             #FIXME: this should be driven by the yml in the cert tarball
             bundles1 = self.authorities.digicert.display_certificates(bundles)
             for name, dests in self.args.destinations.items():
-                pfmt('name={name} dests={dests}')
+                print(f'name={name} dests={dests}')
                 bundles2.extend(self.destinations[name].fetch_certificates(bundles1, dests))
         else:
             bundles2 = bundles

@@ -8,7 +8,6 @@ import re
 from datetime import timedelta
 
 from cli.utils.dictionary import merge
-from cli.utils.fmt import *
 from cli.config import CFG
 
 CALLS_STYLE = [
@@ -37,12 +36,12 @@ STATUS_TYPES = [
 
 class WrongBugFormatError(Exception):
     def __init__(self, string):
-        msg = fmt('WrongBugFormatError: bug should be 7-8 digits long but was, {string}')
+        msg = f'WrongBugFormatError: bug should be 7-8 digits long but was, {string}'
         super(WrongBugFormatError, self).__init__(msg)
 
 class WrongPgpFingerprintFormatError(Exception):
     def __init__(self, string):
-        msg = fmt('WrongPgpFingerprintFormatError: pgp fingerprint should be 40 hex characters long; {string} does not match')
+        msg = f'WrongPgpFingerprintFormatError: pgp fingerprint should be 40 hex characters long; {string} does not match'
         super(WrongPgpFingerprintFormatError, self).__init__(msg)
 
 def bug_type(string):
@@ -99,7 +98,7 @@ def get_destinations(destinations=None, **kwargs):
     if destinations is not None:
         for k, v in destinations.items():
             for i in v.keys():
-                d += [fmt('{k}:{i}')]
+                d += [f'{k}:{i}']
     return d
 
 # these are the default values for these arguments

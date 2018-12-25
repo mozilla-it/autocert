@@ -12,7 +12,6 @@ from urlpath import URL
 from pathlib2 import Path
 
 from exceptions import AutocertError
-from utils.fmt import *
 
 CONFIG_DIR = os.path.dirname(__file__)
 CONFIG_YML = '{0}/config.yml'.format(CONFIG_DIR)
@@ -53,7 +52,7 @@ def _fixup(obj):
                 elif 'path' in k:
                     d[k] = Path(v)
                 elif 'auth' == k:
-                    with open(fmt('{CONFIG_DIR}/{v}'), 'r') as f:
+                    with open(f'{CONFIG_DIR}/{v}', 'r') as f:
                         d[k] = yaml.safe_load(f.read())
             elif isinstance(v, dict):
                 d[k] = _fixup(v)

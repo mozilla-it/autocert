@@ -7,7 +7,6 @@ import pytest
 from subprocess import check_output
 
 from utils import timestamp
-from utils.fmt import *
 from bundle import Bundle
 
 DIR = os.path.dirname(os.path.realpath(__file__))

@@ -10,7 +10,6 @@ from ruamel import yaml
 from datetime import datetime, timedelta
 
 from utils.dictionary import merge, head, head_body
-from utils.fmt import *
 from app import app
 from config import CFG
 from endpoint.base import EndpointBase
