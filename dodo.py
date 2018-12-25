@@ -413,14 +413,11 @@ def task_rmcache():
     '''
     recursively delete python cache files
     '''
+    rmrf = 'rm -rf "{}" \;'
     return dict(
         actions=[
-            'find cli/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
-            'find cli/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
-            'find api/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
-            'find api/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
-            'find tests/ -depth -name __pycache__ -type d -exec rm -r "{}" \;',
-            'find tests/ -depth -name "*.pyc" -type f -exec rm -r "{}" \;',
+            f'sudo find {REPOROOT} -depth -name __pycache__ -type d -exec {rmrf}',
+            f'sudo find {REPOROOT} -depth -name *.pyc -type f -exec {rmrf}',
         ]
     )
 
