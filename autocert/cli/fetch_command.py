@@ -13,7 +13,7 @@ from cli.config import CFG
 
 def do_fetch(ns):
     bundle_path = '/data/autocert/bundles'
-    src = f'{ns.bundle_host}:{ns.bundle_path}/{ns.bundle_name}'
+    src = f'{ns.bundle_host}:{bundle_path}/{ns.bundle_name}'
     dst = os.getcwd()
     exitcode, out, err = call(f'rsync -avP --rsync-path="sudo rsync" "{src}" "{dst}"', throw=True)
     if ns.encrypt:
