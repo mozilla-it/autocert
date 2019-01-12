@@ -1,6 +1,6 @@
 language: python
 python:
-  - "3.5"
+  - "3.6"
 install:
   - "git fetch --unshallow --tags"
   - "pip install -r requirements.txt"
