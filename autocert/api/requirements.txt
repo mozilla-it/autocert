@@ -13,3 +13,4 @@ Jinja2>=2.7.3
 packaging>=16.8
 dnspython3>=1.15.0
 python-whois>=0.6.5
+leatherman>=0.1.0

@@ -16,9 +16,9 @@ from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.yaml import yaml_format
 from utils.isinstance import *
 from utils import timestamp
-from utils import sift
 from utils import pki
 from config import CFG
+from leatherman.fuzzy import fuzzy
 
 FILETYPE = {
     '-----BEGIN RSA PRIVATE KEY-----':          '.key',
@@ -137,7 +137,8 @@ class BundleProperties(type):
         bundles = []
         if isint(within):
             within = timedelta(within)
-        for bundle_name in sorted(sift.fnmatches(cls.names, bundle_name_pns)):
+        bundle_names = fuzzy(cli.names).include(*bundle_name_pns)
+        for bundle_name in sorted(bundle_names):
             bundle = Bundle.from_disk(bundle_name, bundle_path=cls.bundle_path)
             if bundle.sans:
                 bundle.sans = sorted(bundle.sans)
