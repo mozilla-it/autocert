@@ -45,11 +45,8 @@ class WrongPgpFingerprintFormatError(Exception):
         super(WrongPgpFingerprintFormatError, self).__init__(msg)
 
 def bug_type(string):
-    pattern = '\d{7,8}'
-    regex = re.compile(pattern)
-    if regex.match(string):
-        return string
-    raise WrongBugFormatError(string)
+    # We don't always use bugzilla anymore. Any format can be valid
+    return string
 
 def x509_file(path):
     return open(path).read()
