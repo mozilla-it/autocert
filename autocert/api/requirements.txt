@@ -7,9 +7,10 @@ cryptography>=1.8.1
 attrdict>=2.0.0
 urlpath>=1.1.2
 pathlib2>=2.1.0
-ruamel.yaml>=0.12.15
+ruamel.yaml>=0.15.97
 requests>=2.11.1
 Jinja2>=2.7.3
 packaging>=16.8
 dnspython3>=1.15.0
 python-whois>=0.6.5
+leatherman==0.1.6

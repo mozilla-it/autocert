@@ -4,7 +4,8 @@ gunicorn>=19.3.0
 aiohttp>=2.2.2
 tld>=0.8.0
 cryptography>=1.8.1
-ruamel.yaml==0.12.15
+ruamel.yaml>=0.15.97
 pytest==3.0.3
 pytest-cov==2.4.0
 python-whois>=0.6.5
+leatherman==0.1.6

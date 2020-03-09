@@ -2,7 +2,8 @@ doit>=0.29.0
 attrdict>=2.0.0
 urlpath>=1.1.2
 pathlib2>=2.1.0
-ruamel.yaml>=0.12.15
+ruamel.yaml>=0.15.97
 packaging>=16.8
 virtualenv>=15.1.0
 docker-compose>=1.11.1
+leatherman==0.1.6
