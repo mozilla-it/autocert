@@ -11,6 +11,7 @@ from io import BytesIO
 from ruamel import yaml
 from datetime import datetime, timedelta
 
+from leatherman.fuzzy import fuzzy
 from exceptions import AutocertError
 from utils.dictionary import merge, head, body, head_body, keys_ending
 from utils.yaml import yaml_format
@@ -137,7 +138,7 @@ class BundleProperties(type):
         bundles = []
         if isint(within):
             within = timedelta(within)
-        for bundle_name in sorted(sift.fnmatches(cls.names, bundle_name_pns)):
+        for bundle_name in fuzzy(cls.names).include(*bundle_name_pns):
             bundle = Bundle.from_disk(bundle_name, bundle_path=cls.bundle_path)
             if bundle.sans:
                 bundle.sans = sorted(bundle.sans)
