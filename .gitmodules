@@ -1,4 +1,4 @@
 [submodule "api/utils"]
 	path = autocert/api/utils
 	url = https://github.com/scottidler/utils
-	branch = master
+	branch = main
